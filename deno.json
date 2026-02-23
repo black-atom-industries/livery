@@ -1,0 +1,33 @@
+{
+    "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
+    "version": "0.1.0",
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "react",
+        "jsxImportSourceTypes": "@types/react"
+    },
+    "imports": {
+        "@black-atom/core": "jsr:@black-atom/core@^0.2.0",
+        "@std/assert": "jsr:@std/assert@^1.0.0",
+        "@std/path": "jsr:@std/path@^1.0.0",
+        "react": "npm:react@^18.3.1",
+        "@types/react": "npm:@types/react@^18.3.0",
+        "ink": "npm:ink@^5.1.0",
+        "@inkjs/ui": "npm:@inkjs/ui@^2.0.0"
+    },
+    "tasks": {
+        "dev": "deno run --allow-all src/main.tsx",
+        "check": "deno check src/**/*.ts src/**/*.tsx",
+        "lint": "deno lint",
+        "test": "deno test --allow-env --allow-read --allow-write",
+        "compile": "deno compile --allow-all --output livery src/main.tsx"
+    },
+    "nodeModulesDir": "auto",
+    "fmt": {
+        "useTabs": false,
+        "lineWidth": 100,
+        "indentWidth": 4,
+        "semiColons": true,
+        "singleQuote": false
+    }
+}
