@@ -12,15 +12,24 @@
         "@std/path": "jsr:@std/path@^1.0.0",
         "react": "npm:react@^18.3.1",
         "@types/react": "npm:@types/react@^18.3.0",
-        "ink": "npm:ink@^5.1.0",
-        "@inkjs/ui": "npm:@inkjs/ui@^2.0.0"
+        "react-dom": "npm:react-dom@^18.3.1",
+        "@types/react-dom": "npm:@types/react-dom@^18.3.0",
+        "vite": "npm:vite@^6",
+        "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4",
+        "tailwindcss": "npm:tailwindcss@^4",
+        "@tailwindcss/vite": "npm:@tailwindcss/vite@^4",
+        "@tauri-apps/api": "npm:@tauri-apps/api@^2",
+        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2"
     },
     "tasks": {
-        "dev": "deno run --allow-all src/main.tsx",
+        "dev": "deno run -A npm:@tauri-apps/cli tauri dev",
+        "build": "deno run -A npm:@tauri-apps/cli tauri build",
+        "vite:dev": "deno run -A npm:vite",
+        "vite:build": "deno run -A npm:vite build",
         "check": "deno check src/**/*.ts src/**/*.tsx",
         "lint": "deno lint",
         "test": "deno test --allow-env --allow-read --allow-write",
-        "compile": "deno compile --allow-all --output livery src/main.tsx"
+        "fmt": "deno fmt"
     },
     "nodeModulesDir": "auto",
     "fmt": {
