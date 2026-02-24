@@ -22,6 +22,9 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
                     return (
                         <button
                             key={entry.key}
+                            ref={isSelected
+                                ? (el) => el?.scrollIntoView({ block: "nearest" })
+                                : undefined}
                             type="button"
                             onClick={() => onSelect(index)}
                             className={`block w-full text-left px-3 py-1 text-sm cursor-pointer ${
