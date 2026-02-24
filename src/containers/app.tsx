@@ -1,9 +1,7 @@
-import { getGroupedThemes } from "../lib/themes.ts";
+import { themeBundle as themeMap } from "@black-atom/core";
+import denoConfig from "../../deno.json" with { type: "json" };
 import { ThemePicker } from "./theme-picker.tsx";
 
-const groups = getGroupedThemes();
-const themes = groups.flatMap((g) => g.themes);
-
 export function App() {
-    return <ThemePicker groups={groups} themes={themes} version="0.0.2" />;
+    return <ThemePicker themeMap={themeMap} version={denoConfig.version} />;
 }

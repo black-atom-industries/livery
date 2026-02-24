@@ -1,5 +1,4 @@
-import type { CollectionKey, Definition, Key, Meta } from "@black-atom/core";
-import { themeBundle } from "@black-atom/core";
+import type { CollectionKey, Definition, Meta, ThemeMap } from "@black-atom/core";
 
 export const COLLECTION_ORDER: CollectionKey[] = ["default", "jpn", "terra", "stations", "mnml"];
 
@@ -11,14 +10,9 @@ export const COLLECTION_LABELS: Record<CollectionKey, string> = {
     mnml: "MNM",
 };
 
-/** Look up a single theme by key. Returns null for missing/unfinished themes. */
-export function getTheme(key: Key): Definition | null {
-    return themeBundle[key];
-}
-
-/** Get all non-null theme definitions. */
-export function getThemes(): Definition[] {
-    return Object.values(themeBundle).filter((d): d is Definition => d !== null);
+/** Get all non-null theme definitions from a theme map. */
+export function getThemes(themeMap: ThemeMap): Definition[] {
+    return Object.values(themeMap).filter((d): d is Definition => d !== null);
 }
 
 export interface ThemeGroup {
@@ -28,8 +22,8 @@ export interface ThemeGroup {
 }
 
 /** Group themes by collection in display order. Sorts themes within each group by short name. */
-export function getGroupedThemes(): ThemeGroup[] {
-    const themes = getThemes();
+export function getGroupedThemes(themeMap: ThemeMap): ThemeGroup[] {
+    const themes = getThemes(themeMap);
 
     const grouped = themes.reduce((acc, theme) => {
         const key = theme.meta.collection.key;

@@ -4,7 +4,8 @@
     "compilerOptions": {
         "jsx": "react-jsx",
         "jsxImportSource": "react",
-        "jsxImportSourceTypes": "@types/react"
+        "jsxImportSourceTypes": "@types/react",
+        "lib": ["deno.ns", "dom", "dom.iterable"]
     },
     "imports": {
         "@black-atom/core": "jsr:@black-atom/core@^0.2.0",

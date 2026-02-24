@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
-import type { Definition } from "@black-atom/core";
-import type { ThemeGroup } from "../lib/themes.ts";
-import { extractShortName } from "../lib/themes.ts";
+import type { Definition, ThemeMap } from "@black-atom/core";
+import { extractShortName, getGroupedThemes } from "../lib/themes.ts";
 import { MainLayout } from "../components/layouts/main-layout.tsx";
 import { AppHeader } from "../components/app-header.tsx";
 import { AppFooter } from "../components/app-footer.tsx";
@@ -10,12 +9,14 @@ import { ThemeList } from "../components/theme-list.tsx";
 import { ThemeDetail } from "../components/theme-detail.tsx";
 
 interface ThemePickerProps {
-    groups: ThemeGroup[];
-    themes: Definition[];
+    themeMap: ThemeMap;
     version: string;
 }
 
-export function ThemePicker({ groups, themes, version }: ThemePickerProps) {
+export function ThemePicker({ themeMap, version }: ThemePickerProps) {
+    const groups = useMemo(() => getGroupedThemes(themeMap), [themeMap]);
+    const themes = useMemo(() => groups.flatMap((g) => g.themes), [groups]);
+
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [selectedTheme, setSelectedTheme] = useState<Definition | undefined>(
         undefined,
