@@ -16,6 +16,11 @@
                     "type": "json",
                     "path": "deno.json",
                     "jsonpath": "$.version"
+                },
+                {
+                    "type": "toml",
+                    "path": "src-tauri/Cargo.toml",
+                    "jsonpath": "$.package.version"
                 }
             ]
         }

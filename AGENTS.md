@@ -5,9 +5,9 @@ repository.
 
 ## Project Overview
 
-livery ("Paint your cockpit") is the Black Atom theme management CLI. It applies themes across all
-supported developer tools from a single interactive picker, with plans for theme downloading and
-configuration management.
+livery ("Paint your cockpit") is the Black Atom theme management desktop app. It applies themes
+across all supported developer tools from a single interactive picker, with plans for theme
+downloading and configuration management.
 
 Part of the [Black Atom Industries](https://github.com/black-atom-industries) cockpit — **radar**
 (file nav) + **helm** (workspace nav) + **livery** (theme management).
@@ -21,45 +21,51 @@ Livery paints your development cockpit.
 
 ## Tech Stack
 
-- **Runtime**: Deno
-- **UI Framework**: Ink (React for CLIs) via `npm:` specifiers
-- **React**: 18.x with automatic JSX transform (`react-jsx`)
+- **Runtime**: Deno (frontend dev server, formatting, linting, testing)
+- **App Shell**: Tauri v2 (Rust + webview)
+- **UI**: React 18.x with React DOM
+- **Build**: Vite (via Deno)
+- **Styling**: Tailwind CSS v4
 - **Config**: `~/.config/black-atom/livery/config.json`
 
 ## Commands
 
 ```bash
-deno task dev       # Run the picker
-deno task check     # Type-check all source files
-deno task lint      # Run deno lint
-deno task compile   # Compile to single binary (./livery)
+deno task dev         # Launch Tauri app in development mode
+deno task build       # Build production app with Tauri
+deno task vite:dev    # Run Vite dev server only (no Tauri)
+deno task vite:build  # Build frontend only
+deno task check       # Type-check all source files
+deno task lint        # Run deno lint
+deno task test        # Run tests
+deno task fmt         # Format code
 ```
 
 ## Architecture (Draft)
 
 ```
 src/
-  main.tsx                # Entry point: load config + themes, render <App>
-  types.ts                # All shared types (LiveryConfig, ToolConfig, ThemeEntry, etc.)
-  config.ts               # Config loading from ~/.config/black-atom/livery/config.json
-  themes.ts               # Load themes.json, group by collection
-  app.tsx                 # Root Ink component (state machine: picking → applying → done)
+  main.tsx              # Entry point: render React DOM into webview
+  index.css             # Tailwind CSS entry
+  config.ts             # DEFAULT_CONFIG
+  types/
+    config.ts           # LiveryConfig, ToolConfig types
   lib/
-    paths.ts              # Path utilities (expandTilde, getHome)
-    deep-merge.ts         # Recursive object merge
-  components/
-    theme-picker.tsx      # Interactive theme selector (@inkjs/ui Select)
-    progress-view.tsx     # Updater progress display (spinners/checkmarks)
-    status-line.tsx       # Current theme + appearance header
+    paths.ts            # Path utilities (expandTilde, getHome)
+    config.ts           # Config loading, merging, path expansion
+    themes.ts           # Theme data pipeline (getThemeEntries, buildPickerOptions)
+    deep-merge.ts       # Recursive object merge
+  containers/
+    app.tsx             # Root container (smart component)
+  components/           # Dumb UI components (future)
   updaters/
-    mod.ts                # Updater registry + async generator runner
-    types.ts              # Updater interface
-    nvim.ts               # Replace colorscheme in config.lua, restart via tmux
-    tmux.ts               # Swap source-file path, reload
-    ghostty.ts            # Update theme line, SIGUSR2 reload
-    zed.ts                # Update settings.json theme.dark/light
-    delta.ts              # Toggle dark/light comments in .gitconfig
-    system-appearance.ts  # macOS/Linux dark/light mode toggle
+    .gitkeep            # Theme updaters (future)
+src-tauri/
+  Cargo.toml            # Rust dependencies
+  tauri.conf.json       # Tauri window/app configuration
+  src/
+    main.rs             # Rust entry point
+    lib.rs              # Tauri builder setup
 ```
 
 ## Configuration (Draft)
@@ -94,9 +100,8 @@ Key design decisions:
 
 ## Theme Data
 
-`themes.json` at the repo root contains all 32 themes across 5 collections. This is a static copy
-from the dots repo (themes section only, no tools section). The picker owns tool configuration
-separately.
+Theme data comes from `@black-atom/core` (JSR). The Vite build resolves this via the JSR npm
+compatibility layer (`@jsr/black-atom__core`) with a `resolve.alias` in `vite.config.ts`.
 
 ## Planned Commands
 
@@ -106,6 +111,11 @@ separately.
 | `livery init`               | v0.2.0  | Generate config with detected tool paths |
 | `livery download <adapter>` | v0.3.0  | Download theme files from GitHub         |
 | `livery status`             | v0.3.0  | Show current theme + installed adapters  |
+
+## Coding Guidelines
+
+See [docs/coding-guidelines.md](docs/coding-guidelines.md) for conventions on React patterns, file
+structure, styling, TypeScript, testing, git workflow, and the Deno + Vite dual resolution setup.
 
 ## Project Tracking
 

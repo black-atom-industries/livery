@@ -1,4 +1,5 @@
-import { render } from "ink";
-import { App } from "./components/app.tsx";
+import { createRoot } from "react-dom/client";
+import { App } from "./containers/app.tsx";
+import "./index.css";
 
-render(<App />);
+createRoot(document.getElementById("root")!).render(<App />);
