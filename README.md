@@ -2,7 +2,7 @@
 
 > Paint your cockpit.
 
-A CLI for managing [Black Atom](https://github.com/black-atom-industries) themes across your
+A desktop app for managing [Black Atom](https://github.com/black-atom-industries) themes across your
 developer tools. Pick a theme once, apply it everywhere.
 
 ## Status
@@ -12,8 +12,10 @@ Early development. See the
 
 ## Tech Stack
 
+- [Tauri v2](https://tauri.app/) desktop shell
 - [Deno](https://deno.com/) runtime
-- [Ink](https://github.com/vadimdemedes/ink) (React for CLIs)
+- [React](https://react.dev/) + [Vite](https://vite.dev/)
+- [Tailwind CSS](https://tailwindcss.com/) v4
 
 ## Origin of Name
 

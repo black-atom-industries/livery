@@ -3,4 +3,5 @@ deno.lock
 livery
 .worktrees/
 .vite/
-.vite/
+dist/
+src-tauri/target/
