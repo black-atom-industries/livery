@@ -4,7 +4,8 @@ interface Shortcut {
 }
 
 const SHORTCUTS: Shortcut[] = [
-    { key: "↑/↓", label: "navigate" },
+    { key: "↑/↓ j/k", label: "navigate" },
+    { key: "gg/G", label: "top/bottom" },
     { key: "Enter", label: "select" },
     { key: "q", label: "quit" },
 ];

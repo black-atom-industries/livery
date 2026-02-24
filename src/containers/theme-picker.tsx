@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
 import type { ThemeEntry, ThemeGroup } from "../lib/themes.ts";
 import { extractShortName } from "../lib/themes.ts";
 import { MainLayout } from "../components/layouts/main-layout.tsx";
@@ -21,30 +22,22 @@ export function ThemePicker({ groups, themes, version }: ThemePickerProps) {
 
     const selectedEntry = themes[selectedIndex];
 
-    const handleKeyDown = useCallback(
-        (e: KeyboardEvent) => {
-            switch (e.key) {
-                case "ArrowUp":
-                    e.preventDefault();
-                    setSelectedIndex((i) => Math.max(0, i - 1));
-                    break;
-                case "ArrowDown":
-                    e.preventDefault();
-                    setSelectedIndex((i) => Math.min(themes.length - 1, i + 1));
-                    break;
-                case "Enter":
-                    e.preventDefault();
-                    setSelectedTheme(selectedEntry);
-                    break;
-            }
-        },
-        [themes.length, selectedEntry],
-    );
+    const moveUp = () => setSelectedIndex((i) => Math.max(0, i - 1));
+    const moveDown = () => setSelectedIndex((i) => Math.min(themes.length - 1, i + 1));
 
-    useEffect(() => {
-        globalThis.addEventListener("keydown", handleKeyDown);
-        return () => globalThis.removeEventListener("keydown", handleKeyDown);
-    }, [handleKeyDown]);
+    // Arrow keys
+    useHotkey("ArrowUp", moveUp);
+    useHotkey("ArrowDown", moveDown);
+
+    // Vim navigation
+    useHotkey("K", moveUp);
+    useHotkey("J", moveDown);
+    useHotkeySequence(["G", "G"], () => setSelectedIndex(0));
+    useHotkey("Shift+G", () => setSelectedIndex(themes.length - 1));
+
+    useHotkey("Enter", () => {
+        setSelectedTheme(selectedEntry);
+    });
 
     return (
         <MainLayout
