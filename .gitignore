@@ -5,3 +5,5 @@ livery
 .vite/
 dist/
 src-tauri/target/
+/assets/.DS_Store
+/.DS_Store
