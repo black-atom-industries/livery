@@ -12,10 +12,15 @@ Early development. See the
 
 ## Tech Stack
 
-- [Tauri v2](https://tauri.app/) desktop shell
-- [Deno](https://deno.com/) runtime
-- [React](https://react.dev/) + [Vite](https://vite.dev/)
-- [Tailwind CSS](https://tailwindcss.com/) v4
+| Layer         | Technology                                  | Notes                                              |
+| ------------- | ------------------------------------------- | -------------------------------------------------- |
+| Runtime       | [Deno](https://deno.com/)                   | Dev server, formatting, linting, testing           |
+| App shell     | [Tauri v2](https://tauri.app/)              | Rust + system webview                              |
+| Frontend      | [React](https://react.dev/) 18              | Automatic JSX transform (`react-jsx`)              |
+| Build         | [Vite](https://vite.dev/) 6                 | Via `deno run -A npm:vite`                         |
+| Styling       | [Tailwind CSS](https://tailwindcss.com/) v4 | Vite plugin, no PostCSS config needed              |
+| Theme data    | `@black-atom/core`                          | JSR package, resolved via npm compat layer in Vite |
+| Config format | JSON                                        | `~/.config/black-atom/livery/config.json`          |
 
 ## Origin of Name
 

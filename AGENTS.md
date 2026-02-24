@@ -112,6 +112,11 @@ compatibility layer (`@jsr/black-atom__core`) with a `resolve.alias` in `vite.co
 | `livery download <adapter>` | v0.3.0  | Download theme files from GitHub         |
 | `livery status`             | v0.3.0  | Show current theme + installed adapters  |
 
+## Coding Guidelines
+
+See [docs/coding-guidelines.md](docs/coding-guidelines.md) for conventions on React patterns, file
+structure, styling, TypeScript, testing, git workflow, and the Deno + Vite dual resolution setup.
+
 ## Project Tracking
 
 Issues are tracked in [Linear](https://linear.app/black-atom-industries) under the Development team
