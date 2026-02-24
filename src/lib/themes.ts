@@ -6,9 +6,9 @@ export interface ThemeEntry {
     meta: Meta;
 }
 
-const COLLECTION_ORDER: CollectionKey[] = ["default", "jpn", "terra", "stations", "mnml"];
+export const COLLECTION_ORDER: CollectionKey[] = ["default", "jpn", "terra", "stations", "mnml"];
 
-const COLLECTION_LABELS: Record<CollectionKey, string> = {
+export const COLLECTION_LABELS: Record<CollectionKey, string> = {
     default: "Default",
     jpn: "JPN",
     terra: "TER",
@@ -107,4 +107,34 @@ export function buildPickerOptions(): PickerOption[] {
     }
 
     return options;
+}
+
+export interface ThemeGroup {
+    collectionKey: CollectionKey;
+    label: string;
+    themes: ThemeEntry[];
+}
+
+/** Group themes by collection in display order. Sorts themes within each group by short name. */
+export function getGroupedThemes(): ThemeGroup[] {
+    const entries = getThemeEntries();
+
+    const groups = new Map<CollectionKey, ThemeEntry[]>();
+    for (const entry of entries) {
+        const key = entry.meta.collection.key;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key)!.push(entry);
+    }
+
+    for (const group of groups.values()) {
+        group.sort((a, b) => extractShortName(a.meta).localeCompare(extractShortName(b.meta)));
+    }
+
+    return COLLECTION_ORDER
+        .filter((key) => groups.has(key))
+        .map((key) => ({
+            collectionKey: key,
+            label: COLLECTION_LABELS[key] ?? key,
+            themes: groups.get(key)!,
+        }));
 }
