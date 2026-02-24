@@ -17,7 +17,7 @@ Early development. See the
 
 ## Origin of Name
 
-[Livery](https://en.wikipedia.org/wiki/Livery_(aircraft)) is the paint scheme of an aircraft — its
+[Livery](https://en.wikipedia.org/wiki/Livery_(aircraft)) is the paint scheme of an aircraft - its
 visual identity.
 
 ## Other Black Atom Utils

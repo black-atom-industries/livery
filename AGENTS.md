@@ -15,8 +15,9 @@ Part of the [Black Atom Industries](https://github.com/black-atom-industries) co
 **Name origin**: In aviation, _livery_ is the paint scheme of an aircraft — its visual identity.
 Livery paints your development cockpit.
 
-> **Early development**: This project is in its initial design phase. The architecture, configuration
-> format, and file structure described below are a **design draft** and subject to change.
+> **Early development**: This project is in its initial design phase. The architecture,
+> configuration format, and file structure described below are a **design draft** and subject to
+> change.
 
 ## Tech Stack
 
