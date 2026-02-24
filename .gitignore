@@ -2,3 +2,5 @@ node_modules/
 deno.lock
 livery
 .worktrees/
+.vite/
+.vite/
