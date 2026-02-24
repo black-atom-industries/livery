@@ -1,8 +1,8 @@
-import type { ThemeEntry } from "../lib/themes.ts";
+import type { Definition } from "@black-atom/core";
 import { extractShortName } from "../lib/themes.ts";
 
 interface ThemeDetailProps {
-    theme: ThemeEntry | undefined;
+    theme: Definition | undefined;
 }
 
 export function ThemeDetail({ theme }: ThemeDetailProps) {

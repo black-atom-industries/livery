@@ -21,7 +21,7 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
 
                     return (
                         <button
-                            key={entry.key}
+                            key={entry.meta.key}
                             ref={isSelected
                                 ? (el) => el?.scrollIntoView({ block: "nearest" })
                                 : undefined}

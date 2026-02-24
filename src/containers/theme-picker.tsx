@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
-import type { ThemeEntry, ThemeGroup } from "../lib/themes.ts";
+import type { Definition } from "@black-atom/core";
+import type { ThemeGroup } from "../lib/themes.ts";
 import { extractShortName } from "../lib/themes.ts";
 import { MainLayout } from "../components/layouts/main-layout.tsx";
 import { AppHeader } from "../components/app-header.tsx";
@@ -10,13 +11,13 @@ import { ThemeDetail } from "../components/theme-detail.tsx";
 
 interface ThemePickerProps {
     groups: ThemeGroup[];
-    themes: ThemeEntry[];
+    themes: Definition[];
     version: string;
 }
 
 export function ThemePicker({ groups, themes, version }: ThemePickerProps) {
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const [selectedTheme, setSelectedTheme] = useState<ThemeEntry | undefined>(
+    const [selectedTheme, setSelectedTheme] = useState<Definition | undefined>(
         undefined,
     );
 

@@ -55,6 +55,8 @@ docs/                   # Project documentation
 - Prefer explicit types on function signatures and public APIs.
 - Use generics where they add clarity, not for show.
 - `.ts` for pure logic, `.tsx` for anything that returns JSX.
+- Prefer functional iteration (`filter`, `map`, `reduce`) over imperative loops (`for`, `forEach`).
+  Don't mix styles in the same function.
 
 ## File Naming
 
