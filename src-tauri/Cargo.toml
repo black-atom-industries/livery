@@ -1,6 +1,6 @@
 [package]
 name = "livery"
-version = "0.1.0"
+version = "0.0.3"
 description = "Paint your cockpit — Black Atom theme management"
 authors = ["Black Atom Industries"]
 license = "MIT"
