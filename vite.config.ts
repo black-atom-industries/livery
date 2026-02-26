@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import deno from "@deno/vite-plugin";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -7,7 +8,12 @@ const host = Deno.env.get("TAURI_DEV_HOST");
 
 export default defineConfig({
     clearScreen: false,
-    plugins: [deno(), react(), tailwindcss()],
+    plugins: [
+        deno(),
+        tanstackRouter({ target: "react", autoCodeSplitting: true, addExtensions: true }),
+        react(),
+        tailwindcss(),
+    ],
     server: {
         port: 1420,
         strictPort: true,

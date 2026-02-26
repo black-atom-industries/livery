@@ -4,18 +4,14 @@ import { useStore } from "@tanstack/react-store";
 import type { ThemeKeyDefinitionMap } from "@black-atom/core";
 import { appStore } from "../store/app.ts";
 import { getGroupedThemes } from "../lib/themes.ts";
-import { MainLayout } from "../components/layouts/main-layout.tsx";
-import { AppHeader } from "../components/app-header.tsx";
-import { AppFooter } from "../components/app-footer.tsx";
 import { ThemeList } from "../components/theme-list.tsx";
 import { ThemeDetail } from "../components/theme-detail.tsx";
 
 interface ThemePickerProps {
     themeMap: ThemeKeyDefinitionMap;
-    version: string;
 }
 
-export function ThemePicker({ themeMap, version }: ThemePickerProps) {
+export function ThemePicker({ themeMap }: ThemePickerProps) {
     const groups = useMemo(() => getGroupedThemes(themeMap), [themeMap]);
     const themes = useMemo(() => groups.flatMap((g) => g.themes), [groups]);
 
@@ -42,26 +38,22 @@ export function ThemePicker({ themeMap, version }: ThemePickerProps) {
     });
 
     return (
-        <MainLayout
-            header={<AppHeader version={version} />}
-            left={
+        <div className="flex h-full">
+            <div className="w-1/2 overflow-y-auto border-r border-neutral-800 px-4 py-3">
                 <ThemeList
                     groups={groups}
                     selectedIndex={selectedIndex}
                     onSelect={setSelectedIndex}
                 />
-            }
-            right={
-                <div>
-                    <ThemeDetail theme={selectedEntry} />
-                    {selectedTheme && (
-                        <div className="mt-6 text-sm text-green-400">
-                            Selected: {selectedTheme.meta.name}
-                        </div>
-                    )}
-                </div>
-            }
-            footer={<AppFooter />}
-        />
+            </div>
+            <div className="w-1/2 overflow-y-auto px-6 py-3">
+                <ThemeDetail theme={selectedEntry} />
+                {selectedTheme && (
+                    <div className="mt-6 text-sm text-green-400">
+                        Selected: {selectedTheme.meta.name}
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

@@ -14,6 +14,9 @@
         "@std/path": "jsr:@std/path@^1.0.0",
         "@tanstack/store": "npm:@tanstack/store@^0.9",
         "@tanstack/react-store": "npm:@tanstack/react-store@^0.9",
+        "@tanstack/react-router": "npm:@tanstack/react-router@^1",
+        "@tanstack/router-plugin": "npm:@tanstack/router-plugin@^1",
+        "@tanstack/react-router-devtools": "npm:@tanstack/react-router-devtools@^1",
         "@tanstack/react-hotkeys": "npm:@tanstack/react-hotkeys@^0.3.0",
         "react": "npm:react@^18.3.1",
         "@types/react": "npm:@types/react@^18.3.0",
@@ -37,12 +40,15 @@
         "fmt": "deno fmt"
     },
     "nodeModulesDir": "auto",
+    "lint": {
+        "exclude": ["src/routeTree.gen.ts"]
+    },
     "fmt": {
         "useTabs": false,
         "lineWidth": 100,
         "indentWidth": 4,
         "semiColons": true,
         "singleQuote": false,
-        "exclude": ["CHANGELOG.md", "src-tauri/"]
+        "exclude": ["CHANGELOG.md", "src-tauri/", "src/routeTree.gen.ts"]
     }
 }
