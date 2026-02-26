@@ -1,5 +1,4 @@
 import type { ThemeGroup } from "../lib/themes.ts";
-import { extractShortName } from "../lib/themes.ts";
 
 interface ThemeListProps {
     groups: ThemeGroup[];
@@ -16,7 +15,7 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
                 const items = group.themes.map((entry) => {
                     const index = flatIndex++;
                     const isSelected = index === selectedIndex;
-                    const name = extractShortName(entry.meta);
+                    const name = entry.meta.name;
                     const icon = entry.meta.appearance === "dark" ? "☾" : "☀";
 
                     return (

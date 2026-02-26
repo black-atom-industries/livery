@@ -1,8 +1,7 @@
-import type { Definition } from "@black-atom/core";
-import { extractShortName } from "../lib/themes.ts";
+import type { ThemeDefinition } from "@black-atom/core";
 
 interface ThemeDetailProps {
-    theme: Definition | undefined;
+    theme: ThemeDefinition | undefined;
 }
 
 export function ThemeDetail({ theme }: ThemeDetailProps) {
@@ -10,7 +9,7 @@ export function ThemeDetail({ theme }: ThemeDetailProps) {
         return <div className="text-neutral-600 text-sm">No theme selected</div>;
     }
 
-    const name = extractShortName(theme.meta);
+    const name = theme.meta.name;
     const appearance = theme.meta.appearance;
     const collection = theme.meta.collection.label;
 

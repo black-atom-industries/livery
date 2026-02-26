@@ -100,8 +100,8 @@ Key design decisions:
 
 ## Theme Data
 
-Theme data comes from `@black-atom/core` (JSR). The Vite build resolves this via the JSR npm
-compatibility layer (`@jsr/black-atom__core`) with a `resolve.alias` in `vite.config.ts`.
+Theme data comes from `@black-atom/core` (JSR). The `@deno/vite-plugin` handles JSR resolution for
+Vite, so source code imports `@black-atom/core` directly without an npm compatibility layer.
 
 ## Planned Commands
 

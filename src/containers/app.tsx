@@ -1,4 +1,4 @@
-import { themeBundle as themeMap } from "@black-atom/core";
+import { themeMap } from "@black-atom/core";
 import denoConfig from "../../deno.json" with { type: "json" };
 import { ThemePicker } from "./theme-picker.tsx";
 

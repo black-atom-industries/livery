@@ -81,13 +81,7 @@ docs/                   # Project documentation
 - Every commit must be green (tests pass, lint clean).
 - Amend small fixes into the previous commit rather than stacking fix commits.
 
-## Deno + Vite Dual Resolution
+## Deno + Vite Resolution
 
-The `@black-atom/core` package resolves differently depending on context:
-
-- **Deno** (tests, lint, check): via JSR import map in `deno.json`
-- **Vite** (dev server, build): via `@jsr/black-atom__core` npm compat in `node_modules`, aliased in
-  `vite.config.ts`
-
-Both must stay in sync. When updating `@black-atom/core`, update both the JSR and npm entries in
-`deno.json`.
+The `@deno/vite-plugin` bridges Deno's module resolution into Vite, so JSR imports like
+`@black-atom/core` work in both contexts without an npm compatibility layer or `resolve.alias`.

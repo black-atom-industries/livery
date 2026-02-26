@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
-import type { Definition, ThemeMap } from "@black-atom/core";
-import { extractShortName, getGroupedThemes } from "../lib/themes.ts";
+import type { ThemeDefinition, ThemeKeyDefinitionMap } from "@black-atom/core";
+import { getGroupedThemes } from "../lib/themes.ts";
 import { MainLayout } from "../components/layouts/main-layout.tsx";
 import { AppHeader } from "../components/app-header.tsx";
 import { AppFooter } from "../components/app-footer.tsx";
@@ -9,7 +9,7 @@ import { ThemeList } from "../components/theme-list.tsx";
 import { ThemeDetail } from "../components/theme-detail.tsx";
 
 interface ThemePickerProps {
-    themeMap: ThemeMap;
+    themeMap: ThemeKeyDefinitionMap;
     version: string;
 }
 
@@ -18,7 +18,7 @@ export function ThemePicker({ themeMap, version }: ThemePickerProps) {
     const themes = useMemo(() => groups.flatMap((g) => g.themes), [groups]);
 
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const [selectedTheme, setSelectedTheme] = useState<Definition | undefined>(
+    const [selectedTheme, setSelectedTheme] = useState<ThemeDefinition | undefined>(
         undefined,
     );
 
@@ -56,7 +56,7 @@ export function ThemePicker({ themeMap, version }: ThemePickerProps) {
                     <ThemeDetail theme={selectedEntry} />
                     {selectedTheme && (
                         <div className="mt-6 text-sm text-green-400">
-                            Selected: {extractShortName(selectedTheme.meta)}
+                            Selected: {selectedTheme.meta.name}
                         </div>
                     )}
                 </div>
