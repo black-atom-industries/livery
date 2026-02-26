@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
-import type { ThemeDefinition, ThemeKeyDefinitionMap } from "@black-atom/core";
+import { useStore } from "@tanstack/react-store";
+import type { ThemeKeyDefinitionMap } from "@black-atom/core";
+import { appStore } from "../store/app.ts";
 import { getGroupedThemes } from "../lib/themes.ts";
 import { MainLayout } from "../components/layouts/main-layout.tsx";
 import { AppHeader } from "../components/app-header.tsx";
@@ -17,11 +19,9 @@ export function ThemePicker({ themeMap, version }: ThemePickerProps) {
     const groups = useMemo(() => getGroupedThemes(themeMap), [themeMap]);
     const themes = useMemo(() => groups.flatMap((g) => g.themes), [groups]);
 
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const [selectedTheme, setSelectedTheme] = useState<ThemeDefinition | undefined>(
-        undefined,
-    );
+    const selectedTheme = useStore(appStore, (s) => s.selectedTheme);
 
+    const [selectedIndex, setSelectedIndex] = useState(0);
     const selectedEntry = themes[selectedIndex];
 
     const moveUp = () => setSelectedIndex((i) => Math.max(0, i - 1));
@@ -38,7 +38,7 @@ export function ThemePicker({ themeMap, version }: ThemePickerProps) {
     useHotkey("Shift+G", () => setSelectedIndex(themes.length - 1));
 
     useHotkey("Enter", () => {
-        setSelectedTheme(selectedEntry);
+        appStore.setState((s) => ({ ...s, selectedTheme: selectedEntry }));
     });
 
     return (

@@ -12,6 +12,8 @@
         "@deno/vite-plugin": "npm:@deno/vite-plugin@^1",
         "@std/assert": "jsr:@std/assert@^1.0.0",
         "@std/path": "jsr:@std/path@^1.0.0",
+        "@tanstack/store": "npm:@tanstack/store@^0.9",
+        "@tanstack/react-store": "npm:@tanstack/react-store@^0.9",
         "@tanstack/react-hotkeys": "npm:@tanstack/react-hotkeys@^0.3.0",
         "react": "npm:react@^18.3.1",
         "@types/react": "npm:@types/react@^18.3.0",
