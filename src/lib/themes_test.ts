@@ -1,21 +1,7 @@
-import { assertEquals, assertGreater, assertNotEquals } from "@std/assert";
+import { assertEquals, assertGreater } from "@std/assert";
 import { themeMap } from "@black-atom/core";
 import { collectionOrder } from "@black-atom/core";
-import { getGroupedThemes, getThemes } from "./themes.ts";
-
-// --- getThemes ---
-
-Deno.test("getThemes returns non-empty array of full definitions", () => {
-    const themes = getThemes(themeMap);
-    assertGreater(themes.length, 0);
-    themes.forEach((theme) => {
-        assertEquals(typeof theme.meta.key, "string");
-        assertEquals(typeof theme.meta.name, "string");
-        assertNotEquals(theme.primaries, undefined);
-    });
-});
-
-// --- getGroupedThemes ---
+import { getGroupedThemes } from "./themes.ts";
 
 Deno.test("getGroupedThemes returns groups in collectionOrder", () => {
     const groups = getGroupedThemes(themeMap);
@@ -32,8 +18,17 @@ Deno.test("getGroupedThemes sorts themes within each group alphabetically", () =
     });
 });
 
-Deno.test("getGroupedThemes flat count matches getThemes count", () => {
+Deno.test("getGroupedThemes uses collection label from theme meta", () => {
+    const groups = getGroupedThemes(themeMap);
+    groups.forEach((group) => {
+        assertEquals(group.label, group.themes[0].meta.collection.label);
+    });
+});
+
+Deno.test("getGroupedThemes includes all themes from themeMap", () => {
     const grouped = getGroupedThemes(themeMap);
     const flatCount = grouped.reduce((sum, g) => sum + g.themes.length, 0);
-    assertEquals(flatCount, getThemes(themeMap).length);
+    const totalThemes = Object.values(themeMap).filter(Boolean).length;
+    assertGreater(flatCount, 0);
+    assertEquals(flatCount, totalThemes);
 });

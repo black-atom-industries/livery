@@ -1,18 +1,9 @@
-import type { ThemeCollectionKey, ThemeDefinition, ThemeKeyDefinitionMap } from "@black-atom/core";
-import { collectionOrder } from "@black-atom/core";
-
-export const COLLECTION_LABELS: Record<ThemeCollectionKey, string> = {
-    default: "Default",
-    jpn: "JPN",
-    terra: "TER",
-    stations: "STA",
-    mnml: "MNM",
-};
-
-/** Get all non-null theme definitions from a theme map. */
-export function getThemes(themeMap: ThemeKeyDefinitionMap): ThemeDefinition[] {
-    return Object.values(themeMap).filter((d): d is ThemeDefinition => d !== null);
-}
+import {
+    collectionOrder,
+    type ThemeCollectionKey,
+    type ThemeDefinition,
+    type ThemeKeyDefinitionMap,
+} from "@black-atom/core";
 
 export interface ThemeGroup {
     collectionKey: ThemeCollectionKey;
@@ -22,7 +13,7 @@ export interface ThemeGroup {
 
 /** Group themes by collection in display order. Sorts themes within each group by name. */
 export function getGroupedThemes(themeMap: ThemeKeyDefinitionMap): ThemeGroup[] {
-    const themes = getThemes(themeMap);
+    const themes = Object.values(themeMap).filter((d): d is ThemeDefinition => d !== null);
 
     const grouped = themes.reduce((acc, theme) => {
         const key = theme.meta.collection.key;
@@ -35,9 +26,12 @@ export function getGroupedThemes(themeMap: ThemeKeyDefinitionMap): ThemeGroup[] 
 
     return collectionOrder
         .filter((key) => grouped.has(key))
-        .map((key) => ({
-            collectionKey: key,
-            label: COLLECTION_LABELS[key] ?? key,
-            themes: grouped.get(key)!,
-        }));
+        .map((key) => {
+            const themes = grouped.get(key)!;
+            return {
+                collectionKey: key,
+                label: themes[0].meta.collection.label,
+                themes,
+            };
+        });
 }
