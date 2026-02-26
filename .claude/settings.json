@@ -1,0 +1,22 @@
+{
+    "permissions": {
+        "allow": [
+            "Bash(python3:*)",
+            "Bash(deno:*)",
+            "Skill(bai:create)",
+            "Bash(gh pr:*)",
+            "Bash(gh release:*)",
+            "Bash(head:*)",
+            "Bash(gh api:*)",
+            "Bash(git pull:*)",
+            "Bash(ls:*)",
+            "Bash(which rustc:*)",
+            "Bash(which node:*)",
+            "Bash(git checkout:*)",
+            "Bash(npx jsr:*)",
+            "Skill(bai:update)",
+            "Bash(cd:*)",
+            "Bash(npm view:*)"
+        ]
+    }
+}
