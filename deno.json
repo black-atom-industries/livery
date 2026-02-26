@@ -1,11 +1,15 @@
 {
     "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
-    "version": "0.0.3",
+    "version": "0.2.0",
     "compilerOptions": {
         "jsx": "react-jsx",
         "jsxImportSource": "react",
         "jsxImportSourceTypes": "@types/react",
-        "lib": ["deno.ns", "dom", "dom.iterable"]
+        "lib": [
+            "deno.ns",
+            "dom",
+            "dom.iterable"
+        ]
     },
     "imports": {
         "@black-atom/core": "jsr:@black-atom/core@^0.3.2",
@@ -41,7 +45,9 @@
     },
     "nodeModulesDir": "auto",
     "lint": {
-        "exclude": ["src/routeTree.gen.ts"]
+        "exclude": [
+            "src/routeTree.gen.ts"
+        ]
     },
     "fmt": {
         "useTabs": false,
@@ -49,6 +55,10 @@
         "indentWidth": 4,
         "semiColons": true,
         "singleQuote": false,
-        "exclude": ["CHANGELOG.md", "src-tauri/", "src/routeTree.gen.ts"]
+        "exclude": [
+            "CHANGELOG.md",
+            "src-tauri/",
+            "src/routeTree.gen.ts"
+        ]
     }
 }
