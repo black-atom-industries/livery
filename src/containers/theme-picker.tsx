@@ -3,6 +3,7 @@ import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import type { ThemeKeyDefinitionMap } from "@black-atom/core";
 import { appStore } from "../store/app.ts";
+import { applyTheme } from "../lib/apply-theme.ts";
 import { getGroupedThemes } from "../lib/themes.ts";
 import { ThemeList } from "../components/theme-list.tsx";
 import { ThemeDetail } from "../components/theme-detail.tsx";
@@ -34,7 +35,9 @@ export function ThemePicker({ themeMap }: ThemePickerProps) {
     useHotkey("Shift+G", () => setSelectedIndex(themes.length - 1));
 
     useHotkey("Enter", () => {
-        appStore.setState((s) => ({ ...s, selectedTheme: selectedEntry }));
+        const theme = themes[selectedIndex];
+        appStore.setState((s) => ({ ...s, selectedTheme: theme }));
+        applyTheme(theme);
     });
 
     return (
