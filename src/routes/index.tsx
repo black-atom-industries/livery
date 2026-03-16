@@ -6,6 +6,7 @@ import { themeMap } from "@black-atom/core";
 import { appStore } from "../store/app.ts";
 import { applyTheme } from "../lib/apply-theme.ts";
 import { getGroupedThemes } from "../lib/themes.ts";
+import { useConfig } from "../queries/use-config.ts";
 import { ThemeList } from "../components/theme-list.tsx";
 import { ThemeDetail } from "../components/theme-detail.tsx";
 
@@ -14,6 +15,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Component() {
+    const { query: configQuery } = useConfig();
+
     const groups = useMemo(() => getGroupedThemes(themeMap), [themeMap]);
     const themes = useMemo(() => groups.flatMap((g) => g.themes), [groups]);
 
@@ -38,9 +41,10 @@ function Component() {
 
     useHotkey("Enter", () => {
         if (phase === "applying") return;
+        if (!configQuery.data) return;
         const theme = themes[selectedIndex];
         appStore.setState((s) => ({ ...s, selectedTheme: theme }));
-        applyTheme(theme);
+        applyTheme(theme, configQuery.data);
     });
 
     return (
