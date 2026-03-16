@@ -21,10 +21,10 @@ Deno.test("mergeConfig falls back to base system_appearance", () => {
 Deno.test("mergeConfig merges tools from both sides", () => {
     const base: Config = {
         system_appearance: true,
-        tools: { nvim: { config_path: "/base/nvim" } },
+        tools: { nvim: { enabled: true, config_path: "/base/nvim" } },
     };
     const result = mergeConfig(base, {
-        tools: { ghostty: { config_path: "/override/ghostty" } },
+        tools: { ghostty: { enabled: true, config_path: "/override/ghostty" } },
     });
 
     assertEquals(result.tools.nvim?.config_path, "/base/nvim");
@@ -34,10 +34,10 @@ Deno.test("mergeConfig merges tools from both sides", () => {
 Deno.test("mergeConfig override tools win over base tools", () => {
     const base: Config = {
         system_appearance: true,
-        tools: { nvim: { config_path: "/old/path" } },
+        tools: { nvim: { enabled: true, config_path: "/old/path" } },
     };
     const result = mergeConfig(base, {
-        tools: { nvim: { config_path: "/new/path" } },
+        tools: { nvim: { enabled: true, config_path: "/new/path" } },
     });
 
     assertEquals(result.tools.nvim?.config_path, "/new/path");
@@ -56,7 +56,7 @@ Deno.test("expandToolPaths expands tilde in config_path", () => {
     const config: Config = {
         system_appearance: true,
         tools: {
-            nvim: { config_path: "~/.config/nvim/lua/config.lua" },
+            nvim: { enabled: true, config_path: "~/.config/nvim/lua/config.lua" },
         },
     };
 
@@ -71,6 +71,7 @@ Deno.test("expandToolPaths expands tilde in themes_path", () => {
         system_appearance: true,
         tools: {
             tmux: {
+                enabled: true,
                 config_path: "~/.config/tmux/themes.conf",
                 themes_path: "~/repos/black-atom-industries/tmux/themes",
             },
@@ -88,7 +89,7 @@ Deno.test("expandToolPaths leaves absolute paths unchanged", () => {
     const config: Config = {
         system_appearance: false,
         tools: {
-            ghostty: { config_path: "/etc/ghostty/config" },
+            ghostty: { enabled: true, config_path: "/etc/ghostty/config" },
         },
     };
 
@@ -112,7 +113,7 @@ Deno.test("expandToolPaths preserves system_appearance", () => {
     const config: Config = {
         system_appearance: false,
         tools: {
-            nvim: { config_path: "~/.config/nvim/lua/config.lua" },
+            nvim: { enabled: true, config_path: "~/.config/nvim/lua/config.lua" },
         },
     };
 
@@ -135,7 +136,7 @@ Deno.test("loadConfig loads and merges user config", async () => {
     const userConfig = {
         system_appearance: false,
         tools: {
-            nvim: { config_path: "/absolute/path/config.lua" },
+            nvim: { enabled: true, config_path: "/absolute/path/config.lua" },
         },
     };
 
@@ -156,7 +157,7 @@ Deno.test("loadConfig merges partial user config with defaults", async () => {
     await Deno.writeTextFile(
         configPath,
         JSON.stringify({
-            tools: { zed: { config_path: "~/.config/zed/settings.json" } },
+            tools: { zed: { enabled: true, config_path: "~/.config/zed/settings.json" } },
         }),
     );
 

@@ -22,6 +22,7 @@ export function expandToolPaths(config: Config): Config {
         if (!toolConfig) continue;
 
         tools[name as keyof typeof tools] = {
+            enabled: toolConfig.enabled,
             config_path: expandTilde(toolConfig.config_path),
             ...(toolConfig.themes_path ? { themes_path: expandTilde(toolConfig.themes_path) } : {}),
         };

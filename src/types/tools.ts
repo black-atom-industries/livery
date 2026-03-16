@@ -1,6 +1,7 @@
 export type ToolName = "nvim" | "tmux" | "ghostty" | "zed" | "delta";
 
 export interface ToolConfig {
+    enabled: boolean;
     config_path: string;
     themes_path?: string;
 }
