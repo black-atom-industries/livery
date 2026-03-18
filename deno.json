@@ -18,6 +18,8 @@
         "@tanstack/react-query": "npm:@tanstack/react-query@^5",
         "@tanstack/react-router": "npm:@tanstack/react-router@^1",
         "@tanstack/router-plugin": "npm:@tanstack/router-plugin@^1",
+        "@tanstack/react-devtools": "npm:@tanstack/react-devtools@^0",
+        "@tanstack/react-query-devtools": "npm:@tanstack/react-query-devtools@^5",
         "@tanstack/react-router-devtools": "npm:@tanstack/react-router-devtools@^1",
         "@tanstack/react-hotkeys": "npm:@tanstack/react-hotkeys@^0.3.0",
         "react": "npm:react@^18.3.1",

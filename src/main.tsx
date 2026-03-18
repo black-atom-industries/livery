@@ -1,6 +1,9 @@
 import { createRoot } from "react-dom/client";
 import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { routeTree } from "./routeTree.gen.ts";
 import "./index.css";
 
@@ -32,5 +35,12 @@ declare module "@tanstack/react-router" {
 createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
+        <TanStackDevtools
+            config={{ hideUntilHover: true, position: "bottom-right" }}
+            plugins={[
+                { name: "TanStack Query", render: <ReactQueryDevtoolsPanel /> },
+                { name: "TanStack Router", render: <TanStackRouterDevtoolsPanel /> },
+            ]}
+        />
     </QueryClientProvider>,
 );
