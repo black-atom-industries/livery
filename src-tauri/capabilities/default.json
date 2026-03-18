@@ -15,17 +15,6 @@
             "allow": [
                 { "path": "$HOME/.config/black-atom/livery/*" }
             ]
-        },
-        {
-            "identifier": "shell:allow-execute",
-            "allow": [
-                {
-                    "name": "exec-sh",
-                    "cmd": "sh",
-                    "args": ["-c", { "validator": "^pkill -SIGUSR2 ghostty$" }],
-                    "sidecar": false
-                }
-            ]
         }
     ]
 }

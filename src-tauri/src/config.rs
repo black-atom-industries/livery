@@ -16,6 +16,10 @@ pub struct AppConfig {
     pub config_path: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub themes_path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub match_pattern: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub replace_template: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +37,8 @@ impl Default for Config {
                 enabled: true,
                 config_path: "~/.config/ghostty/config".to_string(),
                 themes_path: None,
+                match_pattern: None,
+                replace_template: None,
             },
         );
         Config {

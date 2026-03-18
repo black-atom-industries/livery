@@ -32,8 +32,7 @@
         "@tailwindcss/vite": "npm:@tailwindcss/vite@^4",
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
         "@tauri-apps/cli": "npm:@tauri-apps/cli@^2",
-        "@tauri-apps/plugin-fs": "npm:@tauri-apps/plugin-fs@^2",
-        "@tauri-apps/plugin-shell": "npm:@tauri-apps/plugin-shell@^2"
+        "@tauri-apps/plugin-fs": "npm:@tauri-apps/plugin-fs@^2"
     },
     "tasks": {
         "dev": "deno run -A npm:@tauri-apps/cli dev",
