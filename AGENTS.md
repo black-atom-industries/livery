@@ -76,27 +76,25 @@ Config lives at `~/.config/black-atom/livery/config.json`:
 {
     "system_appearance": true,
     "tools": {
-        "nvim": { "config_path": "~/.config/nvim/lua/config.lua" },
-        "tmux": {
-            "config_path": "~/.config/tmux/themes.conf",
-            "themes_path": "~/repos/black-atom-industries/tmux/themes"
-        },
-        "ghostty": { "config_path": "~/.config/ghostty/config" },
-        "zed": { "config_path": "~/.config/zed/settings.json" },
-        "delta": { "config_path": "~/.gitconfig" }
+        "ghostty": {
+            "enabled": true,
+            "config_path": "~/.config/ghostty/config"
+        }
     }
 }
 ```
 
 Key design decisions:
 
-- **Tools omitted = skipped.** No `enabled` flags. Presence in config means enabled.
+- **`enabled` flag per tool.** Presence in config means configured, `enabled` controls whether it
+  runs. Users can disable a tool without losing their path settings.
 - **No default paths.** Users declare their paths explicitly (via `livery init` in v0.2).
 - **`system_appearance`** is a top-level boolean, not a tool — macOS/Linux dark mode is a system
   toggle, not a config file edit.
 - **`themes_path`** is optional, only needed for tools that reference external theme files (e.g.
   tmux).
-- **`~` expansion** is handled automatically on all paths.
+- **`~` expansion** is handled by Rust on read. Paths are stored with `~` on disk and expanded to
+  absolute paths for the frontend. `save_config` re-tildes paths before writing.
 
 ## Theme Data
 

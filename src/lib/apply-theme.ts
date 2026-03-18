@@ -19,8 +19,13 @@ async function runGhosttyUpdater(
         const updated = replaceGhosttyTheme(content, themeKey);
         await writeTextFile(configPath, updated);
 
-        await Command.create("exec-sh", ["-c", "pkill -SIGUSR2 ghostty"])
+        // Reload ghostty via SIGUSR2. pkill exits non-zero if ghostty isn't running —
+        // that's fine, the config file is already updated for next launch.
+        const output = await Command.create("exec-sh", ["-c", "pkill -SIGUSR2 ghostty"])
             .execute();
+        if (output.code !== 0) {
+            console.warn("[ghostty updater] pkill returned non-zero (ghostty may not be running)");
+        }
 
         return { tool: "ghostty", status: "done" };
     } catch (error) {

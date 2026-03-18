@@ -22,7 +22,7 @@
                 {
                     "name": "exec-sh",
                     "cmd": "sh",
-                    "args": ["-c", { "validator": ".+" }],
+                    "args": ["-c", { "validator": "^pkill -SIGUSR2 ghostty$" }],
                     "sidecar": false
                 }
             ]

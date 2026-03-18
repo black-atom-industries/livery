@@ -48,7 +48,13 @@ fn config_path() -> PathBuf {
 pub fn read_config_from_disk() -> Config {
     let path = config_path();
     match fs::read_to_string(&path) {
-        Ok(content) => serde_json::from_str(&content).unwrap_or_default(),
+        Ok(content) => match serde_json::from_str(&content) {
+            Ok(config) => config,
+            Err(e) => {
+                log::warn!("Failed to parse config, using defaults: {e}");
+                Config::default()
+            }
+        },
         Err(_) => Config::default(),
     }
 }
@@ -92,6 +98,23 @@ fn expand_tool_paths(config: &mut Config) {
     }
 }
 
+/// Re-tilde absolute paths so they are stored portably on disk.
+fn collapse_tool_paths(config: &mut Config) {
+    if let Some(home) = dirs::home_dir() {
+        let home_str = home.to_string_lossy().to_string();
+        for tool in config.tools.values_mut() {
+            if tool.config_path.starts_with(&home_str) {
+                tool.config_path = tool.config_path.replacen(&home_str, "~", 1);
+            }
+            if let Some(ref tp) = tool.themes_path {
+                if tp.starts_with(&home_str) {
+                    tool.themes_path = Some(tp.replacen(&home_str, "~", 1));
+                }
+            }
+        }
+    }
+}
+
 #[tauri::command]
 pub fn get_config(app: AppHandle) -> Config {
     let mut config = read_config_from_disk();
@@ -111,7 +134,9 @@ pub fn get_config(app: AppHandle) -> Config {
 }
 
 #[tauri::command]
-pub fn save_config(app: AppHandle, config: Config) -> Result<(), String> {
+pub fn save_config(app: AppHandle, mut config: Config) -> Result<(), String> {
+    // Re-tilde paths before writing so the config file stays portable
+    collapse_tool_paths(&mut config);
     write_config_to_disk(&config)?;
     scope_config_paths(&app, &config);
     Ok(())
