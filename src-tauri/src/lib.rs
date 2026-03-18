@@ -17,12 +17,6 @@ pub fn run() {
                         .build(),
                 )?;
             }
-
-            // Scope FS paths from config on startup
-            let handle = app.handle().clone();
-            let cfg = config::read_config_from_disk();
-            config::scope_config_paths(&handle, &cfg);
-
             Ok(())
         })
         .run(tauri::generate_context!())

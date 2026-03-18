@@ -5,8 +5,13 @@ use std::path::PathBuf;
 use tauri::AppHandle;
 use tauri_plugin_fs::FsExt;
 
+fn default_true() -> bool {
+    true
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ToolConfig {
+    #[serde(default = "default_true")]
     pub enabled: bool,
     pub config_path: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -38,7 +43,13 @@ impl Default for Config {
 }
 
 fn config_path() -> PathBuf {
-    let home = dirs::home_dir().unwrap_or_default();
+    let home = match dirs::home_dir() {
+        Some(h) => h,
+        None => {
+            log::warn!("Could not determine home directory, using current directory");
+            PathBuf::new()
+        }
+    };
     home.join(".config")
         .join("black-atom")
         .join("livery")
@@ -99,16 +110,19 @@ fn expand_tool_paths(config: &mut Config) {
 }
 
 /// Re-tilde absolute paths so they are stored portably on disk.
+/// The frontend receives expanded paths from get_config. When save_config is called,
+/// paths that start with the home directory are collapsed back to ~/... for portability.
+/// scope_config_paths handles re-expansion internally via shellexpand::tilde.
 fn collapse_tool_paths(config: &mut Config) {
     if let Some(home) = dirs::home_dir() {
-        let home_str = home.to_string_lossy().to_string();
+        let home_prefix = format!("{}/", home.to_string_lossy());
         for tool in config.tools.values_mut() {
-            if tool.config_path.starts_with(&home_str) {
-                tool.config_path = tool.config_path.replacen(&home_str, "~", 1);
+            if tool.config_path.starts_with(&home_prefix) {
+                tool.config_path = format!("~/{}", &tool.config_path[home_prefix.len()..]);
             }
             if let Some(ref tp) = tool.themes_path {
-                if tp.starts_with(&home_str) {
-                    tool.themes_path = Some(tp.replacen(&home_str, "~", 1));
+                if tp.starts_with(&home_prefix) {
+                    tool.themes_path = Some(format!("~/{}", &tp[home_prefix.len()..]));
                 }
             }
         }
@@ -117,15 +131,15 @@ fn collapse_tool_paths(config: &mut Config) {
 
 #[tauri::command]
 pub fn get_config(app: AppHandle) -> Config {
-    let mut config = read_config_from_disk();
-
-    // Ensure config file exists on disk (first launch)
     let path = config_path();
+
+    // Create default config file on first launch
     if !path.exists() {
-        let _ = write_config_to_disk(&config);
+        let _ = write_config_to_disk(&Config::default());
     }
 
-    // Scope paths for enabled tools
+    let mut config = read_config_from_disk();
+
     scope_config_paths(&app, &config);
 
     // Return expanded paths to frontend (FS plugin needs absolute paths)
