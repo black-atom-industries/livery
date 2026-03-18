@@ -39,7 +39,7 @@ function Component() {
     useHotkeySequence(["G", "G"], () => setSelectedIndex(0));
     useHotkey("Shift+G", () => setSelectedIndex(themes.length - 1));
 
-    useHotkey("Enter", () => {
+    const handleApplyTheme = async () => {
         if (phase === "applying") return;
         if (!config.query.data) return;
 
@@ -50,12 +50,14 @@ function Component() {
 
         appStore.setState((s) => ({ ...s, selectedTheme: theme, phase: "applying" }));
 
-        applyTheme(updaters, (results) => {
+        await applyTheme(updaters, (results) => {
             appStore.setState((s) => ({ ...s, updaterResults: results }));
-        }).then(() => {
-            appStore.setState((s) => ({ ...s, phase: "done" }));
         });
-    });
+
+        appStore.setState((s) => ({ ...s, phase: "done" }));
+    };
+
+    useHotkey("Enter", handleApplyTheme);
 
     return (
         <div className="flex h-full">

@@ -30,7 +30,6 @@ function RootLayout() {
             <footer className="shrink-0 px-6 py-2 border-t border-neutral-800 text-xs text-neutral-500">
                 <AppFooter />
             </footer>
-
         </div>
     );
 }
