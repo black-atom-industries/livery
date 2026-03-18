@@ -1,5 +1,4 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useStore } from "@tanstack/react-store";
 import denoConfig from "../../deno.json" with { type: "json" };
 import { AppHeader } from "../components/app-header.tsx";
@@ -31,8 +30,6 @@ function RootLayout() {
             <footer className="shrink-0 px-6 py-2 border-t border-neutral-800 text-xs text-neutral-500">
                 <AppFooter />
             </footer>
-
-            <TanStackRouterDevtools position="bottom-right" />
         </div>
     );
 }

@@ -15,8 +15,11 @@
         "@std/path": "jsr:@std/path@^1.0.0",
         "@tanstack/store": "npm:@tanstack/store@^0.9",
         "@tanstack/react-store": "npm:@tanstack/react-store@^0.9",
+        "@tanstack/react-query": "npm:@tanstack/react-query@^5",
         "@tanstack/react-router": "npm:@tanstack/react-router@^1",
         "@tanstack/router-plugin": "npm:@tanstack/router-plugin@^1",
+        "@tanstack/react-devtools": "npm:@tanstack/react-devtools@^0",
+        "@tanstack/react-query-devtools": "npm:@tanstack/react-query-devtools@^5",
         "@tanstack/react-router-devtools": "npm:@tanstack/react-router-devtools@^1",
         "@tanstack/react-hotkeys": "npm:@tanstack/react-hotkeys@^0.3.0",
         "react": "npm:react@^18.3.1",
@@ -28,7 +31,9 @@
         "tailwindcss": "npm:tailwindcss@^4",
         "@tailwindcss/vite": "npm:@tailwindcss/vite@^4",
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
-        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2"
+        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2",
+        "@tauri-apps/plugin-fs": "npm:@tauri-apps/plugin-fs@^2",
+        "@tauri-apps/plugin-shell": "npm:@tauri-apps/plugin-shell@^2"
     },
     "tasks": {
         "dev": "deno run -A npm:@tauri-apps/cli dev",

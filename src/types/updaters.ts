@@ -4,7 +4,7 @@ import { Config } from "./config.ts";
 export type UpdateStatus = "pending" | "running" | "done" | "skipped" | "error";
 
 export interface UpdateResult {
-    tool: string;
+    app: string;
     status: UpdateStatus;
     message?: string;
 }

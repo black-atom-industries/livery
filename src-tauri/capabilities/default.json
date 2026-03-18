@@ -6,6 +6,26 @@
         "main"
     ],
     "permissions": [
-        "core:default"
+        "core:default",
+        "fs:default",
+        "fs:allow-read-text-file",
+        "fs:allow-write-text-file",
+        {
+            "identifier": "fs:scope",
+            "allow": [
+                { "path": "$HOME/.config/black-atom/livery/*" }
+            ]
+        },
+        {
+            "identifier": "shell:allow-execute",
+            "allow": [
+                {
+                    "name": "exec-sh",
+                    "cmd": "sh",
+                    "args": ["-c", { "validator": "^pkill -SIGUSR2 ghostty$" }],
+                    "sidecar": false
+                }
+            ]
+        }
     ]
 }
