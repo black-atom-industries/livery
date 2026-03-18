@@ -2,13 +2,17 @@ name: Claude Code Review
 
 on:
     pull_request:
-        types: [labeled]
+        types: [opened, synchronize, labeled, ready_for_review]
+
+concurrency:
+    group: claude-review-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
 
 jobs:
     claude-review:
         if: |
             !github.event.pull_request.draft &&
-            github.event.label.name == 'needs-review'
+            contains(github.event.pull_request.labels.*.name, 'needs-review')
         runs-on: ubuntu-latest
         permissions:
             contents: read
