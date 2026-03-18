@@ -6,18 +6,21 @@ import type { UpdateResult } from "../types/updaters.ts";
 import { replaceConfigPattern } from "../lib/replace-config-pattern.ts";
 import { APP_PATTERN_DEFAULTS } from "./defaults.ts";
 
-const DEFAULTS = APP_PATTERN_DEFAULTS.ghostty!;
-
 export async function runGhosttyUpdater(
     themeKey: ThemeKey,
     appConfig: AppConfig,
 ): Promise<UpdateResult> {
-    const matchPattern = appConfig.match_pattern ?? DEFAULTS.matchPattern;
-    const replaceTemplate = appConfig.replace_template ?? DEFAULTS.replaceTemplate;
+    const defaults = APP_PATTERN_DEFAULTS.ghostty;
+    const matchPattern = appConfig.match_pattern ?? defaults?.matchPattern;
+    const replaceTemplate = appConfig.replace_template ?? defaults?.replaceTemplate;
+
+    if (!matchPattern || !replaceTemplate) {
+        return { app: "ghostty", status: "error", message: "No pattern defaults for ghostty" };
+    }
 
     try {
         const content = await readTextFile(appConfig.config_path);
-        const updated = replaceConfigPattern(content, matchPattern, replaceTemplate, themeKey);
+        const updated = replaceConfigPattern({ content, matchPattern, replaceTemplate, themeKey });
         await writeTextFile(appConfig.config_path, updated);
 
         await invoke("reload_ghostty");
@@ -25,7 +28,7 @@ export async function runGhosttyUpdater(
         return { app: "ghostty", status: "done" };
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error("[ghostty updater]", error);
+        console.warn("[ghostty updater]", error);
         return { app: "ghostty", status: "error", message };
     }
 }

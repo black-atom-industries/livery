@@ -6,19 +6,22 @@ import type { UpdateResult } from "../types/updaters.ts";
 import { replaceConfigPattern } from "../lib/replace-config-pattern.ts";
 import { APP_PATTERN_DEFAULTS } from "./defaults.ts";
 
-const DEFAULTS = APP_PATTERN_DEFAULTS.nvim!;
-
 export async function runNvimUpdater(
     themeKey: ThemeKey,
     appConfig: AppConfig,
 ): Promise<UpdateResult> {
-    const matchPattern = appConfig.match_pattern ?? DEFAULTS.matchPattern;
-    const replaceTemplate = appConfig.replace_template ?? DEFAULTS.replaceTemplate;
+    const defaults = APP_PATTERN_DEFAULTS.nvim;
+    const matchPattern = appConfig.match_pattern ?? defaults?.matchPattern;
+    const replaceTemplate = appConfig.replace_template ?? defaults?.replaceTemplate;
+
+    if (!matchPattern || !replaceTemplate) {
+        return { app: "nvim", status: "error", message: "No pattern defaults for nvim" };
+    }
 
     try {
         // Persist: update config file
         const content = await readTextFile(appConfig.config_path);
-        const updated = replaceConfigPattern(content, matchPattern, replaceTemplate, themeKey);
+        const updated = replaceConfigPattern({ content, matchPattern, replaceTemplate, themeKey });
         await writeTextFile(appConfig.config_path, updated);
 
         // Live reload: send :colorscheme to all running nvim instances
@@ -27,7 +30,7 @@ export async function runNvimUpdater(
         return { app: "nvim", status: "done" };
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error("[nvim updater]", error);
+        console.warn("[nvim updater]", error);
         return { app: "nvim", status: "error", message };
     }
 }
