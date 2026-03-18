@@ -4,7 +4,7 @@ import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { themeMap } from "@black-atom/core";
 import { appStore } from "../store/app.ts";
-import { applyTheme } from "../lib/apply-theme.ts";
+import { applyTheme, getEnabledUpdaters } from "../lib/apply-theme.ts";
 import { getGroupedThemes } from "../lib/themes.ts";
 import { useConfig } from "../queries/use-config.ts";
 import { ThemeList } from "../components/theme-list.tsx";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Component() {
-    const { query: configQuery } = useConfig();
+    const config = useConfig();
 
     const groups = useMemo(() => getGroupedThemes(themeMap), [themeMap]);
     const themes = useMemo(() => groups.flatMap((g) => g.themes), [groups]);
@@ -41,10 +41,20 @@ function Component() {
 
     useHotkey("Enter", () => {
         if (phase === "applying") return;
-        if (!configQuery.data) return;
+        if (!config.query.data) return;
+
         const theme = themes[selectedIndex];
-        appStore.setState((s) => ({ ...s, selectedTheme: theme }));
-        applyTheme(theme, configQuery.data);
+        const updaters = getEnabledUpdaters(theme.meta.key, config.query.data.apps);
+
+        if (updaters.length === 0) return;
+
+        appStore.setState((s) => ({ ...s, selectedTheme: theme, phase: "applying" }));
+
+        applyTheme(updaters, (results) => {
+            appStore.setState((s) => ({ ...s, updaterResults: results }));
+        }).then(() => {
+            appStore.setState((s) => ({ ...s, phase: "done" }));
+        });
     });
 
     return (
