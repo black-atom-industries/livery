@@ -50,11 +50,13 @@ function Component() {
 
         appStore.setState((s) => ({ ...s, selectedTheme: theme, phase: "applying" }));
 
-        await applyTheme(updaters, (results) => {
-            appStore.setState((s) => ({ ...s, updaterResults: results }));
-        });
-
-        appStore.setState((s) => ({ ...s, phase: "done" }));
+        try {
+            await applyTheme(updaters, (results) => {
+                appStore.setState((s) => ({ ...s, updaterResults: results }));
+            });
+        } finally {
+            appStore.setState((s) => ({ ...s, phase: "done" }));
+        }
     };
 
     useHotkey("Enter", handleApplyTheme);
