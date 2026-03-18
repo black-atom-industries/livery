@@ -1,6 +1,6 @@
-import { ToolConfig, ToolName } from "./tools.ts";
+import { AppConfig, AppName } from "./apps.ts";
 
 export interface Config {
     system_appearance: boolean;
-    tools: Partial<Record<ToolName, ToolConfig>>;
+    apps: Partial<Record<AppName, AppConfig>>;
 }

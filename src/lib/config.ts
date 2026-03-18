@@ -1,31 +1,29 @@
 import { expandTilde } from "./paths.ts";
 import { Config } from "../types/config.ts";
-import type { ToolName } from "../types/tools.ts";
+import type { AppName } from "../types/apps.ts";
 
 export function mergeConfig(base: Config, override: Partial<Config>): Config {
     return {
         system_appearance: override.system_appearance ?? base.system_appearance,
-        tools: { ...base.tools, ...override.tools },
+        apps: { ...base.apps, ...override.apps },
     };
 }
 
-export function expandToolPaths(config: Config): Config {
-    const tools: Config["tools"] = {};
+export function expandAppPaths(config: Config): Config {
+    const apps: Config["apps"] = {};
 
-    for (const [name, toolConfig] of Object.entries(config.tools)) {
-        if (!toolConfig) continue;
+    for (const [name, appConfig] of Object.entries(config.apps)) {
+        if (!appConfig) continue;
 
-        tools[name as ToolName] = {
-            ...toolConfig,
-            config_path: expandTilde(toolConfig.config_path),
-            ...(toolConfig.themes_path
-                ? { themes_path: expandTilde(toolConfig.themes_path) }
-                : {}),
+        apps[name as AppName] = {
+            ...appConfig,
+            config_path: expandTilde(appConfig.config_path),
+            ...(appConfig.themes_path ? { themes_path: expandTilde(appConfig.themes_path) } : {}),
         };
     }
 
     return {
         ...config,
-        tools,
+        apps,
     };
 }

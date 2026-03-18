@@ -7,7 +7,7 @@ export interface ProgressState {
     total: number;
     /** 0-100 percentage, or null when there are no results (indeterminate). */
     value: number | null;
-    /** Name of the currently running tool, or null if none running. */
+    /** Name of the currently running app, or null if none running. */
     currentLabel: string | null;
     /** Aggregate status: idle (no results), running, done, or error. */
     status: ProgressStatus;
@@ -47,7 +47,7 @@ export function getProgressState(results: UpdateResult[]): ProgressState {
         completedCount,
         total,
         value,
-        currentLabel: running?.tool ?? null,
+        currentLabel: running?.app ?? null,
         status,
     };
 }

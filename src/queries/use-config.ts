@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import type { Config } from "../types/config.ts";
-import type { ToolConfig, ToolName } from "../types/tools.ts";
+import type { AppConfig, AppName } from "../types/apps.ts";
 
 const TOPIC = "config" as const;
 const queryKey = (keys: string[] = []) => [TOPIC, ...keys] as const;
@@ -14,9 +14,9 @@ export const useConfig = () => {
         staleTime: Infinity, // Config only changes via our own save mutation
     });
 
-    const enabledTools = useMemo(
+    const enabledApps = useMemo(
         () =>
-            (Object.entries(query.data?.tools ?? {}) as [ToolName, ToolConfig][])
+            (Object.entries(query.data?.apps ?? {}) as [AppName, AppConfig][])
                 .filter(([_, cfg]) => cfg.enabled)
                 .map(([name]) => name),
         [query.data],
@@ -30,7 +30,7 @@ export const useConfig = () => {
 
     return {
         query,
-        enabledTools,
+        enabledApps,
         save,
     };
 };

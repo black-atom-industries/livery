@@ -10,7 +10,7 @@ fn default_true() -> bool {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ToolConfig {
+pub struct AppConfig {
     #[serde(default = "default_true")]
     pub enabled: bool,
     pub config_path: String,
@@ -21,15 +21,15 @@ pub struct ToolConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub system_appearance: bool,
-    pub tools: HashMap<String, ToolConfig>,
+    pub apps: HashMap<String, AppConfig>,
 }
 
 impl Default for Config {
     fn default() -> Self {
-        let mut tools = HashMap::new();
-        tools.insert(
+        let mut apps = HashMap::new();
+        apps.insert(
             "ghostty".to_string(),
-            ToolConfig {
+            AppConfig {
                 enabled: true,
                 config_path: "~/.config/ghostty/config".to_string(),
                 themes_path: None,
@@ -37,7 +37,7 @@ impl Default for Config {
         );
         Config {
             system_appearance: true,
-            tools,
+            apps,
         }
     }
 }
@@ -83,13 +83,13 @@ fn write_config_to_disk(config: &Config) -> Result<(), String> {
 
 pub fn scope_config_paths(app: &AppHandle, config: &Config) {
     let scope = app.fs_scope();
-    for (name, tool) in &config.tools {
-        if tool.enabled {
-            let path = shellexpand::tilde(&tool.config_path).to_string();
+    for (name, app_config) in &config.apps {
+        if app_config.enabled {
+            let path = shellexpand::tilde(&app_config.config_path).to_string();
             if let Err(e) = scope.allow_file(&path) {
                 log::warn!("Failed to scope {name} config_path: {e}");
             }
-            if let Some(ref tp) = tool.themes_path {
+            if let Some(ref tp) = app_config.themes_path {
                 let expanded = shellexpand::tilde(tp).to_string();
                 if let Err(e) = scope.allow_directory(&expanded, true) {
                     log::warn!("Failed to scope {name} themes_path: {e}");
@@ -99,12 +99,12 @@ pub fn scope_config_paths(app: &AppHandle, config: &Config) {
     }
 }
 
-/// Expand tilde in all tool paths so the frontend receives absolute paths.
-fn expand_tool_paths(config: &mut Config) {
-    for tool in config.tools.values_mut() {
-        tool.config_path = shellexpand::tilde(&tool.config_path).to_string();
-        if let Some(ref tp) = tool.themes_path {
-            tool.themes_path = Some(shellexpand::tilde(tp).to_string());
+/// Expand tilde in all app paths so the frontend receives absolute paths.
+fn expand_app_paths(config: &mut Config) {
+    for app_config in config.apps.values_mut() {
+        app_config.config_path = shellexpand::tilde(&app_config.config_path).to_string();
+        if let Some(ref tp) = app_config.themes_path {
+            app_config.themes_path = Some(shellexpand::tilde(tp).to_string());
         }
     }
 }
@@ -113,16 +113,16 @@ fn expand_tool_paths(config: &mut Config) {
 /// The frontend receives expanded paths from get_config. When save_config is called,
 /// paths that start with the home directory are collapsed back to ~/... for portability.
 /// scope_config_paths handles re-expansion internally via shellexpand::tilde.
-fn collapse_tool_paths(config: &mut Config) {
+fn collapse_app_paths(config: &mut Config) {
     if let Some(home) = dirs::home_dir() {
         let home_prefix = format!("{}/", home.to_string_lossy());
-        for tool in config.tools.values_mut() {
-            if tool.config_path.starts_with(&home_prefix) {
-                tool.config_path = format!("~/{}", &tool.config_path[home_prefix.len()..]);
+        for app_config in config.apps.values_mut() {
+            if app_config.config_path.starts_with(&home_prefix) {
+                app_config.config_path = format!("~/{}", &app_config.config_path[home_prefix.len()..]);
             }
-            if let Some(ref tp) = tool.themes_path {
+            if let Some(ref tp) = app_config.themes_path {
                 if tp.starts_with(&home_prefix) {
-                    tool.themes_path = Some(format!("~/{}", &tp[home_prefix.len()..]));
+                    app_config.themes_path = Some(format!("~/{}", &tp[home_prefix.len()..]));
                 }
             }
         }
@@ -143,14 +143,14 @@ pub fn get_config(app: AppHandle) -> Config {
     scope_config_paths(&app, &config);
 
     // Return expanded paths to frontend (FS plugin needs absolute paths)
-    expand_tool_paths(&mut config);
+    expand_app_paths(&mut config);
     config
 }
 
 #[tauri::command]
 pub fn save_config(app: AppHandle, mut config: Config) -> Result<(), String> {
     // Re-tilde paths before writing so the config file stays portable
-    collapse_tool_paths(&mut config);
+    collapse_app_paths(&mut config);
     write_config_to_disk(&config)?;
     scope_config_paths(&app, &config);
     Ok(())

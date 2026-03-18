@@ -1,7 +1,7 @@
 import type { ThemeKey } from "@black-atom/core";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
-import type { ToolConfig } from "../types/tools.ts";
+import type { AppConfig } from "../types/apps.ts";
 import type { UpdateResult } from "../types/updaters.ts";
 
 /**
@@ -25,12 +25,12 @@ export function replaceGhosttyTheme(content: string, themeKey: string): string {
  */
 export async function runGhosttyUpdater(
     themeKey: ThemeKey,
-    toolConfig: ToolConfig,
+    appConfig: AppConfig,
 ): Promise<UpdateResult> {
     try {
-        const content = await readTextFile(toolConfig.config_path);
+        const content = await readTextFile(appConfig.config_path);
         const updated = replaceGhosttyTheme(content, themeKey);
-        await writeTextFile(toolConfig.config_path, updated);
+        await writeTextFile(appConfig.config_path, updated);
 
         // Reload ghostty via SIGUSR2. pkill exits non-zero if ghostty isn't running —
         // that's fine, the config file is already updated for next launch.
@@ -40,10 +40,10 @@ export async function runGhosttyUpdater(
             console.warn("[ghostty updater] pkill returned non-zero (ghostty may not be running)");
         }
 
-        return { tool: "ghostty", status: "done" };
+        return { app: "ghostty", status: "done" };
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.error("[ghostty updater]", error);
-        return { tool: "ghostty", status: "error", message };
+        return { app: "ghostty", status: "error", message };
     }
 }
