@@ -2,8 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
-use tauri::AppHandle;
-use tauri_plugin_fs::FsExt;
+
 
 fn default_true() -> bool {
     true
@@ -87,25 +86,7 @@ fn write_config_to_disk(config: &Config) -> Result<(), String> {
     Ok(())
 }
 
-pub fn scope_config_paths(app: &AppHandle, config: &Config) {
-    let scope = app.fs_scope();
-    for (name, app_config) in &config.apps {
-        if app_config.enabled {
-            let path = shellexpand::tilde(&app_config.config_path).to_string();
-            if let Err(e) = scope.allow_file(&path) {
-                log::warn!("Failed to scope {name} config_path: {e}");
-            }
-            if let Some(ref tp) = app_config.themes_path {
-                let expanded = shellexpand::tilde(tp).to_string();
-                if let Err(e) = scope.allow_directory(&expanded, true) {
-                    log::warn!("Failed to scope {name} themes_path: {e}");
-                }
-            }
-        }
-    }
-}
-
-/// Expand tilde in config_path so the FS plugin receives absolute paths.
+/// Expand tilde in config_path so the frontend receives absolute paths.
 /// themes_path is NOT expanded — it's used in replace templates and should keep ~ for portability.
 fn expand_app_paths(config: &mut Config) {
     for app_config in config.apps.values_mut() {
@@ -116,7 +97,6 @@ fn expand_app_paths(config: &mut Config) {
 /// Re-tilde absolute paths so they are stored portably on disk.
 /// The frontend receives expanded paths from get_config. When save_config is called,
 /// paths that start with the home directory are collapsed back to ~/... for portability.
-/// scope_config_paths handles re-expansion internally via shellexpand::tilde.
 fn collapse_app_paths(config: &mut Config) {
     if let Some(home) = dirs::home_dir() {
         let home_prefix = format!("{}/", home.to_string_lossy());
@@ -134,7 +114,7 @@ fn collapse_app_paths(config: &mut Config) {
 }
 
 #[tauri::command]
-pub fn get_config(app: AppHandle) -> Config {
+pub fn get_config() -> Config {
     let path = config_path();
 
     // Create default config file on first launch
@@ -144,18 +124,15 @@ pub fn get_config(app: AppHandle) -> Config {
 
     let mut config = read_config_from_disk();
 
-    scope_config_paths(&app, &config);
-
-    // Return expanded paths to frontend (FS plugin needs absolute paths)
+    // Return expanded paths to frontend
     expand_app_paths(&mut config);
     config
 }
 
 #[tauri::command]
-pub fn save_config(app: AppHandle, mut config: Config) -> Result<(), String> {
+pub fn save_config(mut config: Config) -> Result<(), String> {
     // Re-tilde paths before writing so the config file stays portable
     collapse_app_paths(&mut config);
     write_config_to_disk(&config)?;
-    scope_config_paths(&app, &config);
     Ok(())
 }

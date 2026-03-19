@@ -8,13 +8,13 @@
         "lib": ["deno.ns", "dom", "dom.iterable"]
     },
     "tasks": {
-        "dev": "deno run -a npm:@tauri-apps/cli dev",
+        "dev": "deno run -A npm:@tauri-apps/cli dev",
         "build": "deno run -A npm:@tauri-apps/cli build",
         "vite:dev": "deno run -A npm:vite",
         "vite:build": "deno run -A npm:vite build",
         "check": "deno check src/**/*.ts src/**/*.tsx",
         "test": "deno test -P",
-        "checks": "deno task check && deno lint && deno fmt && deno task test",
+        "checks": "deno task check && deno lint && deno fmt && deno task test && cd src-tauri && cargo test",
         "install-hooks": "cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit && echo 'Hooks installed.'"
     },
     "nodeModulesDir": "auto",
@@ -60,7 +60,6 @@
         "tailwindcss": "npm:tailwindcss@^4",
         "@tailwindcss/vite": "npm:@tailwindcss/vite@^4",
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
-        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2",
-        "@tauri-apps/plugin-fs": "npm:@tauri-apps/plugin-fs@^2"
+        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2"
     }
 }
