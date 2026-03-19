@@ -10,6 +10,7 @@ pub fn run() {
             config::save_config,
             updaters::ghostty::reload_ghostty,
             updaters::nvim::reload_nvim,
+            updaters::tmux::reload_tmux,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

@@ -5,27 +5,34 @@ import { replaceConfigPattern } from "../lib/replace-config-pattern.ts";
 import { APP_PATTERN_DEFAULTS } from "./defaults.ts";
 import type { UpdaterContext } from "./registry.ts";
 
-export async function runGhosttyUpdater(ctx: UpdaterContext): Promise<UpdateResult> {
-    const { themeKey, appConfig } = ctx;
-    const defaults = APP_PATTERN_DEFAULTS.ghostty;
+export async function runTmuxUpdater(ctx: UpdaterContext): Promise<UpdateResult> {
+    const { themeKey, collectionKey, appConfig } = ctx;
+    const defaults = APP_PATTERN_DEFAULTS.tmux;
     const matchPattern = appConfig.match_pattern ?? defaults?.matchPattern;
     const replaceTemplate = appConfig.replace_template ?? defaults?.replaceTemplate;
 
     if (!matchPattern || !replaceTemplate) {
-        return { app: "ghostty", status: "error", message: "No pattern defaults for ghostty" };
+        return { app: "tmux", status: "error", message: "No pattern defaults for tmux" };
     }
 
     try {
         const content = await readTextFile(appConfig.config_path);
-        const updated = replaceConfigPattern({ content, matchPattern, replaceTemplate, themeKey });
+        const updated = replaceConfigPattern({
+            content,
+            matchPattern,
+            replaceTemplate,
+            themeKey,
+            collectionKey,
+            themesPath: appConfig.themes_path,
+        });
         await writeTextFile(appConfig.config_path, updated);
 
-        await invoke("reload_ghostty");
+        await invoke("reload_tmux", { configPath: appConfig.config_path });
 
-        return { app: "ghostty", status: "done" };
+        return { app: "tmux", status: "done" };
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.warn("[ghostty updater]", error);
-        return { app: "ghostty", status: "error", message };
+        console.warn("[tmux updater]", error);
+        return { app: "tmux", status: "error", message };
     }
 }

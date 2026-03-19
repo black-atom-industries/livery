@@ -122,3 +122,74 @@ Deno.test("replaceConfigPattern only replaces first match", () => {
     });
     assertEquals(result, "theme = new.conf\ntheme = b.conf");
 });
+
+// --- Tmux patterns ---
+
+Deno.test("replaceConfigPattern replaces tmux source-file line", () => {
+    const input = [
+        'bind r source-file ~/.config/tmux/tmux.conf \\; display "reloaded!"',
+        "source-file ~/repos/black-atom-industries/tmux/themes/terra/black-atom-terra-fall-night.conf",
+        "source-file ~/.config/tmux/keymaps.conf",
+    ].join("\n");
+
+    const result = replaceConfigPattern({
+        content: input,
+        matchPattern: "^source-file\\s+.+/themes/.+\\.conf$",
+        replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
+        themeKey: "black-atom-jpn-koyo-hiru",
+        collectionKey: "jpn",
+        themesPath: "~/repos/black-atom-industries/tmux/themes",
+    });
+
+    assertEquals(
+        result,
+        [
+            'bind r source-file ~/.config/tmux/tmux.conf \\; display "reloaded!"',
+            "source-file ~/repos/black-atom-industries/tmux/themes/jpn/black-atom-jpn-koyo-hiru.conf",
+            "source-file ~/.config/tmux/keymaps.conf",
+        ].join("\n"),
+    );
+});
+
+Deno.test("replaceConfigPattern handles tmux theme with different collection", () => {
+    const input = "source-file ~/themes/terra/old-theme.conf";
+    const result = replaceConfigPattern({
+        content: input,
+        matchPattern: "^source-file\\s+.+/themes/.+\\.conf$",
+        replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
+        themeKey: "new-theme",
+        collectionKey: "default",
+        themesPath: "~/themes",
+    });
+    assertEquals(result, "source-file ~/themes/default/new-theme.conf");
+});
+
+Deno.test("replaceConfigPattern throws if themesPath referenced but not provided", () => {
+    assertThrows(
+        () =>
+            replaceConfigPattern({
+                content: "source-file ~/themes/terra/old.conf",
+                matchPattern: "^source-file\\s+.+\\.conf$",
+                replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
+                themeKey: "new",
+                collectionKey: "terra",
+            }),
+        Error,
+        "themesPath was provided",
+    );
+});
+
+Deno.test("replaceConfigPattern throws if collectionKey referenced but not provided", () => {
+    assertThrows(
+        () =>
+            replaceConfigPattern({
+                content: "source-file ~/themes/terra/old.conf",
+                matchPattern: "^source-file\\s+.+\\.conf$",
+                replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
+                themeKey: "new",
+                themesPath: "~/themes",
+            }),
+        Error,
+        "collectionKey was provided",
+    );
+});

@@ -14,4 +14,8 @@ export const APP_PATTERN_DEFAULTS: Partial<Record<AppName, AppPatternDefaults>> 
         matchPattern: 'colorscheme\\s*=\\s*"[^"]*"',
         replaceTemplate: 'colorscheme = "{themeKey}"',
     },
+    tmux: {
+        matchPattern: "^source-file\\s+.+/themes/.+\\.conf$",
+        replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
+    },
 };

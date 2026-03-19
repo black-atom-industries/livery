@@ -44,7 +44,11 @@ function Component() {
         if (!config.query.data) return;
 
         const theme = themes[selectedIndex];
-        const updaters = getEnabledUpdaters(theme.meta.key, config.query.data.apps);
+        const updaters = getEnabledUpdaters(
+            theme.meta.key,
+            theme.meta.collection.key,
+            config.query.data.apps,
+        );
 
         if (updaters.length === 0) return;
 

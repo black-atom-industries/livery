@@ -105,13 +105,11 @@ pub fn scope_config_paths(app: &AppHandle, config: &Config) {
     }
 }
 
-/// Expand tilde in all app paths so the frontend receives absolute paths.
+/// Expand tilde in config_path so the FS plugin receives absolute paths.
+/// themes_path is NOT expanded — it's used in replace templates and should keep ~ for portability.
 fn expand_app_paths(config: &mut Config) {
     for app_config in config.apps.values_mut() {
         app_config.config_path = shellexpand::tilde(&app_config.config_path).to_string();
-        if let Some(ref tp) = app_config.themes_path {
-            app_config.themes_path = Some(shellexpand::tilde(tp).to_string());
-        }
     }
 }
 
