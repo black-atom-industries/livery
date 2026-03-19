@@ -4,7 +4,7 @@ import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { themeMap } from "@black-atom/core";
 import { appStore } from "../store/app.ts";
-import { applyTheme, getEnabledUpdaters } from "../lib/apply-theme.ts";
+import { applyTheme, createUpdaters, getEnabledApps } from "../lib/updaters.ts";
 import { getGroupedThemes } from "../lib/themes.ts";
 import { useConfig } from "../queries/use-config.ts";
 import { ThemeList } from "../components/theme-list.tsx";
@@ -44,12 +44,8 @@ function Component() {
         if (!config.query.data) return;
 
         const theme = themes[selectedIndex];
-        const updaters = getEnabledUpdaters(
-            theme.meta.key,
-            theme.meta.appearance,
-            theme.meta.collection.key,
-            config.query.data.apps,
-        );
+        const enabledApps = getEnabledApps(config.query.data.apps);
+        const updaters = createUpdaters(enabledApps, theme.meta);
 
         if (updaters.length === 0) return;
 

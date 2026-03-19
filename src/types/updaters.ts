@@ -1,5 +1,4 @@
-import type { ThemeKey, ThemeMeta } from "@black-atom/core";
-import { Config } from "./config.ts";
+import type { AppName } from "./apps.ts";
 
 export type UpdateStatus = "pending" | "running" | "done" | "skipped" | "error";
 
@@ -9,12 +8,7 @@ export interface UpdateResult {
     message?: string;
 }
 
-export interface Updater {
-    name: string;
-    label: string;
-    apply(args: {
-        themeKey: ThemeKey;
-        theme: ThemeMeta;
-        config: Config;
-    }): Promise<UpdateResult>;
+export interface UpdaterEntry {
+    app: AppName;
+    run: () => Promise<UpdateResult>;
 }
