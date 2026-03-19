@@ -18,9 +18,10 @@ export const APP_PATTERN_DEFAULTS: Partial<Record<AppName, AppPatternDefaults>> 
         matchPattern: "^source-file\\s+.+/themes/.+\\.conf$",
         replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
     },
-    // Delta uses a separate include file (~/.gitconfig.delta) managed by livery.
-    // The file contains [delta "black-atom-dark"], [delta "black-atom-light"] feature blocks
-    // and the active features line. The main .gitconfig has [include] path = ~/.gitconfig.delta.
+    // Delta uses a separate include file (~/.gitconfig.delta).
+    // Users must create this file with [delta "black-atom-dark"] and [delta "black-atom-light"]
+    // feature blocks, and add [include] path = ~/.gitconfig.delta to their .gitconfig.
+    // Livery only updates the `features = ...` line — it does not create or bootstrap the file.
     delta: {
         matchPattern: "features\\s*=\\s*black-atom-(dark|light)",
         replaceTemplate: "features = black-atom-{appearance}",

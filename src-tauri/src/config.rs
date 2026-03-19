@@ -10,7 +10,7 @@ pub enum AppName {
     Nvim,
     Tmux,
     Ghostty,
-    Zed,
+    Zed, // not yet implemented
     Delta,
 }
 
@@ -65,7 +65,7 @@ impl Default for Config {
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/tmux/tmux.conf".to_string(),
-                themes_path: Some("~/repos/black-atom-industries/tmux/themes".to_string()),
+                themes_path: None, // user must set this to their tmux themes directory
                 match_pattern: None,
                 replace_template: None,
             },
