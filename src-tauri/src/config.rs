@@ -101,9 +101,34 @@ fn config_path() -> PathBuf {
         .join("config.json")
 }
 
+/// Merge user config with defaults — fills in missing fields from the default config.
+fn merge_with_defaults(mut user_config: Config) -> Config {
+    let defaults = Config::default();
+
+    for (name, default_app) in &defaults.apps {
+        match user_config.apps.get_mut(name) {
+            Some(app) => {
+                // Fill missing optional fields from defaults
+                if app.match_pattern.is_none() {
+                    app.match_pattern = default_app.match_pattern.clone();
+                }
+                if app.replace_template.is_none() {
+                    app.replace_template = default_app.replace_template.clone();
+                }
+            }
+            None => {
+                // App not in user config — add the default (disabled)
+                user_config.apps.insert(*name, default_app.clone());
+            }
+        }
+    }
+
+    user_config
+}
+
 pub fn read_config_from_disk() -> Config {
     let path = config_path();
-    match fs::read_to_string(&path) {
+    let user_config = match fs::read_to_string(&path) {
         Ok(content) => match serde_json::from_str(&content) {
             Ok(config) => config,
             Err(e) => {
@@ -112,7 +137,9 @@ pub fn read_config_from_disk() -> Config {
             }
         },
         Err(_) => Config::default(),
-    }
+    };
+
+    merge_with_defaults(user_config)
 }
 
 fn write_config_to_disk(config: &Config) -> Result<(), String> {
