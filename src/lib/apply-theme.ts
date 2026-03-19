@@ -1,4 +1,4 @@
-import type { ThemeKey } from "@black-atom/core";
+import type { ThemeCollectionKey, ThemeKey } from "@black-atom/core";
 import type { AppConfig, AppName } from "../types/apps.ts";
 import type { UpdateResult } from "../types/updaters.ts";
 import { updaterRegistry } from "../updaters/registry.ts";
@@ -11,13 +11,14 @@ export interface UpdaterEntry {
 /** Build the list of updaters for enabled apps that have a registered updater. */
 export function getEnabledUpdaters(
     themeKey: ThemeKey,
+    collectionKey: ThemeCollectionKey,
     apps: Partial<Record<AppName, AppConfig>>,
 ): UpdaterEntry[] {
     return (Object.entries(apps) as [AppName, AppConfig][])
         .filter(([name, app]) => app.enabled && updaterRegistry[name])
-        .map(([name, app]) => ({
+        .map(([name, appConfig]) => ({
             app: name,
-            run: () => updaterRegistry[name]!(themeKey, app),
+            run: () => updaterRegistry[name]!({ themeKey, collectionKey, appConfig }),
         }));
 }
 
