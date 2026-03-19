@@ -3,6 +3,7 @@ import type { AppConfig, AppName } from "../types/apps.ts";
 import type { UpdateResult } from "../types/updaters.ts";
 import { runGhosttyUpdater } from "./ghostty.ts";
 import { runNvimUpdater } from "./nvim.ts";
+import { runTmuxUpdater } from "./tmux.ts";
 
 export interface UpdaterContext {
     themeKey: ThemeKey;
@@ -16,4 +17,5 @@ export type AppUpdater = (ctx: UpdaterContext) => Promise<UpdateResult>;
 export const updaterRegistry: Partial<Record<AppName, AppUpdater>> = {
     ghostty: runGhosttyUpdater,
     nvim: runNvimUpdater,
+    tmux: runTmuxUpdater,
 };

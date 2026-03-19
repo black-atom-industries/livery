@@ -7,7 +7,9 @@ pub fn reload_tmux(config_path: String) -> Result<(), String> {
         .output()
     {
         Ok(output) => {
-            if !output.status.success() {
+            if output.status.success() {
+                log::info!("Reloaded tmux config: {config_path}");
+            } else {
                 log::info!("tmux source-file returned non-zero (tmux may not be running)");
             }
             Ok(())
