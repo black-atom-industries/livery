@@ -15,70 +15,124 @@ Part of the [Black Atom Industries](https://github.com/black-atom-industries) co
 **Name origin**: In aviation, _livery_ is the paint scheme of an aircraft — its visual identity.
 Livery paints your development cockpit.
 
-> **Early development**: This project is in its initial design phase. The architecture,
-> configuration format, and file structure described below are a **design draft** and subject to
-> change.
-
 ## Tech Stack
 
 - **Runtime**: Deno (frontend dev server, formatting, linting, testing)
 - **App Shell**: Tauri v2 (Rust + webview)
 - **UI**: React 18.x with React DOM
+- **State**: TanStack Store (client state), TanStack Query (server state / config)
 - **Build**: Vite (via Deno)
 - **Styling**: Tailwind CSS v4
 - **Config**: `~/.config/black-atom/livery/config.json`
 
+## Architecture Boundary
+
+**TypeScript (frontend) = orchestrator.** Manages UI, state, calling order. Decides _what_ to do.
+
+**Rust (backend) = executor.** Handles all OS operations — file I/O, process signals, socket
+communication. Does _how_ to do it.
+
+Updaters call typed Rust commands via `invoke()`:
+
+- `replace_in_file` — generic regex find-and-replace on any file
+- `reload_ghostty`, `reload_nvim`, `reload_tmux` — app-specific reload signals
+- `get_config`, `save_config` — config file management
+
+No direct file system access from TypeScript. No shell commands from TypeScript.
+
 ## Commands
 
 ```bash
-deno task dev         # Launch Tauri app in development mode
-deno task build       # Build production app with Tauri
-deno task vite:dev    # Run Vite dev server only (no Tauri)
-deno task vite:build  # Build frontend only
-deno task check       # Type-check all source files
-deno task lint        # Run deno lint
-deno task test        # Run tests
-deno task fmt         # Format code
+deno task dev           # Launch Tauri app in development mode
+deno task build         # Build production app with Tauri
+deno task vite:dev      # Run Vite dev server only (no Tauri)
+deno task vite:build    # Build frontend only
+deno task check         # Type-check all source files
+deno task test          # Run tests (uses permissions from deno.json)
+deno task checks        # Run check + lint + fmt + test (pre-commit hook)
+deno task install-hooks # Install git pre-commit hook
+deno lint               # Run deno lint
+deno fmt                # Format code
+cargo test              # Run Rust tests (from src-tauri/)
 ```
 
-## Architecture (Draft)
+## Project Structure
 
 ```
 src/
-  main.tsx              # Entry point: render React DOM into webview
+  main.tsx              # Entry point: React DOM + QueryClientProvider + TanStack DevTools
   index.css             # Tailwind CSS entry
   config.ts             # DEFAULT_CONFIG
   types/
-    config.ts           # LiveryConfig, ToolConfig types
+    apps.ts             # AppName, AppConfig types
+    config.ts           # Config type
+    updaters.ts         # UpdateResult, UpdaterEntry types
   lib/
-    paths.ts            # Path utilities (expandTilde, getHome)
-    config.ts           # Config loading, merging, path expansion
-    themes.ts           # Theme data pipeline (getThemeEntries, buildPickerOptions)
-    deep-merge.ts       # Recursive object merge
-  containers/
-    app.tsx             # Root container (smart component)
-  components/           # Dumb UI components (future)
+    updaters.ts         # Orchestration: getEnabledApps, createUpdaters, applyTheme
+    updaters_test.ts    # Orchestration tests
+    config.ts           # Config merging, path expansion
+    paths.ts            # Path utilities (expandTilde)
+    themes.ts           # Theme data pipeline (getGroupedThemes)
+    progress.ts         # Progress state derivation
+  queries/
+    use-config.ts       # TanStack Query hook for config (server state)
   updaters/
-    .gitkeep            # Theme updaters (future)
+    registry.ts         # UpdaterContext, AppUpdater type, updater registry
+    defaults.ts         # Default match/replace patterns per app
+    ghostty.ts          # Ghostty updater
+    nvim.ts             # Neovim updater
+    tmux.ts             # Tmux updater
+    delta.ts            # Delta updater
+  store/
+    app.ts              # TanStack Store: phase, selectedTheme, updaterResults
+  routes/
+    __root.tsx          # Root layout: header, progress bar, footer
+    index.tsx           # Theme picker (route = container)
+    settings/route.tsx  # Settings placeholder
+  components/           # Dumb UI components
 src-tauri/
   Cargo.toml            # Rust dependencies
   tauri.conf.json       # Tauri window/app configuration
+  capabilities/
+    default.json        # Tauri permissions (core only — no FS/Shell plugins)
   src/
     main.rs             # Rust entry point
-    lib.rs              # Tauri builder setup
+    lib.rs              # Tauri builder: command registration
+    config.rs           # Config I/O: get_config, save_config, tilde expansion
+    updaters/
+      mod.rs            # Module declarations
+      config_file.rs    # replace_in_file command (generic regex replace)
+      ghostty.rs        # reload_ghostty (SIGUSR2)
+      nvim.rs           # reload_nvim (socket discovery)
+      tmux.rs           # reload_tmux (tmux source-file)
+scripts/
+  hooks/pre-commit      # Pre-commit hook (runs deno task checks)
 ```
 
-## Configuration (Draft)
+## Configuration
 
 Config lives at `~/.config/black-atom/livery/config.json`:
 
 ```json
 {
     "system_appearance": true,
-    "tools": {
+    "apps": {
         "ghostty": {
             "enabled": true,
             "config_path": "~/.config/ghostty/config"
+        },
+        "nvim": {
+            "enabled": true,
+            "config_path": "~/.config/nvim/lua/config.lua"
+        },
+        "tmux": {
+            "enabled": true,
+            "config_path": "~/.config/tmux/tmux.conf",
+            "themes_path": "~/repos/black-atom-industries/tmux/themes"
+        },
+        "delta": {
+            "enabled": true,
+            "config_path": "~/.gitconfig"
         }
     }
 }
@@ -86,29 +140,21 @@ Config lives at `~/.config/black-atom/livery/config.json`:
 
 Key design decisions:
 
-- **`enabled` flag per tool.** Presence in config means configured, `enabled` controls whether it
-  runs. Users can disable a tool without losing their path settings.
-- **No default paths.** Users declare their paths explicitly (via `livery init` in v0.2).
-- **`system_appearance`** is a top-level boolean, not a tool — macOS/Linux dark mode is a system
-  toggle, not a config file edit.
-- **`themes_path`** is optional, only needed for tools that reference external theme files (e.g.
+- **`enabled` flag per app.** Presence in config means configured, `enabled` controls whether it
+  runs. Users can disable an app without losing their path settings.
+- **`system_appearance`** is a top-level boolean — macOS/Linux dark mode is a system toggle, not an
+  app config.
+- **`themes_path`** is optional, only needed for apps that reference external theme files (e.g.
   tmux).
-- **`~` expansion** is handled by Rust on read. Paths are stored with `~` on disk and expanded to
-  absolute paths for the frontend. `save_config` re-tildes paths before writing.
+- **`match_pattern` / `replace_template`** are optional overrides per app. Each updater has sensible
+  defaults in `src/updaters/defaults.ts`.
+- **`~` expansion** is handled by Rust on read. Paths are stored with `~` on disk. `config_path` is
+  expanded for the frontend; `themes_path` is NOT expanded (used in templates).
 
 ## Theme Data
 
 Theme data comes from `@black-atom/core` (JSR). The `@deno/vite-plugin` handles JSR resolution for
 Vite, so source code imports `@black-atom/core` directly without an npm compatibility layer.
-
-## Planned Commands
-
-| Command                     | Version | Description                              |
-| --------------------------- | ------- | ---------------------------------------- |
-| `livery pick`               | v0.1.0  | Interactive theme picker                 |
-| `livery init`               | v0.2.0  | Generate config with detected tool paths |
-| `livery download <adapter>` | v0.3.0  | Download theme files from GitHub         |
-| `livery status`             | v0.3.0  | Show current theme + installed adapters  |
 
 ## Coding Guidelines
 

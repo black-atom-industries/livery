@@ -5,31 +5,50 @@
 A desktop app for managing [Black Atom](https://github.com/black-atom-industries) themes across your
 developer tools. Pick a theme once, apply it everywhere.
 
+## Supported Apps
+
+| App | What it does | Reload |
+|-|-|-|
+| **Ghostty** | Updates `theme = ...` in config | SIGUSR2 (instant repaint) |
+| **Neovim** | Updates `colorscheme = "..."` in Lua config | Live via server sockets |
+| **Tmux** | Updates `source-file` theme path | `tmux source-file` |
+| **Delta** | Switches `features = black-atom-dark/light` | On next git command |
+
+More updaters coming: zed, lazygit, macOS system appearance.
+
+## Architecture
+
+- **Frontend**: React + TanStack (Router, Store, Query) in a Tauri v2 webview
+- **Backend**: Rust handles all file I/O and OS operations via typed commands
+- **Config**: `~/.config/black-atom/livery/config.json` — per-app settings with configurable
+  match/replace patterns
+
 ## Status
 
-Early development. See the
+Active development. See the
 [livery project](https://linear.app/black-atom-industries/project/livery-ebebb9cdaef9) for progress.
 
 ## Tech Stack
 
-| Layer         | Technology                                  | Notes                                              |
-| ------------- | ------------------------------------------- | -------------------------------------------------- |
-| Runtime       | [Deno](https://deno.com/)                   | Dev server, formatting, linting, testing           |
-| App shell     | [Tauri v2](https://tauri.app/)              | Rust + system webview                              |
-| Frontend      | [React](https://react.dev/) 18              | Automatic JSX transform (`react-jsx`)              |
-| Build         | [Vite](https://vite.dev/) 6                 | Via `deno run -A npm:vite`                         |
-| Styling       | [Tailwind CSS](https://tailwindcss.com/) v4 | Vite plugin, no PostCSS config needed              |
-| Theme data    | `@black-atom/core`                          | JSR package, resolved via npm compat layer in Vite |
-| Config format | JSON                                        | `~/.config/black-atom/livery/config.json`          |
+| Layer | Technology | Notes |
+|-|-|-|
+| Runtime | [Deno](https://deno.com/) | Dev server, formatting, linting, testing |
+| App shell | [Tauri v2](https://tauri.app/) | Rust + system webview |
+| Frontend | [React](https://react.dev/) 18 | Automatic JSX transform |
+| State | [TanStack](https://tanstack.com/) Store + Query | Client + server state |
+| Build | [Vite](https://vite.dev/) 6 | Via `deno run -A npm:vite` |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) v4 | Vite plugin |
+| Theme data | `@black-atom/core` | JSR package |
+| Config | JSON | `~/.config/black-atom/livery/config.json` |
 
 ## Origin of Name
 
-[Livery](https://en.wikipedia.org/wiki/Livery_(aircraft)) is the paint scheme of an aircraft - its
+[Livery](https://en.wikipedia.org/wiki/Livery_(aircraft)) is the paint scheme of an aircraft — its
 visual identity.
 
 ## Other Black Atom Utils
 
-- [helm](https://github.com/black-atom-industries/helm) (tmux session and repo management)
+- [helm](https://github.com/black-atom-industries/helm) — tmux session and repo management
 - [radar.nvim](https://github.com/black-atom-industries/radar.nvim) — file nav
 
 ## License
