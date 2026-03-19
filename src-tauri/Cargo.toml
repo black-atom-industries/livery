@@ -25,7 +25,6 @@ dirs = "6"
 shellexpand = "3"
 tauri = { version = "2.10.0", features = [] }
 tauri-plugin-log = "2"
-tauri-plugin-fs = "2"
 regex = "1"
 
 [dev-dependencies]
