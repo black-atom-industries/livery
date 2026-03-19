@@ -7,12 +7,12 @@ developer tools. Pick a theme once, apply it everywhere.
 
 ## Supported Apps
 
-| App | What it does | Reload |
-|-|-|-|
-| **Ghostty** | Updates `theme = ...` in config | SIGUSR2 (instant repaint) |
-| **Neovim** | Updates `colorscheme = "..."` in Lua config | Live via server sockets |
-| **Tmux** | Updates `source-file` theme path | `tmux source-file` |
-| **Delta** | Switches `features = black-atom-dark/light` | On next git command |
+| App         | What it does                                | Reload                    |
+| ----------- | ------------------------------------------- | ------------------------- |
+| **Ghostty** | Updates `theme = ...` in config             | SIGUSR2 (instant repaint) |
+| **Neovim**  | Updates `colorscheme = "..."` in Lua config | Live via server sockets   |
+| **Tmux**    | Updates `source-file` theme path            | `tmux source-file`        |
+| **Delta**   | Switches `features = black-atom-dark/light` | On next git command       |
 
 More updaters coming: zed, lazygit, macOS system appearance.
 
@@ -30,16 +30,16 @@ Active development. See the
 
 ## Tech Stack
 
-| Layer | Technology | Notes |
-|-|-|-|
-| Runtime | [Deno](https://deno.com/) | Dev server, formatting, linting, testing |
-| App shell | [Tauri v2](https://tauri.app/) | Rust + system webview |
-| Frontend | [React](https://react.dev/) 18 | Automatic JSX transform |
-| State | [TanStack](https://tanstack.com/) Store + Query | Client + server state |
-| Build | [Vite](https://vite.dev/) 6 | Via `deno run -A npm:vite` |
-| Styling | [Tailwind CSS](https://tailwindcss.com/) v4 | Vite plugin |
-| Theme data | `@black-atom/core` | JSR package |
-| Config | JSON | `~/.config/black-atom/livery/config.json` |
+| Layer      | Technology                                      | Notes                                     |
+| ---------- | ----------------------------------------------- | ----------------------------------------- |
+| Runtime    | [Deno](https://deno.com/)                       | Dev server, formatting, linting, testing  |
+| App shell  | [Tauri v2](https://tauri.app/)                  | Rust + system webview                     |
+| Frontend   | [React](https://react.dev/) 18                  | Automatic JSX transform                   |
+| State      | [TanStack](https://tanstack.com/) Store + Query | Client + server state                     |
+| Build      | [Vite](https://vite.dev/) 6                     | Via `deno run -A npm:vite`                |
+| Styling    | [Tailwind CSS](https://tailwindcss.com/) v4     | Vite plugin                               |
+| Theme data | `@black-atom/core`                              | JSR package                               |
+| Config     | JSON                                            | `~/.config/black-atom/livery/config.json` |
 
 ## Origin of Name
 
