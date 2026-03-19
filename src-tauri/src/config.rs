@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
-use tauri::AppHandle;
+
 
 fn default_true() -> bool {
     true
@@ -114,7 +114,7 @@ fn collapse_app_paths(config: &mut Config) {
 }
 
 #[tauri::command]
-pub fn get_config(_app: AppHandle) -> Config {
+pub fn get_config() -> Config {
     let path = config_path();
 
     // Create default config file on first launch
@@ -130,7 +130,7 @@ pub fn get_config(_app: AppHandle) -> Config {
 }
 
 #[tauri::command]
-pub fn save_config(_app: AppHandle, mut config: Config) -> Result<(), String> {
+pub fn save_config(mut config: Config) -> Result<(), String> {
     // Re-tilde paths before writing so the config file stays portable
     collapse_app_paths(&mut config);
     write_config_to_disk(&config)?;

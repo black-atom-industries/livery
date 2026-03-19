@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 
 use regex::Regex;
 
@@ -12,6 +14,13 @@ pub fn replace_in_file(
     replace_template: String,
     variables: HashMap<String, String>,
 ) -> Result<(), String> {
+    // Restrict writes to files under $HOME
+    let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
+    let resolved = PathBuf::from(&path);
+    if !resolved.starts_with(&home) {
+        return Err(format!("Path outside home directory is not allowed: {path}"));
+    }
+
     // Read file
     let content =
         std::fs::read_to_string(&path).map_err(|e| format!("Failed to read {path}: {e}"))?;
@@ -32,11 +41,32 @@ pub fn replace_in_file(
         rendered = rendered.replace(&placeholder, value);
     }
 
+    // Validate no unreplaced placeholders remain
+    let re_placeholder = Regex::new(r"\{[a-zA-Z]+\}").unwrap();
+    if re_placeholder.is_match(&rendered) {
+        let missing: Vec<&str> = re_placeholder
+            .find_iter(&rendered)
+            .map(|m| m.as_str())
+            .collect();
+        return Err(format!(
+            "Unreplaced placeholders in template: {}",
+            missing.join(", ")
+        ));
+    }
+
     // Replace first match only
     let updated = regex.replace(&content, rendered.as_str()).to_string();
 
-    // Write back
-    std::fs::write(&path, updated).map_err(|e| format!("Failed to write {path}: {e}"))?;
+    // Atomic write: temp file + persist
+    let parent = Path::new(&path)
+        .parent()
+        .ok_or(format!("No parent directory for {path}"))?;
+    let mut tmp = tempfile::NamedTempFile::new_in(parent)
+        .map_err(|e| format!("Failed to create temp file: {e}"))?;
+    tmp.write_all(updated.as_bytes())
+        .map_err(|e| format!("Failed to write temp file: {e}"))?;
+    tmp.persist(&path)
+        .map_err(|e| format!("Failed to persist to {path}: {e}"))?;
 
     Ok(())
 }
@@ -44,21 +74,18 @@ pub fn replace_in_file(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Write;
 
-    fn write_temp_file(content: &str) -> String {
-        let mut file = tempfile::NamedTempFile::new().unwrap();
+    fn make_temp_file(content: &str) -> tempfile::NamedTempFile {
+        let home = dirs::home_dir().expect("Cannot determine home directory");
+        let mut file = tempfile::NamedTempFile::new_in(home).unwrap();
         file.write_all(content.as_bytes()).unwrap();
-        let path = file.into_temp_path();
-        let path_str = path.to_string_lossy().to_string();
-        // Keep the file by leaking the temp path (it's a test)
-        std::mem::forget(path);
-        path_str
+        file
     }
 
     #[test]
     fn test_replace_ghostty_theme() {
-        let path = write_temp_file("# Colors\ntheme = old-theme.conf\nbold-is-bright = false");
+        let file = make_temp_file("# Colors\ntheme = old-theme.conf\nbold-is-bright = false");
+        let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
         vars.insert("themeKey".to_string(), "new-theme".to_string());
 
@@ -77,9 +104,10 @@ mod tests {
 
     #[test]
     fn test_replace_nvim_colorscheme() {
-        let path = write_temp_file(
+        let file = make_temp_file(
             "return {\n    colorscheme = \"old-theme\",\n    debug = false,\n}",
         );
+        let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
         vars.insert("themeKey".to_string(), "new-theme".to_string());
 
@@ -97,7 +125,8 @@ mod tests {
 
     #[test]
     fn test_replace_tmux_source_file() {
-        let path = write_temp_file("source-file ~/themes/terra/old.conf\nother line");
+        let file = make_temp_file("source-file ~/themes/terra/old.conf\nother line");
+        let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
         vars.insert("themeKey".to_string(), "new-theme".to_string());
         vars.insert("collectionKey".to_string(), "jpn".to_string());
@@ -117,7 +146,8 @@ mod tests {
 
     #[test]
     fn test_replace_delta_appearance() {
-        let path = write_temp_file("[delta]\n    features = black-atom-dark");
+        let file = make_temp_file("[delta]\n    features = black-atom-dark");
+        let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
         vars.insert("themeKey".to_string(), "any".to_string());
         vars.insert("appearance".to_string(), "light".to_string());
@@ -136,7 +166,8 @@ mod tests {
 
     #[test]
     fn test_pattern_not_found_returns_error() {
-        let path = write_temp_file("no match here");
+        let file = make_temp_file("no match here");
+        let path = file.path().to_str().unwrap().to_string();
         let vars = HashMap::new();
 
         let result = replace_in_file(
