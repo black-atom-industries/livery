@@ -33,8 +33,38 @@ impl Default for Config {
         apps.insert(
             "ghostty".to_string(),
             AppConfig {
-                enabled: true,
+                enabled: false,
                 config_path: "~/.config/ghostty/config".to_string(),
+                themes_path: None,
+                match_pattern: None,
+                replace_template: None,
+            },
+        );
+        apps.insert(
+            "nvim".to_string(),
+            AppConfig {
+                enabled: false,
+                config_path: "~/.config/nvim/lua/config.lua".to_string(),
+                themes_path: None,
+                match_pattern: None,
+                replace_template: None,
+            },
+        );
+        apps.insert(
+            "tmux".to_string(),
+            AppConfig {
+                enabled: false,
+                config_path: "~/.config/tmux/tmux.conf".to_string(),
+                themes_path: Some("~/repos/black-atom-industries/tmux/themes".to_string()),
+                match_pattern: None,
+                replace_template: None,
+            },
+        );
+        apps.insert(
+            "delta".to_string(),
+            AppConfig {
+                enabled: false,
+                config_path: "~/.gitconfig.delta".to_string(),
                 themes_path: None,
                 match_pattern: None,
                 replace_template: None,

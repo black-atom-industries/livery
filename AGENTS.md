@@ -132,7 +132,7 @@ Config lives at `~/.config/black-atom/livery/config.json`:
         },
         "delta": {
             "enabled": true,
-            "config_path": "~/.gitconfig"
+            "config_path": "~/.gitconfig.delta"
         }
     }
 }
