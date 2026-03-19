@@ -7,7 +7,11 @@ export async function runNvimUpdater(ctx: UpdaterContext): Promise<UpdateResult>
     const { config_path, match_pattern, replace_template } = appConfig;
 
     if (!match_pattern || !replace_template) {
-        return { app: "nvim", status: "error", message: "Missing match_pattern or replace_template" };
+        return {
+            app: "nvim",
+            status: "error",
+            message: "Missing match_pattern or replace_template",
+        };
     }
 
     try {

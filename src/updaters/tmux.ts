@@ -7,7 +7,11 @@ export async function runTmuxUpdater(ctx: UpdaterContext): Promise<UpdateResult>
     const { config_path, match_pattern, replace_template, themes_path } = appConfig;
 
     if (!match_pattern || !replace_template) {
-        return { app: "tmux", status: "error", message: "Missing match_pattern or replace_template" };
+        return {
+            app: "tmux",
+            status: "error",
+            message: "Missing match_pattern or replace_template",
+        };
     }
 
     try {
