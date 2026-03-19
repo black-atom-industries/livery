@@ -64,8 +64,7 @@ src/
   index.css             # Tailwind CSS entry
   config.ts             # DEFAULT_CONFIG
   types/
-    apps.ts             # AppName, AppConfig types
-    config.ts           # Config type
+    config.ts           # Config types 
     updaters.ts         # UpdateResult, UpdaterEntry types
   lib/
     updaters.ts         # Orchestration: getEnabledApps, createUpdaters, applyTheme

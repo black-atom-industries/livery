@@ -1,4 +1,4 @@
-import type { AppName } from "../types/apps.ts";
+import type { AppName } from "../types/config.ts";
 
 export interface AppPatternDefaults {
     matchPattern: string;

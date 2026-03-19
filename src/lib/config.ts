@@ -1,6 +1,6 @@
 import { expandTilde } from "./paths.ts";
 import { Config } from "../types/config.ts";
-import type { AppName } from "../types/apps.ts";
+import type { AppName } from "../types/config.ts";
 
 export function mergeConfig(base: Config, override: Partial<Config>): Config {
     return {

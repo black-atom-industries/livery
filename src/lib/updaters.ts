@@ -1,5 +1,5 @@
 import type { ThemeMeta } from "@black-atom/core";
-import type { AppConfig, AppName } from "../types/apps.ts";
+import type { AppConfig, AppName } from "../types/config.ts";
 import type { UpdaterEntry, UpdateResult } from "../types/updaters.ts";
 import { updaterRegistry } from "../updaters/registry.ts";
 

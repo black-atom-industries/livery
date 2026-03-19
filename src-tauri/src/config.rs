@@ -3,6 +3,16 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
+/// Supported app names. Must be kept in sync with AppName in src/types/config.ts.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AppName {
+    Nvim,
+    Tmux,
+    Ghostty,
+    Zed,
+    Delta,
+}
 
 fn default_true() -> bool {
     true
@@ -24,14 +34,14 @@ pub struct AppConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub system_appearance: bool,
-    pub apps: HashMap<String, AppConfig>,
+    pub apps: HashMap<AppName, AppConfig>,
 }
 
 impl Default for Config {
     fn default() -> Self {
         let mut apps = HashMap::new();
         apps.insert(
-            "ghostty".to_string(),
+            AppName::Ghostty,
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/ghostty/config".to_string(),
@@ -41,7 +51,7 @@ impl Default for Config {
             },
         );
         apps.insert(
-            "nvim".to_string(),
+            AppName::Nvim,
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/nvim/lua/config.lua".to_string(),
@@ -51,7 +61,7 @@ impl Default for Config {
             },
         );
         apps.insert(
-            "tmux".to_string(),
+            AppName::Tmux,
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/tmux/tmux.conf".to_string(),
@@ -61,7 +71,7 @@ impl Default for Config {
             },
         );
         apps.insert(
-            "delta".to_string(),
+            AppName::Delta,
             AppConfig {
                 enabled: false,
                 config_path: "~/.gitconfig.delta".to_string(),
@@ -132,7 +142,8 @@ fn collapse_app_paths(config: &mut Config) {
         let home_prefix = format!("{}/", home.to_string_lossy());
         for app_config in config.apps.values_mut() {
             if app_config.config_path.starts_with(&home_prefix) {
-                app_config.config_path = format!("~/{}", &app_config.config_path[home_prefix.len()..]);
+                app_config.config_path =
+                    format!("~/{}", &app_config.config_path[home_prefix.len()..]);
             }
             if let Some(ref tp) = app_config.themes_path {
                 if tp.starts_with(&home_prefix) {
