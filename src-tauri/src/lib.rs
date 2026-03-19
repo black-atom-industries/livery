@@ -8,6 +8,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             config::get_config,
             config::save_config,
+            updaters::config_file::replace_in_file,
             updaters::ghostty::reload_ghostty,
             updaters::nvim::reload_nvim,
             updaters::tmux::reload_tmux,
