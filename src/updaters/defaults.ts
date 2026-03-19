@@ -18,4 +18,10 @@ export const APP_PATTERN_DEFAULTS: Partial<Record<AppName, AppPatternDefaults>> 
         matchPattern: "^source-file\\s+.+/themes/.+\\.conf$",
         replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
     },
+    // Assumes user has [delta "black-atom-dark"] and [delta "black-atom-light"] feature blocks
+    // in their .gitconfig. First-time users need to set these up before enabling delta in livery.
+    delta: {
+        matchPattern: "features\\s*=\\s*black-atom-(dark|light)",
+        replaceTemplate: "features = black-atom-{appearance}",
+    },
 };

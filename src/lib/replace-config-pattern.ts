@@ -3,21 +3,32 @@ export interface ReplaceConfigPatternArgs {
     matchPattern: string;
     replaceTemplate: string;
     themeKey: string;
+    appearance?: string;
     collectionKey?: string;
     themesPath?: string;
 }
 
 /**
  * Replace the first match of a regex pattern in content with a rendered template.
- * Supports placeholders: {themeKey}, {collectionKey}, {themesPath}.
- * Throws if {themeKey} is missing, if optional placeholders are referenced but not provided,
+ * Supports placeholders: {themeKey}, {appearance}, {collectionKey}, {themesPath}.
+ * Throws if optional placeholders are referenced but not provided,
  * or if the pattern is not found in the content.
  */
 export function replaceConfigPattern(args: ReplaceConfigPatternArgs): string {
-    const { content, matchPattern, replaceTemplate, themeKey, collectionKey, themesPath } = args;
+    const {
+        content,
+        matchPattern,
+        replaceTemplate,
+        themeKey,
+        appearance,
+        collectionKey,
+        themesPath,
+    } = args;
 
-    if (!replaceTemplate.includes("{themeKey}")) {
-        throw new Error("replace_template must contain {themeKey} placeholder");
+    if (replaceTemplate.includes("{appearance}") && !appearance) {
+        throw new Error(
+            "replace_template references {appearance} but no appearance was provided",
+        );
     }
 
     if (replaceTemplate.includes("{collectionKey}") && !collectionKey) {
@@ -33,6 +44,7 @@ export function replaceConfigPattern(args: ReplaceConfigPatternArgs): string {
     const regex = new RegExp(matchPattern, "m");
     const rendered = replaceTemplate
         .replaceAll("{themeKey}", themeKey)
+        .replaceAll("{appearance}", appearance ?? "")
         .replaceAll("{collectionKey}", collectionKey ?? "")
         .replaceAll("{themesPath}", themesPath ?? "");
 

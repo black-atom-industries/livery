@@ -7,6 +7,35 @@
         "jsxImportSourceTypes": "@types/react",
         "lib": ["deno.ns", "dom", "dom.iterable"]
     },
+    "tasks": {
+        "dev": "deno run -a npm:@tauri-apps/cli dev",
+        "build": "deno run -A npm:@tauri-apps/cli build",
+        "vite:dev": "deno run -A npm:vite",
+        "vite:build": "deno run -A npm:vite build",
+        "check": "deno check src/**/*.ts src/**/*.tsx",
+        "test": "deno test -P",
+        "checks": "deno task check && deno lint && deno fmt && deno task test",
+        "install-hooks": "cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit && echo 'Hooks installed.'"
+    },
+    "nodeModulesDir": "auto",
+    "lint": {
+        "exclude": ["src/routeTree.gen.ts"]
+    },
+    "fmt": {
+        "useTabs": false,
+        "lineWidth": 100,
+        "indentWidth": 4,
+        "semiColons": true,
+        "singleQuote": false,
+        "exclude": ["CHANGELOG.md", "src-tauri/", "src/routeTree.gen.ts"]
+    },
+    "test": {
+        "permissions": {
+            "env": true,
+            "read": true,
+            "write": true
+        }
+    },
     "imports": {
         "@base-ui/react": "npm:@base-ui/react@^1",
         "@black-atom/core": "jsr:@black-atom/core@^0.3.2",
@@ -33,27 +62,5 @@
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
         "@tauri-apps/cli": "npm:@tauri-apps/cli@^2",
         "@tauri-apps/plugin-fs": "npm:@tauri-apps/plugin-fs@^2"
-    },
-    "tasks": {
-        "dev": "deno run -A npm:@tauri-apps/cli dev",
-        "build": "deno run -A npm:@tauri-apps/cli build",
-        "vite:dev": "deno run -A npm:vite",
-        "vite:build": "deno run -A npm:vite build",
-        "check": "deno check src/**/*.ts src/**/*.tsx",
-        "lint": "deno lint",
-        "test": "deno test --allow-env --allow-read --allow-write",
-        "fmt": "deno fmt"
-    },
-    "nodeModulesDir": "auto",
-    "lint": {
-        "exclude": ["src/routeTree.gen.ts"]
-    },
-    "fmt": {
-        "useTabs": false,
-        "lineWidth": 100,
-        "indentWidth": 4,
-        "semiColons": true,
-        "singleQuote": false,
-        "exclude": ["CHANGELOG.md", "src-tauri/", "src/routeTree.gen.ts"]
     }
 }

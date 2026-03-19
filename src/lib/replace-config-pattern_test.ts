@@ -48,20 +48,6 @@ Deno.test("replaceConfigPattern throws if pattern not found", () => {
     );
 });
 
-Deno.test("replaceConfigPattern throws if template missing placeholder", () => {
-    assertThrows(
-        () =>
-            replaceConfigPattern({
-                content: "theme = old.conf",
-                matchPattern: "^theme\\s*=\\s*.+$",
-                replaceTemplate: "theme = hardcoded.conf",
-                themeKey: "any",
-            }),
-        Error,
-        "must contain {themeKey}",
-    );
-});
-
 Deno.test("replaceConfigPattern preserves rest of file", () => {
     const input = ["# Comment", "theme = old.conf", "", "font-size = 14"].join("\n");
     const result = replaceConfigPattern({
@@ -191,5 +177,56 @@ Deno.test("replaceConfigPattern throws if collectionKey referenced but not provi
             }),
         Error,
         "collectionKey was provided",
+    );
+});
+
+// --- Delta patterns ---
+
+Deno.test("replaceConfigPattern replaces delta features with appearance", () => {
+    const input = [
+        '[delta "black-atom-dark"]',
+        "    dark = true",
+        "",
+        '[delta "black-atom-light"]',
+        "    light = true",
+        "",
+        "[delta]",
+        "    features = black-atom-dark",
+    ].join("\n");
+
+    const result = replaceConfigPattern({
+        content: input,
+        matchPattern: "features\\s*=\\s*black-atom-(dark|light)",
+        replaceTemplate: "features = black-atom-{appearance}",
+        themeKey: "black-atom-terra-spring-day",
+        appearance: "light",
+    });
+
+    assertEquals(
+        result,
+        [
+            '[delta "black-atom-dark"]',
+            "    dark = true",
+            "",
+            '[delta "black-atom-light"]',
+            "    light = true",
+            "",
+            "[delta]",
+            "    features = black-atom-light",
+        ].join("\n"),
+    );
+});
+
+Deno.test("replaceConfigPattern throws if appearance referenced but not provided", () => {
+    assertThrows(
+        () =>
+            replaceConfigPattern({
+                content: "features = black-atom-dark",
+                matchPattern: "features\\s*=\\s*black-atom-(dark|light)",
+                replaceTemplate: "features = black-atom-{appearance}",
+                themeKey: "any",
+            }),
+        Error,
+        "appearance was provided",
     );
 });
