@@ -1,12 +1,14 @@
-import type { ThemeCollectionKey, ThemeKey } from "@black-atom/core";
+import type { ThemeCollectionKey, ThemeKey, ThemeMeta } from "@black-atom/core";
 import type { AppConfig, AppName } from "../types/apps.ts";
 import type { UpdateResult } from "../types/updaters.ts";
+import { runDeltaUpdater } from "./delta.ts";
 import { runGhosttyUpdater } from "./ghostty.ts";
 import { runNvimUpdater } from "./nvim.ts";
 import { runTmuxUpdater } from "./tmux.ts";
 
 export interface UpdaterContext {
     themeKey: ThemeKey;
+    appearance: ThemeMeta["appearance"];
     collectionKey: ThemeCollectionKey;
     appConfig: AppConfig;
 }
@@ -18,4 +20,5 @@ export const updaterRegistry: Partial<Record<AppName, AppUpdater>> = {
     ghostty: runGhosttyUpdater,
     nvim: runNvimUpdater,
     tmux: runTmuxUpdater,
+    delta: runDeltaUpdater,
 };

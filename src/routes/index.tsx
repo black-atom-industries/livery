@@ -46,6 +46,7 @@ function Component() {
         const theme = themes[selectedIndex];
         const updaters = getEnabledUpdaters(
             theme.meta.key,
+            theme.meta.appearance,
             theme.meta.collection.key,
             config.query.data.apps,
         );

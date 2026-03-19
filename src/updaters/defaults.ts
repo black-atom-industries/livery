@@ -18,4 +18,8 @@ export const APP_PATTERN_DEFAULTS: Partial<Record<AppName, AppPatternDefaults>> 
         matchPattern: "^source-file\\s+.+/themes/.+\\.conf$",
         replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
     },
+    delta: {
+        matchPattern: "features\\s*=\\s*black-atom-(dark|light)",
+        replaceTemplate: "features = black-atom-{appearance}",
+    },
 };
