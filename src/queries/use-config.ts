@@ -15,10 +15,11 @@ export const useConfig = () => {
     });
 
     const enabledApps = useMemo(
-        () =>
-            (Object.entries(query.data?.apps ?? {}) as [AppName, AppConfig][])
+        function getEnabledApps() {
+            return (Object.entries(query.data?.apps ?? {}) as [AppName, AppConfig][])
                 .filter(([_, cfg]) => cfg.enabled)
-                .map(([name]) => name),
+                .map(([name]) => name);
+        },
         [query.data],
     );
 
