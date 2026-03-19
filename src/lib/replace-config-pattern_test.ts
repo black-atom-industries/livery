@@ -163,3 +163,33 @@ Deno.test("replaceConfigPattern handles tmux theme with different collection", (
     });
     assertEquals(result, "source-file ~/themes/default/new-theme.conf");
 });
+
+Deno.test("replaceConfigPattern throws if themesPath referenced but not provided", () => {
+    assertThrows(
+        () =>
+            replaceConfigPattern({
+                content: "source-file ~/themes/terra/old.conf",
+                matchPattern: "^source-file\\s+.+\\.conf$",
+                replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
+                themeKey: "new",
+                collectionKey: "terra",
+            }),
+        Error,
+        "themesPath was provided",
+    );
+});
+
+Deno.test("replaceConfigPattern throws if collectionKey referenced but not provided", () => {
+    assertThrows(
+        () =>
+            replaceConfigPattern({
+                content: "source-file ~/themes/terra/old.conf",
+                matchPattern: "^source-file\\s+.+\\.conf$",
+                replaceTemplate: "source-file {themesPath}/{collectionKey}/{themeKey}.conf",
+                themeKey: "new",
+                themesPath: "~/themes",
+            }),
+        Error,
+        "collectionKey was provided",
+    );
+});
