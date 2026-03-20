@@ -8,7 +8,7 @@ use regex::Regex;
 /// Variables are rendered into the replace_template before replacement.
 /// Supported variable placeholders: {themeKey}, {appearance}, {collectionKey}, {themesPath}
 #[tauri::command]
-pub fn replace_in_file(
+pub fn patch_text_file(
     path: String,
     match_pattern: String,
     replace_template: String,
@@ -91,7 +91,7 @@ mod tests {
         let mut vars = HashMap::new();
         vars.insert("themeKey".to_string(), "new-theme".to_string());
 
-        replace_in_file(
+        patch_text_file(
             path.clone(),
             r"^theme\s*=\s*.+$".to_string(),
             "theme = {themeKey}.conf".to_string(),
@@ -112,7 +112,7 @@ mod tests {
         let mut vars = HashMap::new();
         vars.insert("themeKey".to_string(), "new-theme".to_string());
 
-        replace_in_file(
+        patch_text_file(
             path.clone(),
             r#"colorscheme\s*=\s*"[^"]*""#.to_string(),
             "colorscheme = \"{themeKey}\"".to_string(),
@@ -133,7 +133,7 @@ mod tests {
         vars.insert("collectionKey".to_string(), "jpn".to_string());
         vars.insert("themesPath".to_string(), "~/themes".to_string());
 
-        replace_in_file(
+        patch_text_file(
             path.clone(),
             r"^source-file\s+.+/themes/.+\.conf$".to_string(),
             "source-file {themesPath}/{collectionKey}/{themeKey}.conf".to_string(),
@@ -153,7 +153,7 @@ mod tests {
         vars.insert("themeKey".to_string(), "any".to_string());
         vars.insert("appearance".to_string(), "light".to_string());
 
-        replace_in_file(
+        patch_text_file(
             path.clone(),
             r"features\s*=\s*black-atom-(dark|light)".to_string(),
             "features = black-atom-{appearance}".to_string(),
@@ -171,7 +171,7 @@ mod tests {
         let path = file.path().to_str().unwrap().to_string();
         let vars = HashMap::new();
 
-        let result = replace_in_file(
+        let result = patch_text_file(
             path,
             r"^theme\s*=\s*.+$".to_string(),
             "theme = new".to_string(),

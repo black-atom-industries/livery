@@ -7,7 +7,7 @@ pub fn start_app() {
         .invoke_handler(tauri::generate_handler![
             config::commands::get_config,
             config::commands::save_config,
-            updaters::config_file::replace_in_file,
+            updaters::file_ops::text::patch_text_file,
             updaters::ghostty::reload_ghostty,
             updaters::nvim::reload_nvim,
             updaters::tmux::reload_tmux,
