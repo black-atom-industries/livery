@@ -49,7 +49,7 @@ deno task vite:dev      # Run Vite dev server only (no Tauri)
 deno task vite:build    # Build frontend only
 deno task check         # Type-check all source files
 deno task test          # Run tests (uses permissions from deno.json)
-deno task checks        # Run check + lint + fmt + test (pre-commit hook)
+deno task checks        # Run check + lint + fmt + test + cargo test (pre-commit hook)
 deno task install-hooks # Install git pre-commit hook
 deno lint               # Run deno lint
 deno fmt                # Format code
@@ -74,7 +74,6 @@ src/
     use-config.ts       # TanStack Query hook for config (server state)
   updaters/
     registry.ts         # UpdaterContext, AppUpdater type, updater registry
-    defaults.ts         # Default match/replace patterns per app
     ghostty.ts          # Ghostty updater
     nvim.ts             # Neovim updater
     tmux.ts             # Tmux updater
@@ -93,8 +92,12 @@ src-tauri/
     default.json        # Tauri permissions (core only — no FS/Shell plugins)
   src/
     main.rs             # Rust entry point
-    lib.rs              # Tauri builder: command registration
-    config.rs           # Config I/O: get_config, save_config, tilde expansion
+    lib.rs              # Tauri app builder (start_app)
+    config/
+      mod.rs            # Module declarations
+      types.rs          # AppName, AppConfig, Config + Default impl (single source of truth)
+      io.rs             # File I/O, merging with defaults, tilde expansion
+      commands.rs       # Tauri commands: get_config, save_config
     updaters/
       mod.rs            # Module declarations
       config_file.rs    # replace_in_file command (generic regex replace)
@@ -142,8 +145,9 @@ Key design decisions:
   app config.
 - **`themes_path`** is optional, only needed for apps that reference external theme files (e.g.
   tmux).
-- **`match_pattern` / `replace_template`** are optional overrides per app. Each updater has sensible
-  defaults in `src/updaters/defaults.ts`.
+- **`match_pattern` / `replace_template`** are optional overrides per app. Default patterns live in
+  Rust's `Config::default()` (`src-tauri/src/config/types.rs`) and are merged into user configs on
+  read.
 - **`~` expansion** is handled by Rust on read. Paths are stored with `~` on disk. `config_path` is
   expanded for the frontend; `themes_path` is NOT expanded (used in templates).
 
