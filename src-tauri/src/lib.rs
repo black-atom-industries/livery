@@ -8,6 +8,7 @@ pub fn start_app() {
             config::commands::get_config,
             config::commands::save_config,
             updaters::file_ops::text::patch_text_file,
+            updaters::file_ops::yaml::patch_yaml_file,
             updaters::ghostty::reload_ghostty,
             updaters::nvim::reload_nvim,
             updaters::tmux::reload_tmux,
