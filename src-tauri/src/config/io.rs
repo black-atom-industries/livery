@@ -19,6 +19,9 @@ fn config_path() -> PathBuf {
 }
 
 /// Merge user config with defaults — fills in missing fields from the default config.
+/// This intentionally hydrates the user's config with all default apps (disabled).
+/// When save_config is called, all apps are written to disk — this ensures the config
+/// file always contains the full list of supported apps for the settings UI.
 fn merge_with_defaults(mut user_config: Config) -> Config {
     let defaults = Config::default();
 

@@ -8,7 +8,7 @@ pub enum AppName {
     Nvim,
     Tmux,
     Ghostty,
-    Zed, // not yet implemented
+    Zed, // not yet implemented — intentionally omitted from Config::default() until updater exists
     Delta,
 }
 
