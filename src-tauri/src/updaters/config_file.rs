@@ -18,7 +18,9 @@ pub fn replace_in_file(
     let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
     let resolved = PathBuf::from(&path);
     if !resolved.starts_with(&home) {
-        return Err(format!("Path outside home directory is not allowed: {path}"));
+        return Err(format!(
+            "Path outside home directory is not allowed: {path}"
+        ));
     }
 
     // Read file
@@ -104,9 +106,8 @@ mod tests {
 
     #[test]
     fn test_replace_nvim_colorscheme() {
-        let file = make_temp_file(
-            "return {\n    colorscheme = \"old-theme\",\n    debug = false,\n}",
-        );
+        let file =
+            make_temp_file("return {\n    colorscheme = \"old-theme\",\n    debug = false,\n}");
         let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
         vars.insert("themeKey".to_string(), "new-theme".to_string());

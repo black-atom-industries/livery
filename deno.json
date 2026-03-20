@@ -14,7 +14,7 @@
         "vite:build": "deno run -A npm:vite build",
         "check": "deno check src/**/*.ts src/**/*.tsx",
         "test": "deno test -P",
-        "checks": "deno task check && deno lint && deno fmt && deno task test && cd src-tauri && cargo test",
+        "checks": "./scripts/checks-frontend.sh && ./scripts/checks-backend.sh",
         "install-hooks": "cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit && echo 'Hooks installed.'"
     },
     "nodeModulesDir": "auto",

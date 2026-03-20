@@ -2,4 +2,9 @@
 set -e
 
 echo "Running pre-commit checks..."
-deno task checks
+
+# Navigate to project root (hooks are in .git/hooks/)
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+
+"$PROJECT_ROOT/scripts/checks-frontend.sh"
+"$PROJECT_ROOT/scripts/checks-backend.sh"

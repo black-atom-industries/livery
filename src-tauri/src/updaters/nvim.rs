@@ -2,7 +2,10 @@ use std::path::{Path, PathBuf};
 
 /// Validate that a theme key only contains safe characters (alphanumeric, hyphens, underscores).
 fn is_valid_theme_key(key: &str) -> bool {
-    !key.is_empty() && key.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+    !key.is_empty()
+        && key
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
 }
 
 /// Find all Neovim server sockets in the given tmpdir.
@@ -87,7 +90,11 @@ pub fn reload_nvim(theme_key: String) -> Result<(), String> {
                 log::warn!("Failed to send to nvim socket: {e}");
             }
             _ => {
-                log::info!("Sent colorscheme {} to {}", theme_key, socket_path.display());
+                log::info!(
+                    "Sent colorscheme {} to {}",
+                    theme_key,
+                    socket_path.display()
+                );
             }
         }
     }
