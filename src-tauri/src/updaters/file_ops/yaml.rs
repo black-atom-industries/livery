@@ -12,8 +12,10 @@ use yaml_edit::YamlFile;
 /// - Anything else → overlay replaces target entirely
 #[tauri::command]
 pub fn patch_yaml_file(target_path: String, source_path: String) -> Result<(), String> {
-    // Restrict both paths to files under $HOME
+    // Expand tildes and restrict both paths to files under $HOME
     let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
+    let target_path = shellexpand::tilde(&target_path).to_string();
+    let source_path = shellexpand::tilde(&source_path).to_string();
 
     let resolved_target = PathBuf::from(&target_path);
     if !resolved_target.starts_with(&home) {
@@ -111,28 +113,9 @@ fn apply_overlay(
             .get(key_str)
             .ok_or_else(|| format!("Key '{key_str}' missing in source yaml_edit tree"))?;
 
-        // For scalar values on existing entries, use set_value to preserve
-        // surrounding whitespace and comments. For non-scalars (sequences, new mappings),
-        // use insert_at_index_preserving which correctly formats block collections.
-        let is_scalar = matches!(
-            value,
-            yaml_serde::Value::String(_)
-                | yaml_serde::Value::Number(_)
-                | yaml_serde::Value::Bool(_)
-                | yaml_serde::Value::Null
-        );
-
-        if is_scalar {
-            if let Some(entry) = target_mapping.find_entry_by_key(key_str) {
-                entry.set_value(&source_node, false);
-            } else {
-                target_mapping.set(key_str, &source_node);
-            }
-        } else {
-            // insert_at_index_preserving replaces existing entries at their current
-            // position and correctly handles block sequences/mappings
-            target_mapping.insert_at_index_preserving(0, key_str, &source_node);
-        }
+        // Use set() for all value types. It replaces existing entries in-place
+        // and rebuilds the value with correct indentation for the target context.
+        target_mapping.set(key_str, &source_node);
     }
 
     Ok(())
