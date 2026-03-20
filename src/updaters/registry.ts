@@ -3,6 +3,7 @@ import type { AppConfig, AppName } from "../types/config.ts";
 import type { UpdateResult } from "../types/updaters.ts";
 import { runDeltaUpdater } from "./delta.ts";
 import { runGhosttyUpdater } from "./ghostty.ts";
+import { runLazygitUpdater } from "./lazygit.ts";
 import { runNvimUpdater } from "./nvim.ts";
 import { runTmuxUpdater } from "./tmux.ts";
 
@@ -21,4 +22,5 @@ export const updaterRegistry: Partial<Record<AppName, AppUpdater>> = {
     nvim: runNvimUpdater,
     tmux: runTmuxUpdater,
     delta: runDeltaUpdater,
+    lazygit: runLazygitUpdater,
 };
