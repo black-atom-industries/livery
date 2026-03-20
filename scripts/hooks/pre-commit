@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Running pre-commit checks..."
-
-# Navigate to project root (hooks are in .git/hooks/)
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
-"$PROJECT_ROOT/scripts/checks-frontend.sh"
-"$PROJECT_ROOT/scripts/checks-backend.sh"
+deno run -A "$PROJECT_ROOT/scripts/checks-frontend.ts"
+deno run -A "$PROJECT_ROOT/scripts/checks-backend.ts"
