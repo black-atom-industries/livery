@@ -10,6 +10,7 @@ pub enum AppName {
     Ghostty,
     Zed, // not yet implemented — intentionally omitted from Config::default() until updater exists
     Delta,
+    Lazygit,
 }
 
 fn default_true() -> bool {
@@ -78,6 +79,16 @@ impl Default for Config {
                 themes_path: None,
                 match_pattern: Some(r"features\s*=\s*black-atom-(dark|light)".to_string()),
                 replace_template: Some("features = black-atom-{appearance}".to_string()),
+            },
+        );
+        apps.insert(
+            AppName::Lazygit,
+            AppConfig {
+                enabled: false,
+                config_path: "~/.config/lazygit/config.yml".to_string(),
+                themes_path: None,
+                match_pattern: None,
+                replace_template: None,
             },
         );
         Config {

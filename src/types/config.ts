@@ -1,4 +1,4 @@
-export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta";
+export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta" | "lazygit";
 
 export interface AppConfig {
     enabled: boolean;
