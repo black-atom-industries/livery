@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import type { Config } from "../types/config.ts";
-import type { AppConfig, AppName } from "../types/apps.ts";
+import type { AppConfig, AppName } from "../types/config.ts";
 
 const TOPIC = "config" as const;
 const queryKey = (keys: string[] = []) => [TOPIC, ...keys] as const;

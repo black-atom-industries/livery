@@ -1,4 +1,4 @@
-import type { AppName } from "./apps.ts";
+import type { AppName } from "./config.ts";
 
 export type UpdateStatus = "pending" | "running" | "done" | "skipped" | "error";
 

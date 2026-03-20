@@ -1,5 +1,5 @@
 import type { ThemeCollectionKey, ThemeKey, ThemeMeta } from "@black-atom/core";
-import type { AppConfig, AppName } from "../types/apps.ts";
+import type { AppConfig, AppName } from "../types/config.ts";
 import type { UpdateResult } from "../types/updaters.ts";
 import { runDeltaUpdater } from "./delta.ts";
 import { runGhosttyUpdater } from "./ghostty.ts";

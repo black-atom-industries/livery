@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { applyTheme, createUpdaters, getEnabledApps } from "./updaters.ts";
-import type { AppConfig, AppName } from "../types/apps.ts";
+import type { AppConfig, AppName } from "../types/config.ts";
 import type { ThemeMeta } from "@black-atom/core";
 import type { UpdaterEntry, UpdateResult } from "../types/updaters.ts";
 

@@ -62,16 +62,12 @@ cargo test              # Run Rust tests (from src-tauri/)
 src/
   main.tsx              # Entry point: React DOM + QueryClientProvider + TanStack DevTools
   index.css             # Tailwind CSS entry
-  config.ts             # DEFAULT_CONFIG
   types/
-    apps.ts             # AppName, AppConfig types
-    config.ts           # Config type
+    config.ts           # AppName, AppConfig, Config types
     updaters.ts         # UpdateResult, UpdaterEntry types
   lib/
     updaters.ts         # Orchestration: getEnabledApps, createUpdaters, applyTheme
     updaters_test.ts    # Orchestration tests
-    config.ts           # Config merging, path expansion
-    paths.ts            # Path utilities (expandTilde)
     themes.ts           # Theme data pipeline (getGroupedThemes)
     progress.ts         # Progress state derivation
   queries/
@@ -132,7 +128,7 @@ Config lives at `~/.config/black-atom/livery/config.json`:
         },
         "delta": {
             "enabled": true,
-            "config_path": "~/.gitconfig"
+            "config_path": "~/.gitconfig.delta"
         }
     }
 }

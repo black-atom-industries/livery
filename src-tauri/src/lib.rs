@@ -2,11 +2,11 @@ mod config;
 mod updaters;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
+pub fn start_app() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            config::get_config,
-            config::save_config,
+            config::commands::get_config,
+            config::commands::save_config,
             updaters::config_file::replace_in_file,
             updaters::ghostty::reload_ghostty,
             updaters::nvim::reload_nvim,
