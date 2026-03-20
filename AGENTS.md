@@ -1,29 +1,10 @@
 # livery
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this
-repository.
-
-## Project Overview
-
-livery ("Paint your cockpit") is the Black Atom theme management desktop app. It applies themes
-across all supported developer tools from a single interactive picker, with plans for theme
-downloading and configuration management.
+livery ("Paint your cockpit") is the Black Atom theme management desktop app. Pick a theme once,
+apply it across all configured developer tools simultaneously.
 
 Part of the [Black Atom Industries](https://github.com/black-atom-industries) cockpit — **radar**
 (file nav) + **helm** (workspace nav) + **livery** (theme management).
-
-**Name origin**: In aviation, _livery_ is the paint scheme of an aircraft — its visual identity.
-Livery paints your development cockpit.
-
-## Tech Stack
-
-- **Runtime**: Deno (frontend dev server, formatting, linting, testing)
-- **App Shell**: Tauri v2 (Rust + webview)
-- **UI**: React 18.x with React DOM
-- **State**: TanStack Store (client state), TanStack Query (server state / config)
-- **Build**: Vite (via Deno)
-- **Styling**: Tailwind CSS v4
-- **Config**: `~/.config/black-atom/livery/config.json`
 
 ## Architecture Boundary
 
@@ -36,135 +17,37 @@ Updaters call typed Rust commands via `invoke()`:
 
 - `replace_in_file` — generic regex find-and-replace on any file
 - `reload_ghostty`, `reload_nvim`, `reload_tmux` — app-specific reload signals
-- `get_config`, `save_config` — config file management
+- `get_config`, `save_config` — config file management with default merging
 
 No direct file system access from TypeScript. No shell commands from TypeScript.
 
-## Commands
-
-```bash
-deno task dev           # Launch Tauri app in development mode
-deno task build         # Build production app with Tauri
-deno task vite:dev      # Run Vite dev server only (no Tauri)
-deno task vite:build    # Build frontend only
-deno task check         # Type-check all source files
-deno task test          # Run tests (uses permissions from deno.json)
-deno task checks        # Run check + lint + fmt + test + cargo test (pre-commit hook)
-deno task install-hooks # Install git pre-commit hook
-deno lint               # Run deno lint
-deno fmt                # Format code
-cargo test              # Run Rust tests (from src-tauri/)
-```
-
-## Project Structure
-
-```
-src/
-  main.tsx              # Entry point: React DOM + QueryClientProvider + TanStack DevTools
-  index.css             # Tailwind CSS entry
-  types/
-    config.ts           # AppName, AppConfig, Config types
-    updaters.ts         # UpdateResult, UpdaterEntry types
-  lib/
-    updaters.ts         # Orchestration: getEnabledApps, createUpdaters, applyTheme
-    updaters_test.ts    # Orchestration tests
-    themes.ts           # Theme data pipeline (getGroupedThemes)
-    progress.ts         # Progress state derivation
-  queries/
-    use-config.ts       # TanStack Query hook for config (server state)
-  updaters/
-    registry.ts         # UpdaterContext, AppUpdater type, updater registry
-    ghostty.ts          # Ghostty updater
-    nvim.ts             # Neovim updater
-    tmux.ts             # Tmux updater
-    delta.ts            # Delta updater
-  store/
-    app.ts              # TanStack Store: phase, selectedTheme, updaterResults
-  routes/
-    __root.tsx          # Root layout: header, progress bar, footer
-    index.tsx           # Theme picker (route = container)
-    settings/route.tsx  # Settings placeholder
-  components/           # Dumb UI components
-src-tauri/
-  Cargo.toml            # Rust dependencies
-  tauri.conf.json       # Tauri window/app configuration
-  capabilities/
-    default.json        # Tauri permissions (core only — no FS/Shell plugins)
-  src/
-    main.rs             # Rust entry point
-    lib.rs              # Tauri app builder (start_app)
-    config/
-      mod.rs            # Module declarations
-      types.rs          # AppName, AppConfig, Config + Default impl (single source of truth)
-      io.rs             # File I/O, merging with defaults, tilde expansion
-      commands.rs       # Tauri commands: get_config, save_config
-    updaters/
-      mod.rs            # Module declarations
-      config_file.rs    # replace_in_file command (generic regex replace)
-      ghostty.rs        # reload_ghostty (SIGUSR2)
-      nvim.rs           # reload_nvim (socket discovery)
-      tmux.rs           # reload_tmux (tmux source-file)
-scripts/
-  hooks/pre-commit      # Pre-commit hook (runs deno task checks)
-```
-
-## Configuration
-
-Config lives at `~/.config/black-atom/livery/config.json`:
-
-```json
-{
-    "system_appearance": true,
-    "apps": {
-        "ghostty": {
-            "enabled": true,
-            "config_path": "~/.config/ghostty/config"
-        },
-        "nvim": {
-            "enabled": true,
-            "config_path": "~/.config/nvim/lua/config.lua"
-        },
-        "tmux": {
-            "enabled": true,
-            "config_path": "~/.config/tmux/tmux.conf",
-            "themes_path": "~/repos/black-atom-industries/tmux/themes"
-        },
-        "delta": {
-            "enabled": true,
-            "config_path": "~/.gitconfig.delta"
-        }
-    }
-}
-```
-
-Key design decisions:
+## Configuration Design Decisions
 
 - **`enabled` flag per app.** Presence in config means configured, `enabled` controls whether it
   runs. Users can disable an app without losing their path settings.
-- **`system_appearance`** is a top-level boolean — macOS/Linux dark mode is a system toggle, not an
-  app config.
-- **`themes_path`** is optional, only needed for apps that reference external theme files (e.g.
-  tmux).
-- **`match_pattern` / `replace_template`** are optional overrides per app. Default patterns live in
-  Rust's `Config::default()` (`src-tauri/src/config/types.rs`) and are merged into user configs on
-  read.
-- **`~` expansion** is handled by Rust on read. Paths are stored with `~` on disk. `config_path` is
-  expanded for the frontend; `themes_path` is NOT expanded (used in templates).
-
-## Theme Data
-
-Theme data comes from `@black-atom/core` (JSR). The `@deno/vite-plugin` handles JSR resolution for
-Vite, so source code imports `@black-atom/core` directly without an npm compatibility layer.
+- **Default patterns in Rust.** `match_pattern` / `replace_template` defaults live in
+  `Config::default()` (`src-tauri/src/config/types.rs`). Merged into user configs on read.
+- **`~` expansion** handled by Rust. `config_path` is expanded for the frontend; `themes_path` is
+  NOT expanded (used in templates).
+- **Delta** uses a separate `~/.gitconfig.delta` include file, not `.gitconfig` directly.
 
 ## Coding Guidelines
 
-See [docs/coding-guidelines.md](docs/coding-guidelines.md) for conventions on React patterns, file
-structure, styling, TypeScript, testing, git workflow, and the Deno + Vite dual resolution setup.
+See [docs/coding-guidelines.md](docs/coding-guidelines.md) for React patterns, file structure,
+styling, TypeScript, testing, and git workflow conventions.
 
 ## Project Tracking
 
-Issues are tracked in [Linear](https://linear.app/black-atom-industries) under the Development team
-in the **livery** project.
+Issues tracked in [Linear](https://linear.app/black-atom-industries) under the **livery** project.
+
+## Sources of Truth
+
+- **Tauri v2 docs**: https://tauri.app/
+- **TanStack Query docs**: https://tanstack.com/query/latest
+- **TanStack Router docs**: https://tanstack.com/router/latest
+- **TanStack Store docs**: https://tanstack.com/store/latest
+- **@black-atom/core**: https://jsr.io/@black-atom/core
+- **Deno docs**: https://docs.deno.com/
 
 ---
 
