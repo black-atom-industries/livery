@@ -8,7 +8,9 @@ export interface UpdateResult {
     message?: string;
 }
 
+export type UpdaterAppName = AppName | "system_appearance";
+
 export interface UpdaterEntry {
-    app: AppName;
+    app: UpdaterAppName;
     run: () => Promise<UpdateResult>;
 }

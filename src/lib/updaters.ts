@@ -39,7 +39,7 @@ export function createUpdaters(
 
     if (config.system_appearance) {
         appUpdaters.push({
-            app: "system_appearance" as AppName,
+            app: "system_appearance",
             run: async (): Promise<UpdateResult> => {
                 try {
                     return await invoke<UpdateResult>("update_system_appearance", {

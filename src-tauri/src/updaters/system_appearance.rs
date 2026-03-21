@@ -59,3 +59,28 @@ fn update_linux(dark: bool) -> UpdateResult {
         Err(_) => UpdateResult::skipped(APP_STR, "gsettings not found (non-GNOME desktop?)"),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unknown_appearance_returns_error() {
+        let result = update("banana");
+        assert_eq!(result.status, "error");
+        assert!(result.message.unwrap().contains("Unknown appearance"));
+    }
+
+    #[test]
+    fn dark_appearance_is_accepted() {
+        // Can't assert on the outcome (platform-dependent), but should not panic
+        let result = update("dark");
+        assert!(result.status == "done" || result.status == "skipped");
+    }
+
+    #[test]
+    fn light_appearance_is_accepted() {
+        let result = update("light");
+        assert!(result.status == "done" || result.status == "skipped");
+    }
+}

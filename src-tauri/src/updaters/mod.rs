@@ -116,7 +116,7 @@ pub async fn update_app(
 /// Toggle system-wide dark/light mode. Separate from update_app because system
 /// appearance is not an app with AppConfig — it's a standalone boolean toggle.
 #[tauri::command]
-pub async fn update_system_appearance(appearance: String) -> UpdateResult {
+pub fn update_system_appearance(appearance: String) -> UpdateResult {
     system_appearance::update(&appearance)
 }
 
