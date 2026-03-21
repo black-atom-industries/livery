@@ -26,6 +26,7 @@ gui:
       - "#c9dae7"
     searchingActiveBorderColor:
       - "#73838e"
+
   authorColors:
     "*": "#8fbc8a"
   branchColors:

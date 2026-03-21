@@ -5122,8 +5122,7 @@ dependencies = [
 [[package]]
 name = "yaml-edit"
 version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c249044401e064d1f4d7ec0937c343b283e9da13de92298435ff6bf0ad53552"
+source = "git+https://github.com/nikbrunner/yaml-edit?branch=main#d840717221ecb5e380b252ce0b67b60a5147e089"
 dependencies = [
  "base64 0.22.1",
  "rowan",
