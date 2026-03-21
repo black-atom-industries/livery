@@ -4,10 +4,12 @@
 
 Theme selection triggers updaters for each enabled app:
 
-1. User picks a theme → `UpdaterContext` is built (themeKey, appearance, collectionKey, appConfig)
-2. TypeScript orchestrator calls updaters sequentially from `updaterRegistry`
-3. Each updater invokes Rust commands via `invoke()` to patch config files
-4. Apps that support it get a reload signal (ghostty, nvim, tmux)
+1. User picks a theme → frontend builds `UpdaterEntry[]` from enabled apps
+2. Frontend calls `invoke("update_app", { app, themeKey, appearance, collectionKey })` per app
+3. Backend dispatcher reads app config, patches config files, and reloads if needed
+4. If `config.system_appearance` is true, frontend also calls `invoke("update_system_appearance")`
+
+All per-app logic lives in the backend. The frontend only decides _which_ apps to update.
 
 ## File Operations
 
@@ -33,12 +35,12 @@ Both enforce home-directory restriction and use atomic writes (temp file + persi
 
 ## Supported Apps
 
-| App              | Method                         | Reload                     |
-| ---------------- | ------------------------------ | -------------------------- |
-| ghostty          | `patch_text_file` (regex)      | SIGUSR2                    |
-| nvim             | `patch_text_file` (regex)      | socket `nvim --server`     |
-| tmux             | `patch_text_file` (regex)      | `tmux source-file`         |
-| delta            | `patch_text_file` (regex)      | none (reads on invocation) |
-| lazygit          | `patch_yaml_file` (YAML merge) | none (reads on launch)     |
-| zed              | planned — `patch_json_file`    | auto-watches settings      |
-| macOS appearance | planned — `osascript`          | immediate                  |
+| App               | Method                                          | Reload                     |
+| ----------------- | ----------------------------------------------- | -------------------------- |
+| ghostty           | `patch_text_file` (regex)                       | SIGUSR2                    |
+| nvim              | `patch_text_file` (regex)                       | socket `nvim --server`     |
+| tmux              | `patch_text_file` (regex)                       | `tmux source-file`         |
+| delta             | `patch_text_file` (regex)                       | none (reads on invocation) |
+| lazygit           | `patch_yaml_file` (YAML merge)                  | none (reads on launch)     |
+| zed               | planned — `patch_json_file`                     | auto-watches settings      |
+| system appearance | `osascript` (macOS) / `gsettings` (Linux/GNOME) | immediate                  |

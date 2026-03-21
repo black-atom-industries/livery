@@ -2,6 +2,7 @@ pub mod file_ops;
 mod ghostty;
 mod lazygit;
 mod nvim;
+mod system_appearance;
 mod tmux;
 
 use std::collections::HashMap;
@@ -110,6 +111,13 @@ pub async fn update_app(
         AppName::Lazygit => lazygit::update(app_str, &app_config, &ctx),
         AppName::Zed => UpdateResult::skipped(app_str, "Not yet implemented"),
     }
+}
+
+/// Toggle system-wide dark/light mode. Separate from update_app because system
+/// appearance is not an app with AppConfig — it's a standalone boolean toggle.
+#[tauri::command]
+pub fn update_system_appearance(appearance: String) -> UpdateResult {
+    system_appearance::update(&appearance)
 }
 
 /// Generic text-based updater for apps that only need patch_text_file (no reload).

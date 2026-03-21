@@ -14,7 +14,7 @@ src-tauri/src/
     commands.rs             # get_config, save_config Tauri commands
     io.rs                   # Disk I/O, tilde expansion, default merging
   updaters/
-    mod.rs                  # update_app command (single entry point), UpdateResult, dispatcher
+    mod.rs                  # update_app + update_system_appearance commands, UpdateResult, dispatcher
     file_ops/
       text.rs               # patch_text_file — regex replace with template variables
       yaml.rs               # patch_yaml_file — lossless YAML merge (yaml-edit + yaml_serde)
@@ -22,6 +22,7 @@ src-tauri/src/
     nvim.rs                 # nvim update + reload (socket)
     tmux.rs                 # tmux update + reload (source-file)
     lazygit.rs              # lazygit update (YAML merge, no reload)
+    system_appearance.rs    # macOS/Linux system dark/light mode toggle
 ```
 
 ## Conventions
