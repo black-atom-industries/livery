@@ -16,7 +16,11 @@ pub fn patch_text_file(
 ) -> Result<(), String> {
     // Restrict writes to files under $HOME
     let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
-    let resolved = PathBuf::from(&path);
+    let home = home.canonicalize().unwrap_or(home);
+    let path = shellexpand::tilde(&path).to_string();
+    let resolved = PathBuf::from(&path)
+        .canonicalize()
+        .map_err(|e| format!("Cannot resolve path {path}: {e}"))?;
     if !resolved.starts_with(&home) {
         return Err(format!(
             "Path outside home directory is not allowed: {path}"
@@ -197,6 +201,30 @@ mod tests {
             result, expected,
             "Delta config mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
         );
+    }
+
+    #[test]
+    fn test_nvim_vimcmd_colorscheme_replace() {
+        let target = copy_fixture_to_temp("text/nvim-config-vimcmd.lua");
+        let target_path = target.path().to_str().unwrap().to_string();
+        let mut vars = HashMap::new();
+        vars.insert(
+            "themeKey".to_string(),
+            "black-atom-terra-spring-day".to_string(),
+        );
+
+        patch_text_file(
+            target_path.clone(),
+            r#"vim\.cmd\.colorscheme\("[^"]*"\)"#.to_string(),
+            r#"vim.cmd.colorscheme("{themeKey}")"#.to_string(),
+            vars,
+        )
+        .unwrap();
+
+        let result = std::fs::read_to_string(&target_path).unwrap();
+        let expected =
+            std::fs::read_to_string(fixture_path("text/nvim-config-vimcmd-expected.lua")).unwrap();
+        assert_eq!(result.trim_end(), expected.trim_end());
     }
 
     #[test]

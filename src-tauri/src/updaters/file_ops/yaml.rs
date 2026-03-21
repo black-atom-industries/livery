@@ -487,6 +487,27 @@ mod tests {
     }
 
     #[test]
+    fn test_merge_is_idempotent() {
+        let target = copy_fixture_to_temp("yaml/lazygit-config.yml");
+        let source = copy_fixture_to_temp("yaml/lazygit-theme-source.yml");
+        let target_path = target.path().to_str().unwrap().to_string();
+        let source_path = source.path().to_str().unwrap().to_string();
+
+        // Apply once
+        patch_yaml_file(target_path.clone(), source_path.clone()).unwrap();
+        let after_first = std::fs::read_to_string(&target_path).unwrap();
+
+        // Apply again
+        patch_yaml_file(target_path.clone(), source_path).unwrap();
+        let after_second = std::fs::read_to_string(&target_path).unwrap();
+
+        assert_eq!(
+            after_first, after_second,
+            "Applying the merge twice should produce the same result.\n\n--- FIRST ---\n{after_first}\n--- SECOND ---\n{after_second}"
+        );
+    }
+
+    #[test]
     fn test_invalid_yaml_source() {
         let target = make_temp_file("key: value\n");
         let source = make_temp_file("not: valid: yaml: [[[\n");
