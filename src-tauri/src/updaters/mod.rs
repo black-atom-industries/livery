@@ -11,6 +11,9 @@ use serde::Serialize;
 use crate::config::{io as config_io, types::AppName};
 
 /// Context passed to each per-app updater.
+///
+/// `themes_path` is cloned from AppConfig for use in `build_variables()` template rendering.
+/// Per-app updaters that need it as a path (e.g., lazygit) read it from AppConfig directly.
 pub struct UpdateContext<'a> {
     pub theme_key: &'a str,
     pub appearance: &'a str,

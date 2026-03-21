@@ -22,9 +22,10 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
 
     if let Err(msg) = reload(ctx.theme_key) {
         log::warn!("{msg}");
-        // Config file is already patched — nvim will pick up the theme on next open.
-        // Return done with a warning rather than error, since the file update succeeded.
-        return UpdateResult::done(app_str);
+        return UpdateResult::skipped(
+            app_str,
+            format!("Config patched; live reload failed: {msg}"),
+        );
     }
     UpdateResult::done(app_str)
 }
