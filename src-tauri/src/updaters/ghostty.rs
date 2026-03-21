@@ -18,13 +18,19 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
         return UpdateResult::error(app_str, e);
     }
 
-    reload();
+    if let Err(msg) = reload() {
+        log::warn!("{msg}");
+        return UpdateResult::skipped(
+            app_str,
+            format!("Config patched; live reload failed: {msg}"),
+        );
+    }
     UpdateResult::done(app_str)
 }
 
 /// Send SIGUSR2 to ghostty to reload config.
-/// Returns even if ghostty isn't running — the config file is already updated.
-fn reload() {
+/// Non-zero exit from pkill is not an error — ghostty may not be running.
+fn reload() -> Result<(), String> {
     match std::process::Command::new("pkill")
         .args(["-SIGUSR2", "ghostty"])
         .output()
@@ -33,9 +39,8 @@ fn reload() {
             if !output.status.success() {
                 log::info!("pkill returned non-zero (ghostty may not be running)");
             }
+            Ok(())
         }
-        Err(e) => {
-            log::warn!("Failed to run pkill: {e}");
-        }
+        Err(e) => Err(format!("Failed to run pkill: {e}")),
     }
 }

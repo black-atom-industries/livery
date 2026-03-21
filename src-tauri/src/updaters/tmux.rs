@@ -18,12 +18,19 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
         return UpdateResult::error(app_str, e);
     }
 
-    reload(&app_config.config_path);
+    if let Err(msg) = reload(&app_config.config_path) {
+        log::warn!("{msg}");
+        return UpdateResult::skipped(
+            app_str,
+            format!("Config patched; live reload failed: {msg}"),
+        );
+    }
     UpdateResult::done(app_str)
 }
 
 /// Reload tmux by sourcing the config file.
-fn reload(config_path: &str) {
+/// Non-zero exit is not an error — tmux may not be running.
+fn reload(config_path: &str) -> Result<(), String> {
     match std::process::Command::new("tmux")
         .args(["source-file", config_path])
         .output()
@@ -34,9 +41,8 @@ fn reload(config_path: &str) {
             } else {
                 log::info!("tmux source-file returned non-zero (tmux may not be running)");
             }
+            Ok(())
         }
-        Err(e) => {
-            log::warn!("Failed to run tmux: {e}");
-        }
+        Err(e) => Err(format!("Failed to run tmux: {e}")),
     }
 }
