@@ -1,15 +1,9 @@
-use std::collections::HashMap;
-
 use crate::config::types::AppConfig;
 
 use super::file_ops;
-use super::UpdateResult;
+use super::{UpdateContext, UpdateResult};
 
-pub fn update(
-    app_str: &str,
-    app_config: &AppConfig,
-    variables: &HashMap<String, String>,
-) -> UpdateResult {
+pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> UpdateResult {
     let (pattern, template) = match (&app_config.match_pattern, &app_config.replace_template) {
         (Some(p), Some(t)) => (p, t),
         _ => return UpdateResult::error(app_str, "Missing match_pattern or replace_template"),
@@ -19,7 +13,7 @@ pub fn update(
         app_config.config_path.clone(),
         pattern.clone(),
         template.clone(),
-        variables.clone(),
+        ctx.build_variables(),
     ) {
         return UpdateResult::error(app_str, e);
     }
@@ -29,7 +23,7 @@ pub fn update(
 }
 
 /// Send SIGUSR2 to ghostty to reload config.
-/// Returns Ok even if ghostty isn't running — the config file is already updated.
+/// Returns even if ghostty isn't running — the config file is already updated.
 fn reload() {
     match std::process::Command::new("pkill")
         .args(["-SIGUSR2", "ghostty"])

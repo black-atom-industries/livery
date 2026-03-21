@@ -1,16 +1,11 @@
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use crate::config::types::AppConfig;
 
 use super::file_ops;
-use super::UpdateResult;
+use super::{UpdateContext, UpdateResult};
 
-pub fn update(
-    app_str: &str,
-    app_config: &AppConfig,
-    variables: &HashMap<String, String>,
-) -> UpdateResult {
+pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> UpdateResult {
     let (pattern, template) = match (&app_config.match_pattern, &app_config.replace_template) {
         (Some(p), Some(t)) => (p, t),
         _ => return UpdateResult::error(app_str, "Missing match_pattern or replace_template"),
@@ -20,13 +15,12 @@ pub fn update(
         app_config.config_path.clone(),
         pattern.clone(),
         template.clone(),
-        variables.clone(),
+        ctx.build_variables(),
     ) {
         return UpdateResult::error(app_str, e);
     }
 
-    let theme_key = variables.get("themeKey").map(|s| s.as_str()).unwrap_or("");
-    reload(theme_key);
+    reload(ctx.theme_key);
     UpdateResult::done(app_str)
 }
 

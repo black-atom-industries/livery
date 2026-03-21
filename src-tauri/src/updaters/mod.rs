@@ -15,6 +15,21 @@ pub struct UpdateContext<'a> {
     pub theme_key: &'a str,
     pub appearance: &'a str,
     pub collection_key: &'a str,
+    pub themes_path: Option<String>,
+}
+
+impl UpdateContext<'_> {
+    /// Build the template variable map for text-based patching.
+    pub fn build_variables(&self) -> HashMap<String, String> {
+        let mut vars = HashMap::new();
+        vars.insert("themeKey".to_string(), self.theme_key.to_string());
+        vars.insert("appearance".to_string(), self.appearance.to_string());
+        vars.insert("collectionKey".to_string(), self.collection_key.to_string());
+        if let Some(ref tp) = self.themes_path {
+            vars.insert("themesPath".to_string(), tp.clone());
+        }
+        vars
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -41,9 +56,21 @@ impl UpdateResult {
             message: Some(msg.into()),
         }
     }
+
+    pub fn skipped(app: &str, msg: impl Into<String>) -> Self {
+        Self {
+            app: app.to_string(),
+            status: "skipped".to_string(),
+            message: Some(msg.into()),
+        }
+    }
 }
 
 /// Single entry point for all app updates. The frontend calls this once per app.
+///
+/// Each invocation reads config from disk independently — this is inherent to the
+/// Tauri IPC model where each `invoke` call is a separate request. At the current
+/// scale (~5 apps, tiny JSON file) this is fine.
 #[tauri::command]
 pub fn update_app(
     app: AppName,
@@ -65,38 +92,24 @@ pub fn update_app(
         theme_key: &theme_key,
         appearance: &appearance,
         collection_key: &collection_key,
+        themes_path: app_config.themes_path.clone(),
     };
 
-    // Build template variables from context
-    let variables = build_variables(&ctx, app_config.themes_path.as_deref());
-
     match app {
-        AppName::Ghostty => ghostty::update(app_str, &app_config, &variables),
-        AppName::Nvim => nvim::update(app_str, &app_config, &variables),
-        AppName::Tmux => tmux::update(app_str, &app_config, &variables),
-        AppName::Delta => patch_text_updater(app_str, &app_config, &variables),
+        AppName::Ghostty => ghostty::update(app_str, &app_config, &ctx),
+        AppName::Nvim => nvim::update(app_str, &app_config, &ctx),
+        AppName::Tmux => tmux::update(app_str, &app_config, &ctx),
+        AppName::Delta => patch_text_updater(app_str, &app_config, &ctx),
         AppName::Lazygit => lazygit::update(app_str, &app_config, &ctx),
-        AppName::Zed => UpdateResult::error(app_str, "Zed updater not yet implemented"),
+        AppName::Zed => UpdateResult::skipped(app_str, "Not yet implemented"),
     }
-}
-
-/// Build the template variable map from context.
-fn build_variables(ctx: &UpdateContext, themes_path: Option<&str>) -> HashMap<String, String> {
-    let mut vars = HashMap::new();
-    vars.insert("themeKey".to_string(), ctx.theme_key.to_string());
-    vars.insert("appearance".to_string(), ctx.appearance.to_string());
-    vars.insert("collectionKey".to_string(), ctx.collection_key.to_string());
-    if let Some(tp) = themes_path {
-        vars.insert("themesPath".to_string(), tp.to_string());
-    }
-    vars
 }
 
 /// Generic text-based updater for apps that only need patch_text_file (no reload).
 fn patch_text_updater(
     app_str: &str,
     app_config: &crate::config::types::AppConfig,
-    variables: &HashMap<String, String>,
+    ctx: &UpdateContext,
 ) -> UpdateResult {
     let (pattern, template) = match (&app_config.match_pattern, &app_config.replace_template) {
         (Some(p), Some(t)) => (p, t),
@@ -107,7 +120,7 @@ fn patch_text_updater(
         app_config.config_path.clone(),
         pattern.clone(),
         template.clone(),
-        variables.clone(),
+        ctx.build_variables(),
     ) {
         Ok(()) => UpdateResult::done(app_str),
         Err(e) => UpdateResult::error(app_str, e),
