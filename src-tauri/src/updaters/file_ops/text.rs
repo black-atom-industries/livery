@@ -8,7 +8,7 @@ use regex::Regex;
 /// Variables are rendered into the replace_template before replacement.
 /// Supported variable placeholders: {themeKey}, {appearance}, {collectionKey}, {themesPath}
 #[tauri::command]
-pub fn replace_in_file(
+pub fn patch_text_file(
     path: String,
     match_pattern: String,
     replace_template: String,
@@ -16,7 +16,11 @@ pub fn replace_in_file(
 ) -> Result<(), String> {
     // Restrict writes to files under $HOME
     let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
-    let resolved = PathBuf::from(&path);
+    let home = home.canonicalize().unwrap_or(home);
+    let path = shellexpand::tilde(&path).to_string();
+    let resolved = PathBuf::from(&path)
+        .canonicalize()
+        .map_err(|e| format!("Cannot resolve path {path}: {e}"))?;
     if !resolved.starts_with(&home) {
         return Err(format!(
             "Path outside home directory is not allowed: {path}"
@@ -76,8 +80,17 @@ pub fn replace_in_file(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
 
-    fn make_temp_file(content: &str) -> tempfile::NamedTempFile {
+    fn fixture_path(name: &str) -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("fixtures")
+            .join(name)
+    }
+
+    fn copy_fixture_to_temp(fixture_name: &str) -> tempfile::NamedTempFile {
+        let content = std::fs::read_to_string(fixture_path(fixture_name)).unwrap();
         let home = dirs::home_dir().expect("Cannot determine home directory");
         let mut file = tempfile::NamedTempFile::new_in(home).unwrap();
         file.write_all(content.as_bytes()).unwrap();
@@ -85,13 +98,16 @@ mod tests {
     }
 
     #[test]
-    fn test_replace_ghostty_theme() {
-        let file = make_temp_file("# Colors\ntheme = old-theme.conf\nbold-is-bright = false");
+    fn test_ghostty_theme_replace() {
+        let file = copy_fixture_to_temp("text/ghostty-config.txt");
         let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
-        vars.insert("themeKey".to_string(), "new-theme".to_string());
+        vars.insert(
+            "themeKey".to_string(),
+            "black-atom-terra-spring-day".to_string(),
+        );
 
-        replace_in_file(
+        patch_text_file(
             path.clone(),
             r"^theme\s*=\s*.+$".to_string(),
             "theme = {themeKey}.conf".to_string(),
@@ -100,19 +116,25 @@ mod tests {
         .unwrap();
 
         let result = std::fs::read_to_string(&path).unwrap();
-        assert!(result.contains("theme = new-theme.conf"));
-        assert!(result.contains("bold-is-bright = false"));
+        let expected =
+            std::fs::read_to_string(fixture_path("text/ghostty-config-expected.txt")).unwrap();
+        assert_eq!(
+            result, expected,
+            "Ghostty config mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
+        );
     }
 
     #[test]
-    fn test_replace_nvim_colorscheme() {
-        let file =
-            make_temp_file("return {\n    colorscheme = \"old-theme\",\n    debug = false,\n}");
+    fn test_nvim_colorscheme_replace() {
+        let file = copy_fixture_to_temp("text/nvim-config.lua");
         let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
-        vars.insert("themeKey".to_string(), "new-theme".to_string());
+        vars.insert(
+            "themeKey".to_string(),
+            "black-atom-terra-spring-day".to_string(),
+        );
 
-        replace_in_file(
+        patch_text_file(
             path.clone(),
             r#"colorscheme\s*=\s*"[^"]*""#.to_string(),
             "colorscheme = \"{themeKey}\"".to_string(),
@@ -121,19 +143,27 @@ mod tests {
         .unwrap();
 
         let result = std::fs::read_to_string(&path).unwrap();
-        assert!(result.contains("colorscheme = \"new-theme\""));
+        let expected =
+            std::fs::read_to_string(fixture_path("text/nvim-config-expected.lua")).unwrap();
+        assert_eq!(
+            result, expected,
+            "Nvim config mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
+        );
     }
 
     #[test]
-    fn test_replace_tmux_source_file() {
-        let file = make_temp_file("source-file ~/themes/terra/old.conf\nother line");
+    fn test_tmux_source_file_replace() {
+        let file = copy_fixture_to_temp("text/tmux.conf");
         let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
-        vars.insert("themeKey".to_string(), "new-theme".to_string());
+        vars.insert(
+            "themeKey".to_string(),
+            "black-atom-jpn-koyo-yoru".to_string(),
+        );
         vars.insert("collectionKey".to_string(), "jpn".to_string());
         vars.insert("themesPath".to_string(), "~/themes".to_string());
 
-        replace_in_file(
+        patch_text_file(
             path.clone(),
             r"^source-file\s+.+/themes/.+\.conf$".to_string(),
             "source-file {themesPath}/{collectionKey}/{themeKey}.conf".to_string(),
@@ -142,18 +172,21 @@ mod tests {
         .unwrap();
 
         let result = std::fs::read_to_string(&path).unwrap();
-        assert!(result.contains("source-file ~/themes/jpn/new-theme.conf"));
+        let expected = std::fs::read_to_string(fixture_path("text/tmux-expected.conf")).unwrap();
+        assert_eq!(
+            result, expected,
+            "Tmux config mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
+        );
     }
 
     #[test]
-    fn test_replace_delta_appearance() {
-        let file = make_temp_file("[delta]\n    features = black-atom-dark");
+    fn test_delta_appearance_replace() {
+        let file = copy_fixture_to_temp("text/delta-config.ini");
         let path = file.path().to_str().unwrap().to_string();
         let mut vars = HashMap::new();
-        vars.insert("themeKey".to_string(), "any".to_string());
         vars.insert("appearance".to_string(), "light".to_string());
 
-        replace_in_file(
+        patch_text_file(
             path.clone(),
             r"features\s*=\s*black-atom-(dark|light)".to_string(),
             "features = black-atom-{appearance}".to_string(),
@@ -162,19 +195,48 @@ mod tests {
         .unwrap();
 
         let result = std::fs::read_to_string(&path).unwrap();
-        assert!(result.contains("features = black-atom-light"));
+        let expected =
+            std::fs::read_to_string(fixture_path("text/delta-config-expected.ini")).unwrap();
+        assert_eq!(
+            result, expected,
+            "Delta config mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
+        );
+    }
+
+    #[test]
+    fn test_nvim_vimcmd_colorscheme_replace() {
+        let target = copy_fixture_to_temp("text/nvim-config-vimcmd.lua");
+        let target_path = target.path().to_str().unwrap().to_string();
+        let mut vars = HashMap::new();
+        vars.insert(
+            "themeKey".to_string(),
+            "black-atom-terra-spring-day".to_string(),
+        );
+
+        patch_text_file(
+            target_path.clone(),
+            r#"vim\.cmd\.colorscheme\("[^"]*"\)"#.to_string(),
+            r#"vim.cmd.colorscheme("{themeKey}")"#.to_string(),
+            vars,
+        )
+        .unwrap();
+
+        let result = std::fs::read_to_string(&target_path).unwrap();
+        let expected =
+            std::fs::read_to_string(fixture_path("text/nvim-config-vimcmd-expected.lua")).unwrap();
+        assert_eq!(result.trim_end(), expected.trim_end());
     }
 
     #[test]
     fn test_pattern_not_found_returns_error() {
-        let file = make_temp_file("no match here");
+        let file = copy_fixture_to_temp("text/ghostty-config.txt");
         let path = file.path().to_str().unwrap().to_string();
         let vars = HashMap::new();
 
-        let result = replace_in_file(
+        let result = patch_text_file(
             path,
-            r"^theme\s*=\s*.+$".to_string(),
-            "theme = new".to_string(),
+            r"^nonexistent_pattern\s*=\s*.+$".to_string(),
+            "replacement".to_string(),
             vars,
         );
 

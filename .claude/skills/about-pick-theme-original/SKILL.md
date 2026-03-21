@@ -6,9 +6,9 @@ user-invocable: false
 
 # Original pick-theme Implementation
 
-The original theme picker is a bash script at `~/repos/nikbrunner/dots/common/.local/bin/pick-theme`.
-Livery is replacing this with a Tauri desktop app. This skill documents the original behavior as a
-migration reference.
+The original theme picker is a bash script at
+`~/repos/nikbrunner/dots/common/.local/bin/pick-theme`. Livery is replacing this with a Tauri
+desktop app. This skill documents the original behavior as a migration reference.
 
 ## Source Files
 
@@ -27,12 +27,14 @@ migration reference.
 ## Updaters (in execution order)
 
 ### 1. nvim
+
 - **File**: `$DOTS_DIR/common/.config/nvim/lua/config.lua`
 - **Action**: `sed` replace `colorscheme = .*` with new theme name
 - **Reload**: Restart all nvim instances in tmux panes via `tmux send-keys :restart Enter`
 - **Note**: Uses tmux to find nvim panes, sends Escape first, then `:restart`. Sleeps 0.2s between.
 
 ### 2. tmux
+
 - **File**: `$DOTS_DIR/common/.config/tmux/tmux.conf`
 - **Action**: `sed` replace `source-file .*/black-atom-industries/tmux/themes/...` path
 - **Needs**: theme name + collection name to build path
@@ -40,6 +42,7 @@ migration reference.
 - **Reload**: `tmux source-file "$TMUX_CONFIG"`
 
 ### 3. ghostty
+
 - **File**: `$DOTS_DIR/common/.config/ghostty/config`
 - **Action**: `sed` replace `^theme = .*` with `theme = ${theme}.conf`
 - **Reload**: `pkill -SIGUSR2 ghostty` (requires Ghostty 1.2.0+)
@@ -47,38 +50,45 @@ migration reference.
 - **Note**: Terminal escape sequences suppressed during reload (`stty -echo`)
 
 ### 4. zed
+
 - **File**: `$DOTS_DIR/common/.config/zed/settings.json`
 - **Action**: `jq` to set `.theme.dark` or `.theme.light` based on appearance
 - **Needs**: display_name from themes.json (not the theme key)
 - **Reload**: Zed auto-watches settings file
 
 ### 5. delta
+
 - **File**: `$DOTS_DIR/common/.gitconfig`
 - **Action**: Toggle comments on `dark = true` / `light = true` lines
 - **Needs**: appearance (dark/light), not theme name
 - **Reload**: None needed
 
 ### 6. niri (Linux only)
+
 - **Action**: Symlink theme kdl file
 - **Path**: `~/repos/black-atom-industries/niri/themes/$collection/${theme}.kdl`
 - **Skipped on macOS**
 
 ### 7. waybar (Linux only)
+
 - **Action**: Symlink theme CSS file
 - **Reload**: `killall -SIGUSR2 waybar`
 - **Skipped on macOS**
 
 ### 8. lazygit
+
 - **File**: `$DOTS_DIR/common/.config/lazygit/config.yml`
 - **Action**: `yq` to merge theme YAML into config
 - **Needs**: yq installed
 
 ### 9. helm
+
 - **File**: `~/.config/helm/config.yml`
 - **Action**: `yq` to set `.appearance` to dark/light
 - **Needs**: yq installed
 
 ### 10. macOS system appearance
+
 - **Action**: `osascript` to toggle dark mode
 - **macOS only**
 

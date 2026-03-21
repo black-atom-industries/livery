@@ -15,7 +15,7 @@ export async function runGhosttyUpdater(ctx: UpdaterContext): Promise<UpdateResu
     }
 
     try {
-        await invoke("replace_in_file", {
+        await invoke("patch_text_file", {
             path: config_path,
             matchPattern: match_pattern,
             replaceTemplate: replace_template,

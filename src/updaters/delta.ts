@@ -15,7 +15,7 @@ export async function runDeltaUpdater(ctx: UpdaterContext): Promise<UpdateResult
     }
 
     try {
-        await invoke("replace_in_file", {
+        await invoke("patch_text_file", {
             path: config_path,
             matchPattern: match_pattern,
             replaceTemplate: replace_template,

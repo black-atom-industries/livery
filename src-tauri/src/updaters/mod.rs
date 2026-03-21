@@ -1,4 +1,4 @@
-pub mod config_file;
+pub mod file_ops;
 pub mod ghostty;
 pub mod nvim;
 pub mod tmux;
