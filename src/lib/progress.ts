@@ -1,4 +1,4 @@
-import type { UpdateResult } from "../types/updaters.ts";
+import type { UpdateResult } from "./updaters.ts";
 
 export type ProgressStatus = "idle" | "running" | "done" | "error";
 

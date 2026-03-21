@@ -1,8 +1,8 @@
 import { assertEquals } from "@std/assert";
 import { applyTheme, createUpdaters, getEnabledApps } from "./updaters.ts";
-import type { AppConfig, AppName, Config } from "../types/config.ts";
+import type { AppConfig, AppName } from "../bindings.ts";
 import type { ThemeMeta } from "@black-atom/core";
-import type { UpdaterEntry, UpdateResult } from "../types/updaters.ts";
+import type { UpdaterEntry, UpdateResult } from "./updaters.ts";
 
 // --- getEnabledApps ---
 
@@ -53,8 +53,6 @@ Deno.test("getEnabledApps preserves app config in result", () => {
 
 // --- createUpdaters ---
 
-const stubConfig: Config = { system_appearance: false, apps: {} };
-
 Deno.test("createUpdaters creates an entry per enabled app", () => {
     const enabledApps: [AppName, AppConfig][] = [
         ["ghostty", { enabled: true, config_path: "/ghostty" }],
@@ -69,7 +67,7 @@ Deno.test("createUpdaters creates an entry per enabled app", () => {
         collection: { key: "terra", label: "Terra" },
     } as unknown as ThemeMeta;
 
-    const result = createUpdaters(enabledApps, stubConfig, themeMeta);
+    const result = createUpdaters(enabledApps, themeMeta);
 
     assertEquals(result.length, 2);
     assertEquals(result[0].app, "ghostty");
@@ -87,50 +85,9 @@ Deno.test("createUpdaters returns empty for empty input", () => {
         collection: { key: "default", label: "Default" },
     } as unknown as ThemeMeta;
 
-    const result = createUpdaters([], stubConfig, themeMeta);
+    const result = createUpdaters([], themeMeta);
 
     assertEquals(result.length, 0);
-});
-
-Deno.test("createUpdaters includes system_appearance entry when enabled", () => {
-    const config: Config = { system_appearance: true, apps: {} };
-    const enabledApps: [AppName, AppConfig][] = [
-        ["ghostty", { enabled: true, config_path: "/ghostty" }],
-    ];
-
-    const themeMeta = {
-        key: "black-atom-terra-fall-night",
-        name: "Fall Night",
-        appearance: "dark",
-        status: "release",
-        collection: { key: "terra", label: "Terra" },
-    } as unknown as ThemeMeta;
-
-    const result = createUpdaters(enabledApps, config, themeMeta);
-
-    assertEquals(result.length, 2);
-    assertEquals(result[0].app, "ghostty");
-    assertEquals(result[1].app, "system_appearance");
-});
-
-Deno.test("createUpdaters excludes system_appearance entry when disabled", () => {
-    const config: Config = { system_appearance: false, apps: {} };
-    const enabledApps: [AppName, AppConfig][] = [
-        ["ghostty", { enabled: true, config_path: "/ghostty" }],
-    ];
-
-    const themeMeta = {
-        key: "any",
-        name: "Any",
-        appearance: "dark",
-        status: "release",
-        collection: { key: "default", label: "Default" },
-    } as unknown as ThemeMeta;
-
-    const result = createUpdaters(enabledApps, config, themeMeta);
-
-    assertEquals(result.length, 1);
-    assertEquals(result[0].app, "ghostty");
 });
 
 // --- applyTheme ---

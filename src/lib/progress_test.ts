@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { getProgressState } from "./progress.ts";
-import type { UpdateResult } from "../types/updaters.ts";
+import type { UpdateResult } from "./updaters.ts";
 
 Deno.test("getProgressState returns zero progress for empty results", () => {
     const state = getProgressState([]);
