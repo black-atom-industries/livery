@@ -71,9 +71,17 @@ docs/                   # Project documentation
 
 ## Testing
 
+### Frontend (TypeScript)
+
 - Test files live next to the code they test: `foo.ts` → `foo_test.ts`.
 - Use `@std/assert` for assertions.
 - Run with `deno test --allow-env --allow-read --allow-write`.
+
+### Backend (Rust)
+
+- Tests live in `#[cfg(test)] mod tests` blocks within the source files.
+- Run with `cd src-tauri && cargo test`.
+- See [src-tauri/docs/testing.md](../src-tauri/docs/testing.md) for fixture-based testing patterns.
 
 ## Git
 
