@@ -1,3 +1,9 @@
+---
+name: backend-testing
+description: Fixture-based testing patterns for Rust file operations (file_ops)
+user-invocable: false
+---
+
 # Backend Testing
 
 ## Running Tests
@@ -11,7 +17,7 @@ cd src-tauri && cargo test
 File operations (`file_ops/text.rs`, `file_ops/yaml.rs`) use **real config file fixtures** instead
 of inline test strings. This catches formatting and indentation issues that simplified strings miss.
 
-### Directory Structure
+### Fixture Directory
 
 ```
 src-tauri/tests/fixtures/
@@ -30,19 +36,25 @@ src-tauri/tests/fixtures/
     lazygit-config.yml               # Realistic lazygit config (target)
     lazygit-theme-source.yml         # Black Atom theme file (source/overlay)
     lazygit-config-expected.yml      # Expected output after merge
-    simple-config.yml                # Simple YAML for basic merge tests
+    simple-config.yml
     simple-overlay.yml
     simple-config-expected.yml
 ```
 
-### Pattern
+### Test Pattern
 
-1. Copy a fixture file to a temp location under `$HOME` (required by the home-directory security
-   check)
+1. Copy fixture to a temp file under `$HOME` (required by home-directory security check)
 2. Run the patch function (`patch_text_file` or `patch_yaml_file`)
-3. Compare the result to the expected fixture via `assert_eq!`
+3. Compare result to expected fixture via `assert_eq!`
 
 ```rust
+fn fixture_path(name: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("fixtures")
+        .join(name)
+}
+
 fn copy_fixture_to_temp(fixture_name: &str) -> tempfile::NamedTempFile {
     let content = std::fs::read_to_string(fixture_path(fixture_name)).unwrap();
     let home = dirs::home_dir().expect("Cannot determine home directory");
@@ -53,8 +65,6 @@ fn copy_fixture_to_temp(fixture_name: &str) -> tempfile::NamedTempFile {
 ```
 
 ### Adding Fixtures for New Updaters
-
-When adding a new file operation or updater:
 
 1. Create fixture files with **realistic content** from the actual tool's config format
 2. Include comments, blank lines, and edge cases that exist in real configs
