@@ -1,6 +1,6 @@
 import { Store } from "@tanstack/store";
 import type { ThemeDefinition } from "@black-atom/core";
-import type { UpdateResult } from "../types/updaters.ts";
+import type { UpdateResult } from "../lib/updaters.ts";
 
 export interface AppState {
     phase: "picking" | "applying" | "done";

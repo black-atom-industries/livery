@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use std::collections::HashMap;
 
-/// Supported app names. Must be kept in sync with AppName in src/types/config.ts.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Supported app names. TypeScript bindings are auto-generated via tauri-specta.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
 #[serde(rename_all = "lowercase")]
 pub enum AppName {
     Nvim,
@@ -30,7 +31,7 @@ fn default_true() -> bool {
     true
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct AppConfig {
     #[serde(default = "default_true")]
     pub enabled: bool,
@@ -43,7 +44,7 @@ pub struct AppConfig {
     pub replace_template: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct Config {
     pub system_appearance: bool,
     pub apps: HashMap<AppName, AppConfig>,

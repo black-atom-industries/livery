@@ -63,11 +63,12 @@ fn update_linux(dark: bool) -> UpdateResult {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::updaters::UpdateStatus;
 
     #[test]
     fn unknown_appearance_returns_error() {
         let result = update("banana");
-        assert_eq!(result.status, "error");
+        assert_eq!(result.status, UpdateStatus::Error);
         assert!(result.message.unwrap().contains("Unknown appearance"));
     }
 
@@ -75,12 +76,12 @@ mod tests {
     fn dark_appearance_is_accepted() {
         // Can't assert on the outcome (platform-dependent), but should not panic
         let result = update("dark");
-        assert!(result.status == "done" || result.status == "skipped");
+        assert!(result.status == UpdateStatus::Done || result.status == UpdateStatus::Skipped);
     }
 
     #[test]
     fn light_appearance_is_accepted() {
         let result = update("light");
-        assert!(result.status == "done" || result.status == "skipped");
+        assert!(result.status == UpdateStatus::Done || result.status == UpdateStatus::Skipped);
     }
 }

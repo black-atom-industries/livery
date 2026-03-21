@@ -1,32 +1,46 @@
-import { invoke } from "@tauri-apps/api/core";
 import type { ThemeMeta } from "@black-atom/core";
-import type { AppConfig, AppName, Config } from "../types/config.ts";
-import type { UpdaterEntry, UpdateResult } from "../types/updaters.ts";
+import {
+    type AppConfig,
+    type AppName,
+    commands,
+    type UpdateResult as BackendUpdateResult,
+    type UpdateStatus as BackendUpdateStatus,
+} from "../bindings.ts";
 
-/** Filter apps that are enabled in the config. */
+/** Frontend-extended status includes "pending" and "running" (UI-only states). */
+export type UpdateStatus = BackendUpdateStatus | "pending" | "running";
+
+/** Frontend-extended result that allows UI-only statuses. */
+export type UpdateResult = Omit<BackendUpdateResult, "status"> & { status: UpdateStatus };
+
+export interface UpdaterEntry {
+    app: AppName;
+    run: () => Promise<BackendUpdateResult>;
+}
+
+/** Filter apps that are enabled in the config. Enabled defaults to true if omitted. */
 export function getEnabledApps(
     apps: Partial<Record<AppName, AppConfig>>,
 ): [AppName, AppConfig][] {
     return (Object.entries(apps) as [AppName, AppConfig][])
-        .filter(([_name, app]) => app.enabled);
+        .filter(([_name, app]) => app && app.enabled !== false);
 }
 
-/** Build runnable updaters from enabled apps, config, and theme metadata. */
+/** Build runnable updaters from enabled apps and theme metadata. */
 export function createUpdaters(
     enabledApps: [AppName, AppConfig][],
-    config: Config,
     themeMeta: ThemeMeta,
 ): UpdaterEntry[] {
-    const appUpdaters: UpdaterEntry[] = enabledApps.map(([name]) => ({
+    return enabledApps.map(([name]) => ({
         app: name,
-        run: async (): Promise<UpdateResult> => {
+        run: async (): Promise<BackendUpdateResult> => {
             try {
-                return await invoke<UpdateResult>("update_app", {
-                    app: name,
-                    themeKey: themeMeta.key,
-                    appearance: themeMeta.appearance,
-                    collectionKey: themeMeta.collection.key,
-                });
+                return await commands.updateApp(
+                    name,
+                    themeMeta.key,
+                    themeMeta.appearance,
+                    themeMeta.collection.key,
+                );
             } catch (error) {
                 const raw = error instanceof Error ? error.message : String(error);
                 const message = raw.includes("invalid value")
@@ -36,24 +50,6 @@ export function createUpdaters(
             }
         },
     }));
-
-    if (config.system_appearance) {
-        appUpdaters.push({
-            app: "system_appearance",
-            run: async (): Promise<UpdateResult> => {
-                try {
-                    return await invoke<UpdateResult>("update_system_appearance", {
-                        appearance: themeMeta.appearance,
-                    });
-                } catch (error) {
-                    const message = error instanceof Error ? error.message : String(error);
-                    return { app: "system_appearance", status: "error", message };
-                }
-            },
-        });
-    }
-
-    return appUpdaters;
 }
 
 /** Run updaters sequentially, calling onUpdate after each status change. */

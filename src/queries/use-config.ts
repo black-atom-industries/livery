@@ -1,8 +1,6 @@
 import { useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { invoke } from "@tauri-apps/api/core";
-import type { Config } from "../types/config.ts";
-import type { AppConfig, AppName } from "../types/config.ts";
+import { type AppConfig, type AppName, commands, type Config } from "../bindings.ts";
 
 const TOPIC = "config" as const;
 const queryKey = (keys: string[] = []) => [TOPIC, ...keys] as const;
@@ -10,7 +8,7 @@ const queryKey = (keys: string[] = []) => [TOPIC, ...keys] as const;
 export const useConfig = () => {
     const query = useQuery({
         queryKey: queryKey(),
-        queryFn: () => invoke<Config>("get_config"),
+        queryFn: () => commands.getConfig(),
         staleTime: Infinity, // Config only changes via our own save mutation
     });
 
@@ -26,7 +24,7 @@ export const useConfig = () => {
     // mutationKey ["config", "save"] — MutationCache auto-invalidates all ["config", ...] queries
     const save = useMutation({
         mutationKey: queryKey(["save"]),
-        mutationFn: (config: Config) => invoke("save_config", { config }),
+        mutationFn: (config: Config) => commands.saveConfig(config),
     });
 
     return {

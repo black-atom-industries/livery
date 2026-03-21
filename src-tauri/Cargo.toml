@@ -29,3 +29,6 @@ regex = "1"
 tempfile = "3"
 yaml_edit = { package = "yaml-edit", git = "https://github.com/nikbrunner/yaml-edit", branch = "main" }
 yaml_serde = "0.10"
+specta = { version = "=2.0.0-rc.20", features = ["derive"] }
+tauri-specta = { version = "=2.0.0-rc.20", features = ["typescript"] }
+specta-typescript = "0.0.7"

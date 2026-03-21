@@ -4,6 +4,7 @@ import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { themeMap } from "@black-atom/core";
 import { appStore } from "../store/app.ts";
+import { commands } from "../bindings.ts";
 import { applyTheme, createUpdaters, getEnabledApps } from "../lib/updaters.ts";
 import { getGroupedThemes } from "../lib/themes.ts";
 import { useConfig } from "../queries/use-config.ts";
@@ -45,9 +46,9 @@ function Component() {
 
         const theme = themes[selectedIndex];
         const enabledApps = getEnabledApps(config.query.data.apps);
-        const updaters = createUpdaters(enabledApps, config.query.data, theme.meta);
+        const updaters = createUpdaters(enabledApps, theme.meta);
 
-        if (updaters.length === 0) return;
+        if (updaters.length === 0 && !config.query.data.system_appearance) return;
 
         appStore.setState((s) => ({ ...s, selectedTheme: theme, phase: "applying" }));
 
@@ -55,6 +56,14 @@ function Component() {
             await applyTheme(updaters, (results) => {
                 appStore.setState((s) => ({ ...s, updaterResults: results }));
             });
+
+            if (config.query.data.system_appearance) {
+                try {
+                    await commands.updateSystemAppearance(theme.meta.appearance);
+                } catch (error) {
+                    console.warn("[system appearance]", error);
+                }
+            }
         } finally {
             appStore.setState((s) => ({ ...s, phase: "done" }));
         }

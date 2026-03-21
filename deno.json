@@ -19,7 +19,7 @@
     },
     "nodeModulesDir": "auto",
     "lint": {
-        "exclude": ["src/routeTree.gen.ts"]
+        "exclude": ["src/routeTree.gen.ts", "src/bindings.ts"]
     },
     "fmt": {
         "useTabs": false,
@@ -27,7 +27,7 @@
         "indentWidth": 4,
         "semiColons": true,
         "singleQuote": false,
-        "exclude": ["CHANGELOG.md", "src-tauri/", "src/routeTree.gen.ts"]
+        "exclude": ["CHANGELOG.md", "src-tauri/", "src/routeTree.gen.ts", "src/bindings.ts"]
     },
     "test": {
         "permissions": {

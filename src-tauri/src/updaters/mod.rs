@@ -8,6 +8,7 @@ mod tmux;
 use std::collections::HashMap;
 
 use serde::Serialize;
+use specta::Type;
 
 use crate::config::{io as config_io, types::AppName};
 
@@ -36,10 +37,18 @@ impl UpdateContext<'_> {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[serde(rename_all = "lowercase")]
+pub enum UpdateStatus {
+    Done,
+    Error,
+    Skipped,
+}
+
+#[derive(Debug, Serialize, Type)]
 pub struct UpdateResult {
     pub app: String,
-    pub status: String,
+    pub status: UpdateStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
@@ -48,7 +57,7 @@ impl UpdateResult {
     pub fn done(app: &str) -> Self {
         Self {
             app: app.to_string(),
-            status: "done".to_string(),
+            status: UpdateStatus::Done,
             message: None,
         }
     }
@@ -56,7 +65,7 @@ impl UpdateResult {
     pub fn error(app: &str, msg: impl Into<String>) -> Self {
         Self {
             app: app.to_string(),
-            status: "error".to_string(),
+            status: UpdateStatus::Error,
             message: Some(msg.into()),
         }
     }
@@ -64,7 +73,7 @@ impl UpdateResult {
     pub fn skipped(app: &str, msg: impl Into<String>) -> Self {
         Self {
             app: app.to_string(),
-            status: "skipped".to_string(),
+            status: UpdateStatus::Skipped,
             message: Some(msg.into()),
         }
     }
@@ -76,6 +85,7 @@ impl UpdateResult {
 /// Tauri IPC model where each `invoke` call is a separate request. At the current
 /// scale (~5 apps, tiny JSON file) this is fine.
 #[tauri::command]
+#[specta::specta]
 pub async fn update_app(
     app: AppName,
     theme_key: String,
@@ -116,6 +126,7 @@ pub async fn update_app(
 /// Toggle system-wide dark/light mode. Separate from update_app because system
 /// appearance is not an app with AppConfig — it's a standalone boolean toggle.
 #[tauri::command]
+#[specta::specta]
 pub fn update_system_appearance(appearance: String) -> UpdateResult {
     system_appearance::update(&appearance)
 }

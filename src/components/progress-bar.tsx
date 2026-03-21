@@ -1,5 +1,5 @@
 import { Progress } from "@base-ui/react/progress";
-import type { UpdateResult } from "../types/updaters.ts";
+import type { UpdateResult } from "../lib/updaters.ts";
 import { getProgressState } from "../lib/progress.ts";
 
 interface ProgressBarProps {
