@@ -72,7 +72,7 @@ impl UpdateResult {
 /// Tauri IPC model where each `invoke` call is a separate request. At the current
 /// scale (~5 apps, tiny JSON file) this is fine.
 #[tauri::command]
-pub fn update_app(
+pub async fn update_app(
     app: AppName,
     theme_key: String,
     appearance: String,
@@ -87,6 +87,10 @@ pub fn update_app(
         Some(c) => c.clone(),
         None => return UpdateResult::error(app_str, "App not found in config"),
     };
+
+    if !app_config.enabled {
+        return UpdateResult::skipped(app_str, "App is disabled");
+    }
 
     let ctx = UpdateContext {
         theme_key: &theme_key,

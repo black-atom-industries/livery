@@ -20,7 +20,12 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
         return UpdateResult::error(app_str, e);
     }
 
-    reload(ctx.theme_key);
+    if let Err(msg) = reload(ctx.theme_key) {
+        log::warn!("{msg}");
+        // Config file is already patched — nvim will pick up the theme on next open.
+        // Return done with a warning rather than error, since the file update succeeded.
+        return UpdateResult::done(app_str);
+    }
     UpdateResult::done(app_str)
 }
 
@@ -77,10 +82,11 @@ fn find_nvim_sockets(tmpdir: &Path) -> Vec<PathBuf> {
 
 /// Reload all running Neovim instances by sending :colorscheme via server sockets.
 /// Non-zero exit from nvim --server is fine — means that socket is stale.
-fn reload(theme_key: &str) {
+/// Returns Err with a message if reload could not be attempted (e.g., invalid theme key).
+/// No sockets found is not an error — nvim will pick up the theme on next open.
+fn reload(theme_key: &str) -> Result<(), String> {
     if !is_valid_theme_key(theme_key) {
-        log::warn!("Invalid theme key for nvim reload: {theme_key}");
-        return;
+        return Err(format!("Invalid theme key for nvim reload: {theme_key}"));
     }
 
     let tmpdir = std::env::var("TMPDIR").unwrap_or_else(|_| "/tmp".to_string());
@@ -88,7 +94,7 @@ fn reload(theme_key: &str) {
 
     if sockets.is_empty() {
         log::info!("No nvim sockets found");
-        return;
+        return Ok(());
     }
 
     let cmd = format!(":colorscheme {}<CR>", theme_key);
@@ -122,4 +128,6 @@ fn reload(theme_key: &str) {
             }
         }
     }
+
+    Ok(())
 }
