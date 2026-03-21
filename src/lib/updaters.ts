@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { ThemeMeta } from "@black-atom/core";
-import type { AppConfig, AppName } from "../types/config.ts";
+import type { AppConfig, AppName, Config } from "../types/config.ts";
 import type { UpdaterEntry, UpdateResult } from "../types/updaters.ts";
 
 /** Filter apps that are enabled in the config. */
@@ -11,12 +11,13 @@ export function getEnabledApps(
         .filter(([_name, app]) => app.enabled);
 }
 
-/** Build runnable updaters from enabled apps and theme metadata. */
+/** Build runnable updaters from enabled apps, config, and theme metadata. */
 export function createUpdaters(
     enabledApps: [AppName, AppConfig][],
+    config: Config,
     themeMeta: ThemeMeta,
 ): UpdaterEntry[] {
-    return enabledApps.map(([name]) => ({
+    const appUpdaters: UpdaterEntry[] = enabledApps.map(([name]) => ({
         app: name,
         run: async (): Promise<UpdateResult> => {
             try {
@@ -35,6 +36,24 @@ export function createUpdaters(
             }
         },
     }));
+
+    if (config.system_appearance) {
+        appUpdaters.push({
+            app: "system_appearance" as AppName,
+            run: async (): Promise<UpdateResult> => {
+                try {
+                    return await invoke<UpdateResult>("update_system_appearance", {
+                        appearance: themeMeta.appearance,
+                    });
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    return { app: "system_appearance", status: "error", message };
+                }
+            },
+        });
+    }
+
+    return appUpdaters;
 }
 
 /** Run updaters sequentially, calling onUpdate after each status change. */

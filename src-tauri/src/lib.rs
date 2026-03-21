@@ -8,6 +8,7 @@ pub fn start_app() {
             config::commands::get_config,
             config::commands::save_config,
             updaters::update_app,
+            updaters::update_system_appearance,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

@@ -45,7 +45,7 @@ function Component() {
 
         const theme = themes[selectedIndex];
         const enabledApps = getEnabledApps(config.query.data.apps);
-        const updaters = createUpdaters(enabledApps, theme.meta);
+        const updaters = createUpdaters(enabledApps, config.query.data, theme.meta);
 
         if (updaters.length === 0) return;
 
