@@ -1,4 +1,34 @@
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+
+use crate::config::types::AppConfig;
+
+use super::file_ops;
+use super::UpdateResult;
+
+pub fn update(
+    app_str: &str,
+    app_config: &AppConfig,
+    variables: &HashMap<String, String>,
+) -> UpdateResult {
+    let (pattern, template) = match (&app_config.match_pattern, &app_config.replace_template) {
+        (Some(p), Some(t)) => (p, t),
+        _ => return UpdateResult::error(app_str, "Missing match_pattern or replace_template"),
+    };
+
+    if let Err(e) = file_ops::text::patch_text_file(
+        app_config.config_path.clone(),
+        pattern.clone(),
+        template.clone(),
+        variables.clone(),
+    ) {
+        return UpdateResult::error(app_str, e);
+    }
+
+    let theme_key = variables.get("themeKey").map(|s| s.as_str()).unwrap_or("");
+    reload(theme_key);
+    UpdateResult::done(app_str)
+}
 
 /// Validate that a theme key only contains safe characters (alphanumeric, hyphens, underscores).
 fn is_valid_theme_key(key: &str) -> bool {
@@ -53,10 +83,10 @@ fn find_nvim_sockets(tmpdir: &Path) -> Vec<PathBuf> {
 
 /// Reload all running Neovim instances by sending :colorscheme via server sockets.
 /// Non-zero exit from nvim --server is fine — means that socket is stale.
-#[tauri::command]
-pub fn reload_nvim(theme_key: String) -> Result<(), String> {
-    if !is_valid_theme_key(&theme_key) {
-        return Err(format!("Invalid theme key: {theme_key}"));
+fn reload(theme_key: &str) {
+    if !is_valid_theme_key(theme_key) {
+        log::warn!("Invalid theme key for nvim reload: {theme_key}");
+        return;
     }
 
     let tmpdir = std::env::var("TMPDIR").unwrap_or_else(|_| "/tmp".to_string());
@@ -64,7 +94,7 @@ pub fn reload_nvim(theme_key: String) -> Result<(), String> {
 
     if sockets.is_empty() {
         log::info!("No nvim sockets found");
-        return Ok(());
+        return;
     }
 
     let cmd = format!(":colorscheme {}<CR>", theme_key);
@@ -98,6 +128,4 @@ pub fn reload_nvim(theme_key: String) -> Result<(), String> {
             }
         }
     }
-
-    Ok(())
 }

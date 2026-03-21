@@ -7,7 +7,6 @@ use regex::Regex;
 /// Read a file, apply regex replacement with template variables, and write it back.
 /// Variables are rendered into the replace_template before replacement.
 /// Supported variable placeholders: {themeKey}, {appearance}, {collectionKey}, {themesPath}
-#[tauri::command]
 pub fn patch_text_file(
     path: String,
     match_pattern: String,

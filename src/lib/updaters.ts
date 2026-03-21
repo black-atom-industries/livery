@@ -1,14 +1,14 @@
+import { invoke } from "@tauri-apps/api/core";
 import type { ThemeMeta } from "@black-atom/core";
 import type { AppConfig, AppName } from "../types/config.ts";
 import type { UpdaterEntry, UpdateResult } from "../types/updaters.ts";
-import { updaterRegistry } from "../updaters/registry.ts";
 
-/** Filter apps that are enabled and have a registered updater. */
+/** Filter apps that are enabled in the config. */
 export function getEnabledApps(
     apps: Partial<Record<AppName, AppConfig>>,
 ): [AppName, AppConfig][] {
     return (Object.entries(apps) as [AppName, AppConfig][])
-        .filter(([name, app]) => app.enabled && updaterRegistry[name]);
+        .filter(([_name, app]) => app.enabled);
 }
 
 /** Build runnable updaters from enabled apps and theme metadata. */
@@ -16,15 +16,21 @@ export function createUpdaters(
     enabledApps: [AppName, AppConfig][],
     themeMeta: ThemeMeta,
 ): UpdaterEntry[] {
-    return enabledApps.map(([name, appConfig]) => ({
+    return enabledApps.map(([name]) => ({
         app: name,
-        run: () =>
-            updaterRegistry[name]!({
-                themeKey: themeMeta.key,
-                appearance: themeMeta.appearance,
-                collectionKey: themeMeta.collection.key,
-                appConfig,
-            }),
+        run: async (): Promise<UpdateResult> => {
+            try {
+                return await invoke<UpdateResult>("update_app", {
+                    app: name,
+                    themeKey: themeMeta.key,
+                    appearance: themeMeta.appearance,
+                    collectionKey: themeMeta.collection.key,
+                });
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                return { app: name, status: "error", message };
+            }
+        },
     }));
 }
 

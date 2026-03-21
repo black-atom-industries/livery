@@ -13,6 +13,19 @@ pub enum AppName {
     Lazygit,
 }
 
+impl AppName {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            AppName::Nvim => "nvim",
+            AppName::Tmux => "tmux",
+            AppName::Ghostty => "ghostty",
+            AppName::Zed => "zed",
+            AppName::Delta => "delta",
+            AppName::Lazygit => "lazygit",
+        }
+    }
+}
+
 fn default_true() -> bool {
     true
 }

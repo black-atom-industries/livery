@@ -1,12 +1,11 @@
 import { assertEquals } from "@std/assert";
-import { applyTheme, createUpdaters, getEnabledApps } from "./updaters.ts";
+import { applyTheme, getEnabledApps } from "./updaters.ts";
 import type { AppConfig, AppName } from "../types/config.ts";
-import type { ThemeMeta } from "@black-atom/core";
 import type { UpdaterEntry, UpdateResult } from "../types/updaters.ts";
 
 // --- getEnabledApps ---
 
-Deno.test("getEnabledApps returns only enabled apps with registered updaters", () => {
+Deno.test("getEnabledApps returns only enabled apps", () => {
     const apps: Partial<Record<AppName, AppConfig>> = {
         ghostty: { enabled: true, config_path: "/ghostty" },
         nvim: { enabled: true, config_path: "/nvim" },
@@ -21,14 +20,15 @@ Deno.test("getEnabledApps returns only enabled apps with registered updaters", (
     assertEquals(names.includes("tmux"), false);
 });
 
-Deno.test("getEnabledApps skips apps without registered updaters", () => {
+Deno.test("getEnabledApps includes apps without backend updater (backend handles skipping)", () => {
     const apps: Partial<Record<AppName, AppConfig>> = {
         zed: { enabled: true, config_path: "/zed" },
     };
 
     const result = getEnabledApps(apps);
 
-    assertEquals(result.length, 0);
+    assertEquals(result.length, 1);
+    assertEquals(result[0][0], "zed");
 });
 
 Deno.test("getEnabledApps returns empty for empty config", () => {
@@ -48,45 +48,6 @@ Deno.test("getEnabledApps preserves app config in result", () => {
     assertEquals(result[0][0], "ghostty");
     assertEquals(result[0][1].config_path, "/my/ghostty");
     assertEquals(result[0][1].themes_path, "/themes");
-});
-
-// --- createUpdaters ---
-
-Deno.test("createUpdaters creates an entry per enabled app", () => {
-    const enabledApps: [AppName, AppConfig][] = [
-        ["ghostty", { enabled: true, config_path: "/ghostty" }],
-        ["nvim", { enabled: true, config_path: "/nvim" }],
-    ];
-
-    const themeMeta = {
-        key: "black-atom-terra-fall-night",
-        name: "Fall Night",
-        appearance: "dark",
-        status: "release",
-        collection: { key: "terra", label: "Terra" },
-    } as unknown as ThemeMeta;
-
-    const result = createUpdaters(enabledApps, themeMeta);
-
-    assertEquals(result.length, 2);
-    assertEquals(result[0].app, "ghostty");
-    assertEquals(result[1].app, "nvim");
-    assertEquals(typeof result[0].run, "function");
-    assertEquals(typeof result[1].run, "function");
-});
-
-Deno.test("createUpdaters returns empty for empty input", () => {
-    const themeMeta = {
-        key: "any",
-        name: "Any",
-        appearance: "dark",
-        status: "release",
-        collection: { key: "default", label: "Default" },
-    } as unknown as ThemeMeta;
-
-    const result = createUpdaters([], themeMeta);
-
-    assertEquals(result.length, 0);
 });
 
 // --- applyTheme ---
