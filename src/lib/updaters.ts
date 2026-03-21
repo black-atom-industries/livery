@@ -27,7 +27,10 @@ export function createUpdaters(
                     collectionKey: themeMeta.collection.key,
                 });
             } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
+                const raw = error instanceof Error ? error.message : String(error);
+                const message = raw.includes("invalid value")
+                    ? `App "${name}" is not recognized by the backend. Is AppName in sync?`
+                    : raw;
                 return { app: name, status: "error", message };
             }
         },
