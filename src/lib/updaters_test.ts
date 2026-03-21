@@ -6,7 +6,7 @@ import type { UpdaterEntry, UpdateResult } from "../types/updaters.ts";
 
 // --- getEnabledApps ---
 
-Deno.test("getEnabledApps returns only enabled apps with registered updaters", () => {
+Deno.test("getEnabledApps returns only enabled apps", () => {
     const apps: Partial<Record<AppName, AppConfig>> = {
         ghostty: { enabled: true, config_path: "/ghostty" },
         nvim: { enabled: true, config_path: "/nvim" },
@@ -21,14 +21,15 @@ Deno.test("getEnabledApps returns only enabled apps with registered updaters", (
     assertEquals(names.includes("tmux"), false);
 });
 
-Deno.test("getEnabledApps skips apps without registered updaters", () => {
+Deno.test("getEnabledApps includes apps without backend updater (backend handles skipping)", () => {
     const apps: Partial<Record<AppName, AppConfig>> = {
         zed: { enabled: true, config_path: "/zed" },
     };
 
     const result = getEnabledApps(apps);
 
-    assertEquals(result.length, 0);
+    assertEquals(result.length, 1);
+    assertEquals(result[0][0], "zed");
 });
 
 Deno.test("getEnabledApps returns empty for empty config", () => {

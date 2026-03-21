@@ -1,5 +1,35 @@
 use std::path::{Path, PathBuf};
 
+use crate::config::types::AppConfig;
+
+use super::file_ops;
+use super::{UpdateContext, UpdateResult};
+
+pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> UpdateResult {
+    let (pattern, template) = match (&app_config.match_pattern, &app_config.replace_template) {
+        (Some(p), Some(t)) => (p, t),
+        _ => return UpdateResult::error(app_str, "Missing match_pattern or replace_template"),
+    };
+
+    if let Err(e) = file_ops::text::patch_text_file(
+        app_config.config_path.clone(),
+        pattern.clone(),
+        template.clone(),
+        ctx.build_variables(),
+    ) {
+        return UpdateResult::error(app_str, e);
+    }
+
+    if let Err(msg) = reload(ctx.theme_key) {
+        log::warn!("{msg}");
+        return UpdateResult::skipped(
+            app_str,
+            format!("Config patched; live reload failed: {msg}"),
+        );
+    }
+    UpdateResult::done(app_str)
+}
+
 /// Validate that a theme key only contains safe characters (alphanumeric, hyphens, underscores).
 fn is_valid_theme_key(key: &str) -> bool {
     !key.is_empty()
@@ -53,10 +83,11 @@ fn find_nvim_sockets(tmpdir: &Path) -> Vec<PathBuf> {
 
 /// Reload all running Neovim instances by sending :colorscheme via server sockets.
 /// Non-zero exit from nvim --server is fine — means that socket is stale.
-#[tauri::command]
-pub fn reload_nvim(theme_key: String) -> Result<(), String> {
-    if !is_valid_theme_key(&theme_key) {
-        return Err(format!("Invalid theme key: {theme_key}"));
+/// Returns Err with a message if reload could not be attempted (e.g., invalid theme key).
+/// No sockets found is not an error — nvim will pick up the theme on next open.
+fn reload(theme_key: &str) -> Result<(), String> {
+    if !is_valid_theme_key(theme_key) {
+        return Err(format!("Invalid theme key for nvim reload: {theme_key}"));
     }
 
     let tmpdir = std::env::var("TMPDIR").unwrap_or_else(|_| "/tmp".to_string());

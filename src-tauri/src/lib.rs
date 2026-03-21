@@ -7,11 +7,7 @@ pub fn start_app() {
         .invoke_handler(tauri::generate_handler![
             config::commands::get_config,
             config::commands::save_config,
-            updaters::file_ops::text::patch_text_file,
-            updaters::file_ops::yaml::patch_yaml_file,
-            updaters::ghostty::reload_ghostty,
-            updaters::nvim::reload_nvim,
-            updaters::tmux::reload_tmux,
+            updaters::update_app,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

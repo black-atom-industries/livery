@@ -10,7 +10,6 @@ use yaml_edit::YamlFile;
 /// Merge semantics:
 /// - Mapping + Mapping → recurse, overlay keys win
 /// - Anything else → overlay replaces target entirely
-#[tauri::command]
 pub fn patch_yaml_file(target_path: String, source_path: String) -> Result<(), String> {
     // Expand tildes and restrict both paths to files under $HOME
     let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
