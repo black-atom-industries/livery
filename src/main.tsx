@@ -38,7 +38,10 @@ createRoot(document.getElementById("root")!).render(
         <TanStackDevtools
             config={{ hideUntilHover: true }}
             plugins={[
-                { name: "TanStack Query", render: <ReactQueryDevtoolsPanel /> },
+                {
+                    name: "TanStack Query",
+                    render: <ReactQueryDevtoolsPanel client={queryClient} />,
+                },
                 {
                     name: "TanStack Router",
                     render: <TanStackRouterDevtoolsPanel router={router} />,
