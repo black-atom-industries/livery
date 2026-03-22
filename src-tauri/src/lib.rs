@@ -1,7 +1,6 @@
-mod config;
-mod updaters;
+pub mod config;
+pub mod updaters;
 
-use specta_typescript::Typescript;
 use tauri_specta::{collect_commands, Builder};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -15,7 +14,10 @@ pub fn start_app() {
 
     #[cfg(debug_assertions)]
     builder
-        .export(Typescript::default(), "../src/bindings.ts")
+        .export(
+            specta_typescript::Typescript::default(),
+            "../src/bindings.ts",
+        )
         .expect("Failed to export typescript bindings");
 
     tauri::Builder::default()

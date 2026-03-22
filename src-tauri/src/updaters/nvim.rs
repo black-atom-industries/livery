@@ -20,7 +20,34 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
         return UpdateResult::error(app_str, e);
     }
 
-    if let Err(msg) = reload(ctx.theme_key) {
+    if let Err(msg) = reload(ctx.theme_key, None) {
+        log::warn!("{msg}");
+        return UpdateResult::skipped(
+            app_str,
+            format!("Config patched; live reload failed: {msg}"),
+        );
+    }
+    UpdateResult::done(app_str)
+}
+
+/// Same as `update` but sends to only one nvim instance.
+/// Used by the benchmark to get a per-instance timing independent of how many are open.
+pub fn update_single(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> UpdateResult {
+    let (pattern, template) = match (&app_config.match_pattern, &app_config.replace_template) {
+        (Some(p), Some(t)) => (p, t),
+        _ => return UpdateResult::error(app_str, "Missing match_pattern or replace_template"),
+    };
+
+    if let Err(e) = file_ops::text::patch_text_file(
+        app_config.config_path.clone(),
+        pattern.clone(),
+        template.clone(),
+        ctx.build_variables(),
+    ) {
+        return UpdateResult::error(app_str, e);
+    }
+
+    if let Err(msg) = reload(ctx.theme_key, Some(1)) {
         log::warn!("{msg}");
         return UpdateResult::skipped(
             app_str,
@@ -85,13 +112,16 @@ fn find_nvim_sockets(tmpdir: &Path) -> Vec<PathBuf> {
 /// Non-zero exit from nvim --server is fine — means that socket is stale.
 /// Returns Err with a message if reload could not be attempted (e.g., invalid theme key).
 /// No sockets found is not an error — nvim will pick up the theme on next open.
-fn reload(theme_key: &str) -> Result<(), String> {
+fn reload(theme_key: &str, max_sockets: Option<usize>) -> Result<(), String> {
     if !is_valid_theme_key(theme_key) {
         return Err(format!("Invalid theme key for nvim reload: {theme_key}"));
     }
 
     let tmpdir = std::env::var("TMPDIR").unwrap_or_else(|_| "/tmp".to_string());
-    let sockets = find_nvim_sockets(Path::new(&tmpdir));
+    let mut sockets = find_nvim_sockets(Path::new(&tmpdir));
+    if let Some(limit) = max_sockets {
+        sockets.truncate(limit);
+    }
 
     if sockets.is_empty() {
         log::info!("No nvim sockets found — will apply on next launch");

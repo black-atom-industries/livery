@@ -1,9 +1,9 @@
 pub mod file_ops;
 mod ghostty;
 mod lazygit;
-mod nvim;
+pub mod nvim;
 mod obsidian;
-mod system_appearance;
+pub mod system_appearance;
 mod tmux;
 mod zed;
 
@@ -141,17 +141,7 @@ pub async fn update_app(app: AppName, theme: ThemeContext) -> UpdateResult {
     };
 
     let start = std::time::Instant::now();
-
-    let mut result = match app {
-        AppName::Ghostty => ghostty::update(app_str, &app_config, &ctx),
-        AppName::Nvim => nvim::update(app_str, &app_config, &ctx),
-        AppName::Tmux => tmux::update(app_str, &app_config, &ctx),
-        AppName::Delta => patch_text_updater(app_str, &app_config, &ctx),
-        AppName::Lazygit => lazygit::update(app_str, &app_config, &ctx),
-        AppName::Zed => zed::update(app_str, &app_config, &ctx),
-        AppName::Obsidian => obsidian::update(app_str, &app_config, &ctx),
-    };
-
+    let mut result = dispatch_update(app, &app_config, &ctx);
     let elapsed = start.elapsed().as_millis() as u32;
     result.duration_ms = Some(elapsed);
     log::info!(
@@ -162,6 +152,25 @@ pub async fn update_app(app: AppName, theme: ThemeContext) -> UpdateResult {
     );
 
     result
+}
+
+/// Dispatch an update to the appropriate per-app updater.
+/// Public so the benchmark binary can call it without going through the Tauri command wrapper.
+pub fn dispatch_update(
+    app: AppName,
+    app_config: &crate::config::types::AppConfig,
+    ctx: &UpdateContext,
+) -> UpdateResult {
+    let app_str = app.as_str();
+    match app {
+        AppName::Ghostty => ghostty::update(app_str, app_config, ctx),
+        AppName::Nvim => nvim::update(app_str, app_config, ctx),
+        AppName::Tmux => tmux::update(app_str, app_config, ctx),
+        AppName::Delta => patch_text_updater(app_str, app_config, ctx),
+        AppName::Lazygit => lazygit::update(app_str, app_config, ctx),
+        AppName::Zed => zed::update(app_str, app_config, ctx),
+        AppName::Obsidian => obsidian::update(app_str, app_config, ctx),
+    }
 }
 
 /// Toggle system-wide dark/light mode. Separate from update_app because system
