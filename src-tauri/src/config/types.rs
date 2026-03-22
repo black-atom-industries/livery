@@ -16,6 +16,7 @@ pub enum AppName {
 }
 
 impl AppName {
+    /// All per-app updater variants. Does not include system-level toggles (system_appearance).
     pub const fn all() -> &'static [AppName] {
         &[
             AppName::Nvim,

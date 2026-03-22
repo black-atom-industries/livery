@@ -100,7 +100,7 @@ fn main() {
             let start = Instant::now();
             // For nvim, send to only one instance so timing is independent of open instance count
             let result = if app == AppName::Nvim {
-                nvim::update_single(app.as_str(), &app_config, &ctx)
+                nvim::update(app.as_str(), &app_config, &ctx, Some(1))
             } else {
                 dispatch_update(app, &app_config, &ctx)
             };
@@ -199,7 +199,13 @@ fn parse_iterations() -> usize {
     for i in 0..args.len() {
         if args[i] == "--iterations" {
             if let Some(n) = args.get(i + 1) {
-                let parsed = n.parse().unwrap_or(10);
+                let parsed = match n.parse::<usize>() {
+                    Ok(v) => v,
+                    Err(_) => {
+                        eprintln!("Warning: invalid --iterations value '{n}', using default (10)");
+                        10
+                    }
+                };
                 return parsed.max(MIN_ITERATIONS);
             }
         }

@@ -32,7 +32,7 @@ pub fn start_app() {
                     }),
                 ])
                 .max_file_size(5_000_000) // 5 MB
-                .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepAll)
+                .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepOne)
                 .build(),
         )
         .run(tauri::generate_context!())

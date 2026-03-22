@@ -164,7 +164,7 @@ pub fn dispatch_update(
     let app_str = app.as_str();
     match app {
         AppName::Ghostty => ghostty::update(app_str, app_config, ctx),
-        AppName::Nvim => nvim::update(app_str, app_config, ctx),
+        AppName::Nvim => nvim::update(app_str, app_config, ctx, None),
         AppName::Tmux => tmux::update(app_str, app_config, ctx),
         AppName::Delta => patch_text_updater(app_str, app_config, ctx),
         AppName::Lazygit => lazygit::update(app_str, app_config, ctx),

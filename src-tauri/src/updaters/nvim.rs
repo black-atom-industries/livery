@@ -5,7 +5,14 @@ use crate::config::types::AppConfig;
 use super::file_ops;
 use super::{UpdateContext, UpdateResult};
 
-pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> UpdateResult {
+/// Update nvim config and reload running instances.
+/// `max_sockets` limits how many instances to send to (None = all, Some(1) = benchmark mode).
+pub fn update(
+    app_str: &str,
+    app_config: &AppConfig,
+    ctx: &UpdateContext,
+    max_sockets: Option<usize>,
+) -> UpdateResult {
     let (pattern, template) = match (&app_config.match_pattern, &app_config.replace_template) {
         (Some(p), Some(t)) => (p, t),
         _ => return UpdateResult::error(app_str, "Missing match_pattern or replace_template"),
@@ -20,34 +27,7 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
         return UpdateResult::error(app_str, e);
     }
 
-    if let Err(msg) = reload(ctx.theme_key, None) {
-        log::warn!("{msg}");
-        return UpdateResult::skipped(
-            app_str,
-            format!("Config patched; live reload failed: {msg}"),
-        );
-    }
-    UpdateResult::done(app_str)
-}
-
-/// Same as `update` but sends to only one nvim instance.
-/// Used by the benchmark to get a per-instance timing independent of how many are open.
-pub fn update_single(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> UpdateResult {
-    let (pattern, template) = match (&app_config.match_pattern, &app_config.replace_template) {
-        (Some(p), Some(t)) => (p, t),
-        _ => return UpdateResult::error(app_str, "Missing match_pattern or replace_template"),
-    };
-
-    if let Err(e) = file_ops::text::patch_text_file(
-        app_config.config_path.clone(),
-        pattern.clone(),
-        template.clone(),
-        ctx.build_variables(),
-    ) {
-        return UpdateResult::error(app_str, e);
-    }
-
-    if let Err(msg) = reload(ctx.theme_key, Some(1)) {
+    if let Err(msg) = reload(ctx.theme_key, max_sockets) {
         log::warn!("{msg}");
         return UpdateResult::skipped(
             app_str,
