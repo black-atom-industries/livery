@@ -23,8 +23,8 @@ async saveConfig(config: Config) : Promise<Result<null, string>> {
  * Tauri IPC model where each `invoke` call is a separate request. At the current
  * scale (~5 apps, tiny JSON file) this is fine.
  */
-async updateApp(app: AppName, themeKey: string, appearance: string, collectionKey: string) : Promise<UpdateResult> {
-    return await TAURI_INVOKE("update_app", { app, themeKey, appearance, collectionKey });
+async updateApp(app: AppName, theme: ThemeContext) : Promise<UpdateResult> {
+    return await TAURI_INVOKE("update_app", { app, theme });
 },
 /**
  * Toggle system-wide dark/light mode. Separate from update_app because system
@@ -51,6 +51,10 @@ export type AppConfig = { enabled?: boolean; config_path: string; themes_path?: 
  */
 export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta" | "lazygit"
 export type Config = { system_appearance: boolean; apps: { [key in AppName]: AppConfig } }
+/**
+ * Theme metadata passed from the frontend.
+ */
+export type ThemeContext = { theme_key: string; appearance: string; collection_key: string; theme_label: string | null }
 export type UpdateResult = { app: string; status: UpdateStatus; message?: string | null }
 export type UpdateStatus = "done" | "error" | "skipped"
 

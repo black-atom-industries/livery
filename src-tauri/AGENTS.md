@@ -18,10 +18,12 @@ src-tauri/src/
     file_ops/
       text.rs               # patch_text_file — regex replace with template variables
       yaml.rs               # patch_yaml_file — lossless YAML merge (yaml-edit + yaml_serde)
+      jsonc.rs              # patch_jsonc_file — JSONC CST editing (jsonc-parser, format-preserving)
     ghostty.rs              # ghostty update + reload (SIGUSR2)
     nvim.rs                 # nvim update + reload (socket)
     tmux.rs                 # tmux update + reload (source-file)
     lazygit.rs              # lazygit update (YAML merge, no reload)
+    zed.rs                  # zed update (JSONC patching, no reload — auto-watches)
     system_appearance.rs    # macOS/Linux system dark/light mode toggle
 ```
 
