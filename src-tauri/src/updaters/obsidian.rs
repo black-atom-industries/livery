@@ -32,8 +32,12 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
     let style_settings_path = derive_style_settings_path(appearance_path);
     if let Some(ss_path) = style_settings_path {
         if ss_path.exists() {
+            // Flat JSONC keys — "@@" is the Style Settings plugin separator,
+            // not a path delimiter (patch_jsonc_file only splits on ".").
             let variant_key = match ctx.appearance {
                 "dark" => "black-atom-variants@@dark-theme-variant",
+                "light" => "black-atom-variants@@light-theme-variant",
+                // Unreachable: first match already errors on unknown appearance
                 _ => "black-atom-variants@@light-theme-variant",
             };
 
