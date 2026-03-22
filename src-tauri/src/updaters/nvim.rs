@@ -100,35 +100,49 @@ fn reload(theme_key: &str) -> Result<(), String> {
 
     let cmd = format!(":colorscheme {}<CR>", theme_key);
     let total = sockets.len();
-    let mut sent = 0usize;
-    let mut stale = 0usize;
-    let mut failed = 0usize;
 
-    for socket_path in &sockets {
-        let result = std::process::Command::new("nvim")
-            .args([
-                "--server",
-                &socket_path.to_string_lossy(),
-                "--remote-send",
-                &cmd,
-            ])
-            .output();
+    // Send to all sockets in parallel — each is an independent subprocess
+    let counts: Vec<_> = std::thread::scope(|s| {
+        let handles: Vec<_> = sockets
+            .iter()
+            .map(|socket_path| {
+                let cmd = &cmd;
+                s.spawn(move || {
+                    let result = std::process::Command::new("nvim")
+                        .args([
+                            "--server",
+                            &socket_path.to_string_lossy(),
+                            "--remote-send",
+                            cmd,
+                        ])
+                        .output();
 
-        match result {
-            Ok(output) if !output.status.success() => {
-                stale += 1;
-                log::debug!("Stale nvim socket: {}", socket_path.display());
-            }
-            Err(e) => {
-                failed += 1;
-                log::warn!("Failed to send to nvim socket: {e}");
-            }
-            _ => {
-                sent += 1;
-                log::debug!("Sent colorscheme to {}", socket_path.display());
-            }
-        }
-    }
+                    match result {
+                        Ok(output) if !output.status.success() => {
+                            log::debug!("Stale nvim socket: {}", socket_path.display());
+                            (0u32, 1u32, 0u32) // (sent, stale, failed)
+                        }
+                        Err(e) => {
+                            log::warn!("Failed to send to nvim socket: {e}");
+                            (0, 0, 1)
+                        }
+                        _ => {
+                            log::debug!("Sent colorscheme to {}", socket_path.display());
+                            (1, 0, 0)
+                        }
+                    }
+                })
+            })
+            .collect();
+
+        handles.into_iter().map(|h| h.join().unwrap()).collect()
+    });
+
+    let (sent, stale, failed) = counts
+        .iter()
+        .fold((0u32, 0u32, 0u32), |(s, st, f), &(ds, dst, df)| {
+            (s + ds, st + dst, f + df)
+        });
 
     log::info!(
         "Sent colorscheme {} to {}/{} nvim instances{}{}",
