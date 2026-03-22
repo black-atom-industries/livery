@@ -15,7 +15,10 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
     );
 
     match file_ops::yaml::patch_yaml_file(app_config.config_path.clone(), source_path) {
-        Ok(()) => UpdateResult::done(app_str),
+        Ok(()) => {
+            log::info!("Updated lazygit config: {}", app_config.config_path);
+            UpdateResult::done(app_str)
+        }
         Err(e) => UpdateResult::error(app_str, e),
     }
 }

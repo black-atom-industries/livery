@@ -30,7 +30,13 @@ fn update_macos(dark: bool) -> UpdateResult {
         .args(["-e", &script])
         .output()
     {
-        Ok(output) if output.status.success() => UpdateResult::done(APP_STR),
+        Ok(output) if output.status.success() => {
+            log::info!(
+                "Set macOS appearance to {}",
+                if dark { "dark" } else { "light" }
+            );
+            UpdateResult::done(APP_STR)
+        }
         Ok(output) => {
             let stderr = String::from_utf8_lossy(&output.stderr);
             UpdateResult::error(APP_STR, format!("osascript failed: {stderr}"))
@@ -46,7 +52,10 @@ fn update_linux(dark: bool) -> UpdateResult {
         .args(["set", "org.gnome.desktop.interface", "color-scheme", scheme])
         .output()
     {
-        Ok(output) if output.status.success() => UpdateResult::done(APP_STR),
+        Ok(output) if output.status.success() => {
+            log::info!("Set Linux appearance to {}", scheme);
+            UpdateResult::done(APP_STR)
+        }
         Ok(output) => {
             let stderr = String::from_utf8_lossy(&output.stderr);
             // gsettings not available likely means not GNOME — skip rather than error

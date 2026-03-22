@@ -1,9 +1,9 @@
 pub mod file_ops;
 mod ghostty;
 mod lazygit;
-mod nvim;
+pub mod nvim;
 mod obsidian;
-mod system_appearance;
+pub mod system_appearance;
 mod tmux;
 mod zed;
 
@@ -60,12 +60,25 @@ pub enum UpdateStatus {
     Skipped,
 }
 
+impl UpdateStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Done => "done",
+            Self::Error => "error",
+            Self::Skipped => "skipped",
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Type)]
 pub struct UpdateResult {
     pub app: String,
     pub status: UpdateStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
+    /// Time taken by the updater in milliseconds.
+    /// Set by the dispatcher, not by individual updaters.
+    pub duration_ms: Option<u32>,
 }
 
 impl UpdateResult {
@@ -74,6 +87,7 @@ impl UpdateResult {
             app: app.to_string(),
             status: UpdateStatus::Done,
             message: None,
+            duration_ms: None,
         }
     }
 
@@ -82,6 +96,7 @@ impl UpdateResult {
             app: app.to_string(),
             status: UpdateStatus::Error,
             message: Some(msg.into()),
+            duration_ms: None,
         }
     }
 
@@ -90,6 +105,7 @@ impl UpdateResult {
             app: app.to_string(),
             status: UpdateStatus::Skipped,
             message: Some(msg.into()),
+            duration_ms: None,
         }
     }
 }
@@ -124,14 +140,36 @@ pub async fn update_app(app: AppName, theme: ThemeContext) -> UpdateResult {
         themes_path: app_config.themes_path.clone(),
     };
 
+    let start = std::time::Instant::now();
+    let mut result = dispatch_update(app, &app_config, &ctx);
+    let elapsed = start.elapsed().as_millis() as u32;
+    result.duration_ms = Some(elapsed);
+    log::info!(
+        "{} finished in {}ms ({})",
+        app_str,
+        elapsed,
+        result.status.as_str()
+    );
+
+    result
+}
+
+/// Dispatch an update to the appropriate per-app updater.
+/// Public so the benchmark binary can call it without going through the Tauri command wrapper.
+pub fn dispatch_update(
+    app: AppName,
+    app_config: &crate::config::types::AppConfig,
+    ctx: &UpdateContext,
+) -> UpdateResult {
+    let app_str = app.as_str();
     match app {
-        AppName::Ghostty => ghostty::update(app_str, &app_config, &ctx),
-        AppName::Nvim => nvim::update(app_str, &app_config, &ctx),
-        AppName::Tmux => tmux::update(app_str, &app_config, &ctx),
-        AppName::Delta => patch_text_updater(app_str, &app_config, &ctx),
-        AppName::Lazygit => lazygit::update(app_str, &app_config, &ctx),
-        AppName::Zed => zed::update(app_str, &app_config, &ctx),
-        AppName::Obsidian => obsidian::update(app_str, &app_config, &ctx),
+        AppName::Ghostty => ghostty::update(app_str, app_config, ctx),
+        AppName::Nvim => nvim::update(app_str, app_config, ctx, None),
+        AppName::Tmux => tmux::update(app_str, app_config, ctx),
+        AppName::Delta => patch_text_updater(app_str, app_config, ctx),
+        AppName::Lazygit => lazygit::update(app_str, app_config, ctx),
+        AppName::Zed => zed::update(app_str, app_config, ctx),
+        AppName::Obsidian => obsidian::update(app_str, app_config, ctx),
     }
 }
 
@@ -140,7 +178,16 @@ pub async fn update_app(app: AppName, theme: ThemeContext) -> UpdateResult {
 #[tauri::command]
 #[specta::specta]
 pub fn update_system_appearance(appearance: String) -> UpdateResult {
-    system_appearance::update(&appearance)
+    let start = std::time::Instant::now();
+    let mut result = system_appearance::update(&appearance);
+    let elapsed = start.elapsed().as_millis() as u32;
+    result.duration_ms = Some(elapsed);
+    log::info!(
+        "system_appearance finished in {}ms ({})",
+        elapsed,
+        result.status.as_str()
+    );
+    result
 }
 
 /// Generic text-based updater for apps that only need patch_text_file (no reload).
@@ -160,7 +207,10 @@ fn patch_text_updater(
         template.clone(),
         ctx.build_variables(),
     ) {
-        Ok(()) => UpdateResult::done(app_str),
+        Ok(()) => {
+            log::info!("Updated {} config: {}", app_str, app_config.config_path);
+            UpdateResult::done(app_str)
+        }
         Err(e) => UpdateResult::error(app_str, e),
     }
 }

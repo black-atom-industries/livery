@@ -16,6 +16,19 @@ pub enum AppName {
 }
 
 impl AppName {
+    /// All per-app updater variants. Does not include system-level toggles (system_appearance).
+    pub const fn all() -> &'static [AppName] {
+        &[
+            AppName::Nvim,
+            AppName::Tmux,
+            AppName::Ghostty,
+            AppName::Zed,
+            AppName::Delta,
+            AppName::Lazygit,
+            AppName::Obsidian,
+        ]
+    }
+
     pub fn as_str(&self) -> &'static str {
         match self {
             AppName::Nvim => "nvim",

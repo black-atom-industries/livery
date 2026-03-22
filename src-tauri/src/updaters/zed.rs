@@ -42,7 +42,14 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
     };
 
     match file_ops::jsonc::patch_jsonc_file(app_config.config_path.clone(), key_path, theme_label) {
-        Ok(()) => UpdateResult::done(app_str),
+        Ok(()) => {
+            log::info!(
+                "Updated zed settings: {} (key: {})",
+                app_config.config_path,
+                key_path
+            );
+            UpdateResult::done(app_str)
+        }
         Err(e) => UpdateResult::error(app_str, e),
     }
 }

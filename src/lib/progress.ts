@@ -11,6 +11,8 @@ export interface ProgressState {
     currentLabel: string | null;
     /** Aggregate status: idle (no results), running, done, or error. */
     status: ProgressStatus;
+    /** Sum of duration_ms across all completed updaters, or null if none finished yet. */
+    totalDurationMs: number | null;
 }
 
 const COMPLETED_STATUSES = new Set(["done", "skipped", "error"]);
@@ -23,6 +25,7 @@ export function getProgressState(results: UpdateResult[]): ProgressState {
             value: null,
             currentLabel: null,
             status: "idle",
+            totalDurationMs: null,
         };
     }
 
@@ -43,11 +46,17 @@ export function getProgressState(results: UpdateResult[]): ProgressState {
         status = "running";
     }
 
+    const totalDurationMs = results.reduce<number | null>((sum, r) => {
+        if (r.duration_ms != null) return (sum ?? 0) + r.duration_ms;
+        return sum;
+    }, null);
+
     return {
         completedCount,
         total,
         value,
         currentLabel: running?.app ?? null,
         status,
+        totalDurationMs,
     };
 }

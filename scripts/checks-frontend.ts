@@ -27,6 +27,21 @@ console.log();
 console.log(cyan("── Frontend Checks ──"));
 console.log();
 
+// Guard: bindings.ts must not be empty (specta truncates before writing, panics leave it empty)
+const bindingsPath = new URL("../src/bindings.ts", import.meta.url);
+const bindingsContent = await Deno.readTextFile(bindingsPath);
+if (!bindingsContent.includes("tauri-specta")) {
+    console.error(red("✗ src/bindings.ts is empty or corrupted"));
+    console.error(
+        red(
+            "  Run the app (deno task dev) to regenerate specta bindings, then retry.",
+        ),
+    );
+    Deno.exit(1);
+}
+console.log(green("✓ Bindings check"));
+console.log();
+
 await run("Type check", ["deno", "task", "check"]);
 await run("Lint", ["deno", "lint"]);
 await run("Format", ["deno", "fmt"]);

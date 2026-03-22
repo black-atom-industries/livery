@@ -6,7 +6,7 @@ use jsonc_parser::ParseOptions;
 /// Set a string value at a key path in a JSONC file, preserving comments and formatting.
 ///
 /// `key_path` supports dotted paths: `"theme"` for top-level, `"theme.dark"` for nested.
-/// All keys in the path must already exist — missing keys return an error.
+/// Leaf keys are created if missing. Parent keys in a dotted path must already exist.
 pub fn patch_jsonc_file(path: String, key_path: &str, value: &str) -> Result<(), String> {
     // Restrict writes to files under $HOME
     let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
@@ -67,17 +67,23 @@ pub fn patch_jsonc_file(path: String, key_path: &str, value: &str) -> Result<(),
     Ok(())
 }
 
-/// Set a string value on an existing key in a JSONC object.
+/// Set a string value on a key in a JSONC object. Creates the key if it doesn't exist.
 fn set_string_value(
     obj: &jsonc_parser::cst::CstObject,
     key: &str,
     value: &str,
 ) -> Result<(), String> {
-    let prop = obj
-        .get(key)
-        .ok_or_else(|| format!("Key '{key}' not found"))?;
-
-    prop.set_value(jsonc_parser::cst::CstInputValue::String(value.to_string()));
+    match obj.get(key) {
+        Some(prop) => {
+            prop.set_value(jsonc_parser::cst::CstInputValue::String(value.to_string()));
+        }
+        None => {
+            obj.append(
+                key,
+                jsonc_parser::cst::CstInputValue::String(value.to_string()),
+            );
+        }
+    }
     Ok(())
 }
 
@@ -293,13 +299,17 @@ mod tests {
     }
 
     #[test]
-    fn test_key_not_found() {
+    fn test_missing_key_is_created() {
         let file = copy_fixture_to_temp("jsonc/zed-settings.jsonc");
         let path = file.path().to_str().unwrap().to_string();
 
-        let result = patch_jsonc_file(path, "nonexistent_key", "value");
-        assert!(result.is_err());
-        assert!(result.unwrap_err().contains("not found"));
+        patch_jsonc_file(path.clone(), "nonexistent_key", "new_value").unwrap();
+
+        let result = std::fs::read_to_string(&path).unwrap();
+        assert!(
+            result.contains("\"nonexistent_key\": \"new_value\""),
+            "Missing key should be created"
+        );
     }
 
     #[test]

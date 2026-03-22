@@ -7,7 +7,8 @@ interface ProgressBarProps {
 }
 
 export function ProgressBar({ results }: ProgressBarProps) {
-    const { value, completedCount, total, currentLabel, status } = getProgressState(results);
+    const { value, completedCount, total, currentLabel, status, totalDurationMs } =
+        getProgressState(results);
 
     const indicatorColor = {
         idle: "bg-neutral-600",
@@ -35,6 +36,7 @@ export function ProgressBar({ results }: ProgressBarProps) {
             </Progress.Label>
             <span className="text-xs text-neutral-500 tabular-nums">
                 {completedCount} / {total}
+                {totalDurationMs != null && status !== "running" ? ` (${totalDurationMs}ms)` : ""}
             </span>
             <Progress.Track className="col-span-full h-1 overflow-hidden rounded bg-neutral-800">
                 <Progress.Indicator

@@ -98,7 +98,7 @@ Deno.test("applyTheme calls onUpdate with pending, running, and done states", as
     const updaters: UpdaterEntry[] = [
         {
             app: "ghostty",
-            run: () => Promise.resolve({ app: "ghostty", status: "done" }),
+            run: () => Promise.resolve({ app: "ghostty", status: "done", duration_ms: null }),
         },
     ];
 
@@ -119,11 +119,11 @@ Deno.test("applyTheme handles multiple updaters sequentially", async () => {
     const updaters: UpdaterEntry[] = [
         {
             app: "ghostty",
-            run: () => Promise.resolve({ app: "ghostty", status: "done" }),
+            run: () => Promise.resolve({ app: "ghostty", status: "done", duration_ms: null }),
         },
         {
             app: "nvim",
-            run: () => Promise.resolve({ app: "nvim", status: "done" }),
+            run: () => Promise.resolve({ app: "nvim", status: "done", duration_ms: null }),
         },
     ];
 
@@ -154,6 +154,7 @@ Deno.test("applyTheme propagates error status from failed updater", async () => 
                     app: "ghostty",
                     status: "error",
                     message: "file not found",
+                    duration_ms: null,
                 }),
         },
     ];
