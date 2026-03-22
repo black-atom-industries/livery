@@ -7,14 +7,16 @@ developer tools. Pick a theme once, apply it everywhere.
 
 ## Supported Apps
 
-| App         | What it does                                | Reload                    |
-| ----------- | ------------------------------------------- | ------------------------- |
-| **Ghostty** | Updates `theme = ...` in config             | SIGUSR2 (instant repaint) |
-| **Neovim**  | Updates `colorscheme = "..."` in Lua config | Live via server sockets   |
-| **Tmux**    | Updates `source-file` theme path            | `tmux source-file`        |
-| **Delta**   | Switches `features = black-atom-dark/light` | On next git command       |
-
-More updaters coming: zed, lazygit, macOS system appearance.
+| App                   | What it does                                | Reload                    |
+| --------------------- | ------------------------------------------- | ------------------------- |
+| **Ghostty**           | Updates `theme = ...` in config             | SIGUSR2 (instant repaint) |
+| **Neovim**            | Updates `colorscheme = "..."` in Lua config | Live via server sockets   |
+| **Tmux**              | Updates `source-file` theme path            | `tmux source-file`        |
+| **Delta**             | Switches `features = black-atom-dark/light` | On next git command       |
+| **Zed**               | Patches `theme` in settings.json (JSONC)    | Auto-watches file changes |
+| **Lazygit**           | Merges theme YAML into config               | On next lazygit launch    |
+| **Obsidian**          | Patches appearance + style settings JSON    | `obsidian reload`         |
+| **System Appearance** | Toggles macOS dark/light mode               | Immediate                 |
 
 ## Architecture
 
@@ -40,6 +42,17 @@ Active development. See the
 | Styling    | [Tailwind CSS](https://tailwindcss.com/) v4     | Vite plugin                               |
 | Theme data | `@black-atom/core`                              | JSR package                               |
 | Config     | JSON                                            | `~/.config/black-atom/livery/config.json` |
+
+## Logs
+
+Livery writes logs to the platform log directory:
+
+| Platform | Path                                                          |
+| -------- | ------------------------------------------------------------- |
+| macOS    | `~/Library/Logs/industries.black-atom.livery/livery.log`      |
+| Linux    | `~/.local/share/industries.black-atom.livery/logs/livery.log` |
+
+Logs rotate automatically at 5 MB. Previous log files are kept alongside the current one.
 
 ## Origin of Name
 
