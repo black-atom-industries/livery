@@ -45,7 +45,7 @@ and routes to the per-app update function. No per-app logic exists on the fronte
 
 1. Add variant to `AppName` enum in `config/types.rs` and its `as_str()` match arm
 2. Add default config in `config/defaults.rs`
-3. Add the TypeScript `AppName` union member in `src/types/config.ts`
+3. TypeScript bindings update automatically via tauri-specta on next dev build
 4. Create a Rust updater module in `updaters/` (e.g., `updaters/foo.rs`)
 5. Add the module and dispatch arm in `updaters/mod.rs`
 6. Add fixture files in `tests/fixtures/` and write tests
