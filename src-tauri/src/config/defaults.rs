@@ -67,6 +67,16 @@ impl Default for Config {
                 replace_template: None,
             },
         );
+        apps.insert(
+            AppName::Obsidian,
+            AppConfig {
+                enabled: false,
+                config_path: String::new(),
+                themes_path: None,
+                match_pattern: None,
+                replace_template: None,
+            },
+        );
         Config {
             system_appearance: true,
             apps,
