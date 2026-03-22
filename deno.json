@@ -1,11 +1,15 @@
 {
     "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
-    "version": "0.0.3",
+    "version": "0.2.0",
     "compilerOptions": {
         "jsx": "react-jsx",
         "jsxImportSource": "react",
         "jsxImportSourceTypes": "@types/react",
-        "lib": ["deno.ns", "dom", "dom.iterable"]
+        "lib": [
+            "deno.ns",
+            "dom",
+            "dom.iterable"
+        ]
     },
     "tasks": {
         "dev": "deno run -A npm:@tauri-apps/cli dev",
@@ -20,7 +24,10 @@
     },
     "nodeModulesDir": "auto",
     "lint": {
-        "exclude": ["src/routeTree.gen.ts", "src/bindings.ts"]
+        "exclude": [
+            "src/routeTree.gen.ts",
+            "src/bindings.ts"
+        ]
     },
     "fmt": {
         "useTabs": false,
@@ -28,7 +35,12 @@
         "indentWidth": 4,
         "semiColons": true,
         "singleQuote": false,
-        "exclude": ["CHANGELOG.md", "src-tauri/", "src/routeTree.gen.ts", "src/bindings.ts"]
+        "exclude": [
+            "CHANGELOG.md",
+            "src-tauri/",
+            "src/routeTree.gen.ts",
+            "src/bindings.ts"
+        ]
     },
     "test": {
         "permissions": {
