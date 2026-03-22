@@ -60,6 +60,7 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
         );
     }
 
+    log::info!("Updated obsidian config: {}", appearance_path);
     UpdateResult::done(app_str)
 }
 

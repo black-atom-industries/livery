@@ -25,6 +25,8 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
             format!("Config patched; live reload failed: {msg}"),
         );
     }
+
+    log::info!("Updated ghostty config: {}", app_config.config_path);
     UpdateResult::done(app_str)
 }
 

@@ -160,7 +160,10 @@ fn patch_text_updater(
         template.clone(),
         ctx.build_variables(),
     ) {
-        Ok(()) => UpdateResult::done(app_str),
+        Ok(()) => {
+            log::info!("Updated {} config: {}", app_str, app_config.config_path);
+            UpdateResult::done(app_str)
+        }
         Err(e) => UpdateResult::error(app_str, e),
     }
 }
