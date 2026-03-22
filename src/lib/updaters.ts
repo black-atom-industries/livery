@@ -46,7 +46,7 @@ export function createUpdaters(
                 const message = raw.includes("invalid value")
                     ? `App "${appName}" is not recognized by the backend. Is AppName in sync?`
                     : raw;
-                return { app: appName, status: "error", message };
+                return { app: appName, status: "error", message, duration_ms: null };
             }
         },
     }));
@@ -60,12 +60,13 @@ export async function applyTheme(
     const results: UpdateResult[] = updaters.map<UpdateResult>((u) => ({
         app: u.app,
         status: "pending",
+        duration_ms: null,
     }));
 
     onUpdate(results);
 
     for (let i = 0; i < updaters.length; i++) {
-        results[i] = { app: updaters[i].app, status: "running" };
+        results[i] = { app: updaters[i].app, status: "running", duration_ms: null };
         onUpdate([...results]);
 
         results[i] = await updaters[i].run();

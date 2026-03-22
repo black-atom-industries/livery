@@ -55,7 +55,12 @@ export type Config = { system_appearance: boolean; apps: { [key in AppName]: App
  * Theme metadata passed from the frontend.
  */
 export type ThemeContext = { theme_key: string; appearance: string; collection_key: string; theme_label: string | null }
-export type UpdateResult = { app: string; status: UpdateStatus; message?: string | null }
+export type UpdateResult = { app: string; status: UpdateStatus; message?: string | null; 
+/**
+ * Time taken by the updater in milliseconds.
+ * Set by the dispatcher, not by individual updaters.
+ */
+duration_ms: number | null }
 export type UpdateStatus = "done" | "error" | "skipped"
 
 /** tauri-specta globals **/

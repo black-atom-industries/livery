@@ -10,14 +10,15 @@ Deno.test("getProgressState returns zero progress for empty results", () => {
         value: null,
         currentLabel: null,
         status: "idle",
+        totalDurationMs: null,
     });
 });
 
 Deno.test("getProgressState calculates progress for mixed statuses", () => {
     const results: UpdateResult[] = [
-        { app: "nvim", status: "done" },
-        { app: "tmux", status: "running" },
-        { app: "ghostty", status: "pending" },
+        { app: "nvim", status: "done", duration_ms: null },
+        { app: "tmux", status: "running", duration_ms: null },
+        { app: "ghostty", status: "pending", duration_ms: null },
     ];
     const state = getProgressState(results);
     assertEquals(state.completedCount, 1);
@@ -29,8 +30,8 @@ Deno.test("getProgressState calculates progress for mixed statuses", () => {
 
 Deno.test("getProgressState reports done when all complete", () => {
     const results: UpdateResult[] = [
-        { app: "nvim", status: "done" },
-        { app: "tmux", status: "done" },
+        { app: "nvim", status: "done", duration_ms: null },
+        { app: "tmux", status: "done", duration_ms: null },
     ];
     const state = getProgressState(results);
     assertEquals(state.completedCount, 2);
@@ -42,9 +43,9 @@ Deno.test("getProgressState reports done when all complete", () => {
 
 Deno.test("getProgressState reports error when any app errored", () => {
     const results: UpdateResult[] = [
-        { app: "nvim", status: "done" },
-        { app: "tmux", status: "error", message: "failed" },
-        { app: "ghostty", status: "done" },
+        { app: "nvim", status: "done", duration_ms: null },
+        { app: "tmux", status: "error", message: "failed", duration_ms: null },
+        { app: "ghostty", status: "done", duration_ms: null },
     ];
     const state = getProgressState(results);
     assertEquals(state.completedCount, 3);
@@ -55,9 +56,9 @@ Deno.test("getProgressState reports error when any app errored", () => {
 
 Deno.test("getProgressState counts skipped as completed", () => {
     const results: UpdateResult[] = [
-        { app: "nvim", status: "done" },
-        { app: "tmux", status: "skipped" },
-        { app: "ghostty", status: "running" },
+        { app: "nvim", status: "done", duration_ms: null },
+        { app: "tmux", status: "skipped", duration_ms: null },
+        { app: "ghostty", status: "running", duration_ms: null },
     ];
     const state = getProgressState(results);
     assertEquals(state.completedCount, 2);
