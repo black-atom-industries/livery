@@ -13,17 +13,22 @@ use yaml_edit::YamlFile;
 pub fn patch_yaml_file(target_path: String, source_path: String) -> Result<(), String> {
     // Expand tildes and restrict both paths to files under $HOME
     let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
+    let home = home.canonicalize().unwrap_or(home);
     let target_path = shellexpand::tilde(&target_path).to_string();
     let source_path = shellexpand::tilde(&source_path).to_string();
 
-    let resolved_target = PathBuf::from(&target_path);
+    let resolved_target = PathBuf::from(&target_path)
+        .canonicalize()
+        .map_err(|e| format!("Cannot resolve path {target_path}: {e}"))?;
     if !resolved_target.starts_with(&home) {
         return Err(format!(
             "Path outside home directory is not allowed: {target_path}"
         ));
     }
 
-    let resolved_source = PathBuf::from(&source_path);
+    let resolved_source = PathBuf::from(&source_path)
+        .canonicalize()
+        .map_err(|e| format!("Cannot resolve path {source_path}: {e}"))?;
     if !resolved_source.starts_with(&home) {
         return Err(format!(
             "Path outside home directory is not allowed: {source_path}"
@@ -301,7 +306,7 @@ mod tests {
         let source = make_temp_file("key: value\n");
         let source_path = source.path().to_str().unwrap().to_string();
 
-        let result = patch_yaml_file("/etc/config.yml".to_string(), source_path);
+        let result = patch_yaml_file("/etc/hosts".to_string(), source_path);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("outside home directory"));
     }
@@ -311,7 +316,7 @@ mod tests {
         let target = make_temp_file("key: value\n");
         let target_path = target.path().to_str().unwrap().to_string();
 
-        let result = patch_yaml_file(target_path, "/etc/theme.yml".to_string());
+        let result = patch_yaml_file(target_path, "/etc/hosts".to_string());
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("outside home directory"));
     }
