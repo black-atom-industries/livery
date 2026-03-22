@@ -2,6 +2,7 @@ pub mod file_ops;
 mod ghostty;
 mod lazygit;
 mod nvim;
+mod obsidian;
 mod system_appearance;
 mod tmux;
 mod zed;
@@ -130,6 +131,7 @@ pub async fn update_app(app: AppName, theme: ThemeContext) -> UpdateResult {
         AppName::Delta => patch_text_updater(app_str, &app_config, &ctx),
         AppName::Lazygit => lazygit::update(app_str, &app_config, &ctx),
         AppName::Zed => zed::update(app_str, &app_config, &ctx),
+        AppName::Obsidian => obsidian::update(app_str, &app_config, &ctx),
     }
 }
 

@@ -12,6 +12,7 @@ pub enum AppName {
     Zed,
     Delta,
     Lazygit,
+    Obsidian,
 }
 
 impl AppName {
@@ -23,6 +24,7 @@ impl AppName {
             AppName::Zed => "zed",
             AppName::Delta => "delta",
             AppName::Lazygit => "lazygit",
+            AppName::Obsidian => "obsidian",
         }
     }
 }

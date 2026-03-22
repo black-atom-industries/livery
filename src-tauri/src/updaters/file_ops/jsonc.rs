@@ -208,6 +208,91 @@ mod tests {
     }
 
     #[test]
+    fn test_obsidian_appearance_dark() {
+        let file = copy_fixture_to_temp("jsonc/obsidian-appearance.json");
+        let path = file.path().to_str().unwrap().to_string();
+
+        patch_jsonc_file(path.clone(), "theme", "obsidian").unwrap();
+
+        let result = std::fs::read_to_string(&path).unwrap();
+        let expected =
+            std::fs::read_to_string(fixture_path("jsonc/obsidian-appearance-dark-expected.json"))
+                .unwrap();
+        assert_eq!(
+            result.trim_end(),
+            expected.trim_end(),
+            "Obsidian appearance dark mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
+        );
+    }
+
+    #[test]
+    fn test_obsidian_appearance_light() {
+        let file = copy_fixture_to_temp("jsonc/obsidian-appearance.json");
+        let path = file.path().to_str().unwrap().to_string();
+
+        patch_jsonc_file(path.clone(), "theme", "moonstone").unwrap();
+
+        let result = std::fs::read_to_string(&path).unwrap();
+        let expected = std::fs::read_to_string(fixture_path(
+            "jsonc/obsidian-appearance-light-expected.json",
+        ))
+        .unwrap();
+        assert_eq!(
+            result.trim_end(),
+            expected.trim_end(),
+            "Obsidian appearance light mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
+        );
+    }
+
+    #[test]
+    fn test_obsidian_style_settings_dark_variant() {
+        let file = copy_fixture_to_temp("jsonc/obsidian-style-settings.json");
+        let path = file.path().to_str().unwrap().to_string();
+
+        patch_jsonc_file(
+            path.clone(),
+            "black-atom-variants@@dark-theme-variant",
+            "black-atom-jpn-murasaki-yoru",
+        )
+        .unwrap();
+
+        let result = std::fs::read_to_string(&path).unwrap();
+        let expected = std::fs::read_to_string(fixture_path(
+            "jsonc/obsidian-style-settings-dark-expected.json",
+        ))
+        .unwrap();
+        assert_eq!(
+            result.trim_end(),
+            expected.trim_end(),
+            "Obsidian style settings dark mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
+        );
+    }
+
+    #[test]
+    fn test_obsidian_style_settings_light_variant() {
+        let file = copy_fixture_to_temp("jsonc/obsidian-style-settings.json");
+        let path = file.path().to_str().unwrap().to_string();
+
+        patch_jsonc_file(
+            path.clone(),
+            "black-atom-variants@@light-theme-variant",
+            "black-atom-terra-spring-day",
+        )
+        .unwrap();
+
+        let result = std::fs::read_to_string(&path).unwrap();
+        let expected = std::fs::read_to_string(fixture_path(
+            "jsonc/obsidian-style-settings-light-expected.json",
+        ))
+        .unwrap();
+        assert_eq!(
+            result.trim_end(),
+            expected.trim_end(),
+            "Obsidian style settings light mismatch.\n\n--- ACTUAL ---\n{result}\n--- EXPECTED ---\n{expected}"
+        );
+    }
+
+    #[test]
     fn test_key_not_found() {
         let file = copy_fixture_to_temp("jsonc/zed-settings.jsonc");
         let path = file.path().to_str().unwrap().to_string();
