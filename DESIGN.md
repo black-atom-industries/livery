@@ -42,5 +42,5 @@ Both enforce home-directory restriction and use atomic writes (temp file + persi
 | tmux              | `patch_text_file` (regex)                       | `tmux source-file`         |
 | delta             | `patch_text_file` (regex)                       | none (reads on invocation) |
 | lazygit           | `patch_yaml_file` (YAML merge)                  | none (reads on launch)     |
-| zed               | planned — `patch_json_file`                     | auto-watches settings      |
+| zed               | `patch_jsonc_file` (JSONC CST)                  | none (auto-watches)        |
 | system appearance | `osascript` (macOS) / `gsettings` (Linux/GNOME) | immediate                  |

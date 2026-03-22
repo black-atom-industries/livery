@@ -31,22 +31,22 @@ export function createUpdaters(
     enabledApps: [AppName, AppConfig][],
     themeMeta: ThemeMeta,
 ): UpdaterEntry[] {
-    return enabledApps.map(([name]) => ({
-        app: name,
+    return enabledApps.map(([appName]) => ({
+        app: appName,
         run: async (): Promise<BackendUpdateResult> => {
             try {
-                return await commands.updateApp(
-                    name,
-                    themeMeta.key,
-                    themeMeta.appearance,
-                    themeMeta.collection.key,
-                );
+                return await commands.updateApp(appName, {
+                    theme_key: themeMeta.key,
+                    appearance: themeMeta.appearance,
+                    collection_key: themeMeta.collection.key,
+                    theme_label: themeMeta.label,
+                });
             } catch (error) {
                 const raw = error instanceof Error ? error.message : String(error);
                 const message = raw.includes("invalid value")
-                    ? `App "${name}" is not recognized by the backend. Is AppName in sync?`
+                    ? `App "${appName}" is not recognized by the backend. Is AppName in sync?`
                     : raw;
-                return { app: name, status: "error", message };
+                return { app: appName, status: "error", message };
             }
         },
     }));

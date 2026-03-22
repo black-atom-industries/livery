@@ -48,6 +48,16 @@ impl Default for Config {
             },
         );
         apps.insert(
+            AppName::Zed,
+            AppConfig {
+                enabled: false,
+                config_path: "~/.config/zed/settings.json".to_string(),
+                themes_path: None,
+                match_pattern: None, // not used — JSONC editing is structural
+                replace_template: None,
+            },
+        );
+        apps.insert(
             AppName::Lazygit,
             AppConfig {
                 enabled: false,

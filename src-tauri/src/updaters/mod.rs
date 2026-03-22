@@ -4,22 +4,36 @@ mod lazygit;
 mod nvim;
 mod system_appearance;
 mod tmux;
+mod zed;
 
 use std::collections::HashMap;
 
 use serde::Serialize;
 use specta::Type;
 
+use serde::Deserialize;
+
 use crate::config::{io as config_io, types::AppName};
+
+/// Theme metadata passed from the frontend.
+#[derive(Debug, Deserialize, Type)]
+pub struct ThemeContext {
+    pub theme_key: String,
+    pub appearance: String,
+    pub collection_key: String,
+    pub theme_label: Option<String>,
+}
 
 /// Context passed to each per-app updater.
 ///
 /// `themes_path` is cloned from AppConfig for use in `build_variables()` template rendering.
 /// Per-app updaters that need it as a path (e.g., lazygit) read it from AppConfig directly.
+/// `theme_label` is the formatted theme label for apps like Zed that need display names.
 pub struct UpdateContext<'a> {
     pub theme_key: &'a str,
     pub appearance: &'a str,
     pub collection_key: &'a str,
+    pub theme_label: Option<&'a str>,
     pub themes_path: Option<String>,
 }
 
@@ -86,12 +100,7 @@ impl UpdateResult {
 /// scale (~5 apps, tiny JSON file) this is fine.
 #[tauri::command]
 #[specta::specta]
-pub async fn update_app(
-    app: AppName,
-    theme_key: String,
-    appearance: String,
-    collection_key: String,
-) -> UpdateResult {
+pub async fn update_app(app: AppName, theme: ThemeContext) -> UpdateResult {
     let app_str = app.as_str();
 
     let mut config = config_io::read_config_from_disk();
@@ -107,9 +116,10 @@ pub async fn update_app(
     }
 
     let ctx = UpdateContext {
-        theme_key: &theme_key,
-        appearance: &appearance,
-        collection_key: &collection_key,
+        theme_key: &theme.theme_key,
+        appearance: &theme.appearance,
+        collection_key: &theme.collection_key,
+        theme_label: theme.theme_label.as_deref(),
         themes_path: app_config.themes_path.clone(),
     };
 
@@ -119,7 +129,7 @@ pub async fn update_app(
         AppName::Tmux => tmux::update(app_str, &app_config, &ctx),
         AppName::Delta => patch_text_updater(app_str, &app_config, &ctx),
         AppName::Lazygit => lazygit::update(app_str, &app_config, &ctx),
-        AppName::Zed => UpdateResult::skipped(app_str, "Not yet implemented"),
+        AppName::Zed => zed::update(app_str, &app_config, &ctx),
     }
 }
 
