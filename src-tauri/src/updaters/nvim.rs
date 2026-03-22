@@ -94,11 +94,15 @@ fn reload(theme_key: &str) -> Result<(), String> {
     let sockets = find_nvim_sockets(Path::new(&tmpdir));
 
     if sockets.is_empty() {
-        log::info!("No nvim sockets found");
+        log::info!("No nvim sockets found — will apply on next launch");
         return Ok(());
     }
 
     let cmd = format!(":colorscheme {}<CR>", theme_key);
+    let total = sockets.len();
+    let mut sent = 0usize;
+    let mut stale = 0usize;
+    let mut failed = 0usize;
 
     for socket_path in &sockets {
         let result = std::process::Command::new("nvim")
@@ -112,23 +116,36 @@ fn reload(theme_key: &str) -> Result<(), String> {
 
         match result {
             Ok(output) if !output.status.success() => {
-                log::info!(
-                    "nvim --server {} returned non-zero (stale socket)",
-                    socket_path.display()
-                );
+                stale += 1;
+                log::debug!("Stale nvim socket: {}", socket_path.display());
             }
             Err(e) => {
+                failed += 1;
                 log::warn!("Failed to send to nvim socket: {e}");
             }
             _ => {
-                log::info!(
-                    "Sent colorscheme {} to {}",
-                    theme_key,
-                    socket_path.display()
-                );
+                sent += 1;
+                log::debug!("Sent colorscheme to {}", socket_path.display());
             }
         }
     }
+
+    log::info!(
+        "Sent colorscheme {} to {}/{} nvim instances{}{}",
+        theme_key,
+        sent,
+        total,
+        if stale > 0 {
+            format!(" ({stale} stale)")
+        } else {
+            String::new()
+        },
+        if failed > 0 {
+            format!(" ({failed} failed)")
+        } else {
+            String::new()
+        },
+    );
 
     Ok(())
 }
