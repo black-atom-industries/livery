@@ -8,6 +8,8 @@ communication) happen here. TypeScript never touches the filesystem directly.
 ```
 src-tauri/src/
   lib.rs                    # Tauri command registration
+  bin/
+    perf_benchmark.rs       # Performance benchmark binary (deno task test:perf-benchmark)
   config/
     types.rs                # AppName enum, AppConfig, Config structs
     defaults.rs             # Config::default() — pattern defaults per app
@@ -24,6 +26,7 @@ src-tauri/src/
     tmux.rs                 # tmux update + reload (source-file)
     lazygit.rs              # lazygit update (YAML merge, no reload)
     zed.rs                  # zed update (JSONC patching, no reload — auto-watches)
+    obsidian.rs             # obsidian update (JSONC patching + URI reload)
     system_appearance.rs    # macOS/Linux system dark/light mode toggle
 ```
 

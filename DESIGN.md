@@ -13,14 +13,16 @@ All per-app logic lives in the backend. The frontend only decides _which_ apps t
 
 ## File Operations
 
-Two types of config file patching, both in `src-tauri/src/updaters/file_ops/`:
+Three types of config file patching, all in `src-tauri/src/updaters/file_ops/`:
 
 - **`patch_text_file`** — regex find-and-replace with template variables. Used by ghostty, nvim,
   tmux, delta.
 - **`patch_yaml_file`** — lossless YAML merge preserving comments. Used by lazygit. Uses `yaml-edit`
   for comment preservation + `yaml_serde` for structural iteration.
+- **`patch_jsonc_file`** — CST-based key/value editing preserving comments and formatting. Used by
+  zed, obsidian. Uses `jsonc-parser` for format-preserving edits.
 
-Both enforce home-directory restriction and use atomic writes (temp file + persist).
+All three enforce home-directory restriction and use atomic writes (temp file + persist).
 
 ## Configuration
 
@@ -43,4 +45,5 @@ Both enforce home-directory restriction and use atomic writes (temp file + persi
 | delta             | `patch_text_file` (regex)                       | none (reads on invocation) |
 | lazygit           | `patch_yaml_file` (YAML merge)                  | none (reads on launch)     |
 | zed               | `patch_jsonc_file` (JSONC CST)                  | none (auto-watches)        |
+| obsidian          | `patch_jsonc_file` (JSONC CST)                  | `obsidian://` URI          |
 | system appearance | `osascript` (macOS) / `gsettings` (Linux/GNOME) | immediate                  |
