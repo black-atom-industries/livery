@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/black-atom-industries/livery/compare/v0.2.0...v0.2.1) (2026-03-26)
+
+
+### Documentation
+
+* add ubiquitous language glossary for livery domain ([9dce97a](https://github.com/black-atom-industries/livery/commit/9dce97affe148a0df35bbf8a3ee8a60f2fb3cbaa))
+* sync project knowledge to v0.2.0 — add obsidian, jsonc, benchmark ([59f682b](https://github.com/black-atom-industries/livery/commit/59f682b0afd9cd7138ee11b108466511a81a6f5a))
+
 ## [0.2.0](https://github.com/black-atom-industries/livery/compare/v0.1.0...v0.2.0) (2026-03-22)
 
 
