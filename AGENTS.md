@@ -23,7 +23,7 @@ See [GLOSSARY.md](GLOSSARY.md) for ubiquitous terms.
 
 ## Project Tracking
 
-Issues tracked in [Linear](https://linear.app/black-atom-industries) under the **livery** project.
+Issues tracked in [GitHub Issues](https://github.com/black-atom-industries/livery/issues).
 
 ## Sources of Truth
 

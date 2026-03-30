@@ -11,7 +11,7 @@ Create a commit following livery conventions.
 ## Format
 
 ```
-<type>(<scope>): <description> [<linear-issue>]
+<type>(<scope>): <description> [#<github-issue>]
 ```
 
 ### Types
@@ -22,17 +22,17 @@ Create a commit following livery conventions.
 
 Determined by which files changed:
 
-| Changed files                | Scope      | Example                                                   |
-| ---------------------------- | ---------- | --------------------------------------------------------- |
-| Only `src/`                  | `fe`       | `feat(fe): add theme preview component [DEV-300]`         |
-| Only `src-tauri/`            | `be`       | `fix(be): handle tilde expansion in yaml paths [DEV-317]` |
-| Both `src/` and `src-tauri/` | omit scope | `feat: add lazygit updater [DEV-317]`                     |
-| Neither (docs, config, CI)   | omit scope | `docs: update AGENTS.md [DEV-324]`                        |
+| Changed files                | Scope      | Example                                              |
+| ---------------------------- | ---------- | ---------------------------------------------------- |
+| Only `src/`                  | `fe`       | `feat(fe): add theme preview component #300`         |
+| Only `src-tauri/`            | `be`       | `fix(be): handle tilde expansion in yaml paths #317` |
+| Both `src/` and `src-tauri/` | omit scope | `feat: add lazygit updater #317`                     |
+| Neither (docs, config, CI)   | omit scope | `docs: update AGENTS.md #324`                        |
 
-### Linear Issue
+### GitHub Issue
 
-Include the Linear issue identifier (e.g., `[DEV-317]`) if one is available in context — branch
-name, conversation, or recent issue lookup.
+Include the GitHub issue number (e.g., `#317`) if one is available in context — branch name,
+conversation, or recent issue lookup.
 
 ## Rules
 
@@ -75,6 +75,6 @@ This keeps the branch history clean — each commit is a coherent, working chang
 2. Determine scope from changed file paths
 3. Decide strategy: amend, fixup, or new commit
 4. Draft a concise message (1 sentence) focusing on the _why_, not the _what_
-5. Include Linear issue if available
+5. Include GitHub issue if available
 6. Stage specific files (avoid `git add -A`)
 7. Commit via heredoc for proper formatting
