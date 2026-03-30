@@ -12,6 +12,10 @@ No direct file system access from TypeScript. No shell commands from TypeScript.
 
 See [DESIGN.md](DESIGN.md) for config decisions, updater flow, and data architecture.
 
+## Shared Language
+
+See [GLOSSARY.md](GLOSSARY.md) for ubiquitous terms.
+
 ## Scoped Context
 
 - **Frontend:** [src/AGENTS.md](src/AGENTS.md) — React patterns, TypeScript, Deno

@@ -1,4 +1,4 @@
-# Ubiquitous Language
+# GLOSSARY
 
 > **Shared terms** — Theme, Theme Key, Theme Definition, Appearance, Collection, Collection Key,
 > Theme Meta, and all color groups (Primaries, Palette, UI Colors, Syntax Colors) are defined in
