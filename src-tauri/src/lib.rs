@@ -35,6 +35,44 @@ pub fn start_app() {
                 .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepOne)
                 .build(),
         )
+        .setup(|app| {
+            #[cfg(desktop)]
+            {
+                use tauri::Manager;
+                use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
+
+                let config = config::io::read_config_from_disk();
+                let shortcut_str = config.keymappings.toggle_window.clone();
+
+                let toggle_shortcut: Shortcut = shortcut_str
+                    .parse()
+                    .expect("Invalid global_shortcut in config");
+
+                app.handle().plugin(
+                    tauri_plugin_global_shortcut::Builder::new()
+                        .with_handler(move |app, shortcut, event| {
+                            if shortcut == &toggle_shortcut
+                                && event.state() == ShortcutState::Pressed
+                            {
+                                if let Some(window) = app.get_webview_window("main") {
+                                    if window.is_visible().unwrap_or(false) {
+                                        let _ = window.hide();
+                                    } else {
+                                        let _ = window.show();
+                                        let _ = window.set_focus();
+                                    }
+                                }
+                            }
+                        })
+                        .build(),
+                )?;
+
+                app.global_shortcut().register(toggle_shortcut)?;
+                log::info!("Global shortcut registered: {shortcut_str}");
+            }
+
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

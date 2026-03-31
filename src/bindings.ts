@@ -50,7 +50,8 @@ export type AppConfig = { enabled?: boolean; config_path: string; themes_path?: 
  * Supported app names. TypeScript bindings are auto-generated via tauri-specta.
  */
 export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta" | "lazygit" | "obsidian"
-export type Config = { system_appearance: boolean; apps: { [key in AppName]: AppConfig } }
+export type Config = { system_appearance: boolean; keymappings?: Keymappings; apps: { [key in AppName]: AppConfig } }
+export type Keymappings = { toggle_window: string }
 /**
  * Theme metadata passed from the frontend.
  */
