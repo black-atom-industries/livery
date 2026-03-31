@@ -20,7 +20,8 @@
         "test": "deno test -P",
         "checks": "deno run -A scripts/checks-frontend.ts && deno run -A scripts/checks-backend.ts",
         "install-hooks": "cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit && echo 'Hooks installed.'",
-        "test:perf-benchmark": "cd src-tauri && cargo run --bin perf-benchmark --release"
+        "test:perf-benchmark": "cd src-tauri && cargo run --bin perf-benchmark --release",
+        "install:macos": "deno run -A npm:@tauri-apps/cli build && rm -rf /Applications/livery.app && cp -R src-tauri/target/release/bundle/macos/livery.app /Applications/livery.app"
     },
     "nodeModulesDir": "auto",
     "lint": {
