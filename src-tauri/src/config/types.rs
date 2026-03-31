@@ -60,7 +60,22 @@ pub struct AppConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
+pub struct Keymappings {
+    pub toggle_window: String,
+}
+
+impl Default for Keymappings {
+    fn default() -> Self {
+        Self {
+            toggle_window: "super+ctrl+alt+shift+KeyT".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct Config {
     pub system_appearance: bool,
+    #[serde(default)]
+    pub keymappings: Keymappings,
     pub apps: HashMap<AppName, AppConfig>,
 }

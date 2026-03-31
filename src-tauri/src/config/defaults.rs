@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::types::{AppConfig, AppName, Config};
+use super::types::{AppConfig, AppName, Config, Keymappings};
 
 impl Default for Config {
     fn default() -> Self {
@@ -79,6 +79,7 @@ impl Default for Config {
         );
         Config {
             system_appearance: true,
+            keymappings: Keymappings::default(),
             apps,
         }
     }
