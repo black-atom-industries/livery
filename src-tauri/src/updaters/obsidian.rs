@@ -51,7 +51,14 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
         }
     }
 
-    // Reload Obsidian vault
+    // Reload only if Obsidian is already running — the `obsidian` CLI can
+    // launch the app and block indefinitely when it isn't.
+    // Config files are already patched, so the next Obsidian start picks them up.
+    if !is_running() {
+        log::info!("Obsidian not running, skipping reload (config patched)");
+        return UpdateResult::done(app_str);
+    }
+
     if let Err(msg) = reload() {
         log::warn!("{msg}");
         return UpdateResult::skipped(
@@ -78,8 +85,18 @@ fn derive_style_settings_path(appearance_path: &str) -> Option<PathBuf> {
     })
 }
 
+/// Check whether Obsidian is currently running.
+fn is_running() -> bool {
+    std::process::Command::new("pgrep")
+        .args(["-x", "Obsidian"])
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false)
+}
+
 /// Reload the Obsidian vault via the `obsidian` CLI.
-/// Non-zero exit is not an error — Obsidian may not be running.
+/// Only called when Obsidian is already running — the command can launch
+/// the app and block indefinitely if it isn't.
 fn reload() -> Result<(), String> {
     match std::process::Command::new("obsidian")
         .arg("reload")
@@ -87,7 +104,7 @@ fn reload() -> Result<(), String> {
     {
         Ok(output) => {
             if !output.status.success() {
-                log::info!("obsidian reload returned non-zero (Obsidian may not be running)");
+                log::info!("obsidian reload returned non-zero");
             }
             Ok(())
         }
