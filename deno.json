@@ -28,7 +28,9 @@
     "lint": {
         "exclude": [
             "src/routeTree.gen.ts",
-            "src/bindings.ts"
+            "src/bindings.ts",
+            ".agents/",
+            ".claude/"
         ]
     },
     "fmt": {
@@ -41,7 +43,9 @@
             "CHANGELOG.md",
             "src-tauri/",
             "src/routeTree.gen.ts",
-            "src/bindings.ts"
+            "src/bindings.ts",
+            ".agents/",
+            ".claude/"
         ]
     },
     "test": {
