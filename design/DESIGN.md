@@ -127,11 +127,3 @@ wordmark as the "o" in "atom." Works at every scale: favicon, app icon, watermar
 Both are first-class. The design must work equally well in both appearances — the chrome adapts, the
 structure stays identical. This is especially important for a theme app that literally serves both
 appearances.
-
-## Related Issues
-
-- [DES-25](https://linear.app/black-atom-industries/issue/DES-25/design-logo) — Logo design
-- [DES-26](https://linear.app/black-atom-industries/issue/DES-26/design-banner) — Banner design
-- [DEV-318](https://linear.app/black-atom-industries/issue/DEV-318) — Frontend implementation
-- [DEV-326](https://linear.app/black-atom-industries/issue/DEV-326) — Setup wizard
-- [DEV-299](https://linear.app/black-atom-industries/issue/DEV-299) — Settings page design
