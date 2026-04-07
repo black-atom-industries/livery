@@ -13,11 +13,11 @@ export const Route = createRootRoute({
 
 function RootLayout() {
     const updaterResults = useStore(appStore, (s) => s.updaterResults);
-    const selectedTheme = useStore(appStore, (s) => s.selectedTheme);
+    const currentTheme = useStore(appStore, (s) => s.currentTheme);
 
     return (
         <div className="h-screen flex flex-col bg-neutral-950 text-neutral-100 font-mono">
-            <style id="black-atom-theme-tokens">{themeToStyleSheet(selectedTheme)}</style>
+            <style id="black-atom-theme-tokens">{themeToStyleSheet(currentTheme)}</style>
 
             <header className="shrink-0 px-6 py-4 border-b border-neutral-800">
                 <AppHeader version={denoConfig.version} />
