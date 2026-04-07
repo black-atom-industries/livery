@@ -16,22 +16,37 @@ color themes across developer tools.
 - Berkeley Mono specimen — box-drawing diagrams, hatched shadows, RFC-style schematics
 - The existing black-atom.industries website — bordered sections, monospace, datasheet layout
 
-### Typography
+### Typography — Three Voices
 
-- **Mono (primary):** All labels, navigation, status text, section headers, form fields. Uppercase
-  with letterspacing for section headers. Berkeley Mono is the visual reference (shipping font TBD —
-  needs a free/bundleable alternative).
-- **Display/sans (accent):** Theme names and collection names in the main view specimen area only.
-  Provides visual weight and distinguishes content from chrome.
+- **Display (Space Grotesk Bold):** Headlines, theme names, step numbers, page titles. Tight
+  tracking, uppercase or title case. Provides institutional authority and visual weight. Used
+  sparingly — the exception, not the default.
+- **Body (TBD — IBM Plex Sans or Geist):** Descriptions, documentation, multi-sentence content.
+  Relaxed leading, max 65ch width. Neutral and readable for sustained reading.
+- **Mono (JetBrains Mono / Berkeley Mono):** ALL labels, navigation, status text, section headers,
+  form fields, metadata, keyboard shortcuts. Uppercase with letterspacing for section headers. This
+  is the default voice of the interface — anything that is part of the chrome uses monospace.
+  Berkeley Mono (TX-02) is the visual target, but its license prohibits app bundling and
+  redistribution (EULA §1.14, §9). Licensing inquiry pending (black-atom-industries/ui#5). JetBrains
+  Mono is the fallback. IoskeleyMono (SIL OFL) is an open-source Berkeley Mono approximation worth
+  evaluating.
+
+**Hierarchy through contrast:** Pair massive display headlines with tiny monospace metadata labels
+to create the "technical datasheet" effect.
 
 ### Color System
 
-- **Chrome is near-monochrome.** Dark grays on dark mode, warm off-whites on light mode.
-- **Single accent color:** Status green for synced/active indicators.
+- **Chrome is monochrome.** Dark warm grays on dark mode, warm off-whites on light mode.
+- **Accent colors:** Muted green for synced/active indicators. Optionally muted purple for
+  selection/focus states.
 - **Themes are the color.** Palette swatches and previews bring color. Chrome never competes.
-- **Light mode:** Paper-like warmth to backgrounds (not pure white). Matches the website's warm
-  gray.
-- **Dark mode:** Deep charcoal (not pure black).
+- **Light mode:** Paper-like warmth to backgrounds (not pure white, not olive/yellow). Warm cream
+  inspired by aged cotton paper. The `terra-fall` theme family in `@black-atom/core` (hue ~50) is
+  the closest tonal reference. The `default` family (hue 240) is too cool.
+- **Dark mode:** Deep teal-tinted charcoal (not pure black). The `default-dark` tokens (hue 195)
+  work well here.
+- **All colors import from `@black-atom/core` via JSR** at implementation time — no hardcoded hex
+  values in components.
 
 ### Surfaces & Borders
 
@@ -53,74 +68,82 @@ color themes across developer tools.
 - **Main View:** Hybrid — technical chrome on the side panels, more atmospheric and spacious in the
   center specimen area where themes are displayed.
 
+## Component Patterns
+
+Reusable patterns extracted from screen designs. These map to the component architecture: Dumb
+Components own styling, Containers/Routes own data, Partials compose without styling, Layouts handle
+structural arrangement.
+
+### Buttons — "Actuator" Style
+
+```
+[ PRIMARY_ACTION ]     — Filled contrast background, inverse text, mono uppercase
+[ SECONDARY_ACTION ]   — 1px border, transparent fill, mono uppercase
+[ DISABLED ]           — Muted fill, reduced opacity text
+```
+
+Bracket notation `[ LABEL ]` is the visual signature for interactive elements. No rounded corners.
+No glows. No gradients.
+
+### Status Indicators
+
+Square pip (not circle) + monospace label. Three states:
+
+- Green pip + "SYNCED" / "VALID" / "ACTIVE"
+- Purple pip + "SELECTED" / "FOCUSED" (if a second accent is added)
+- Gray pip + "INACTIVE" / "DISABLED"
+
+### Section Headers
+
+Uppercase monospace label with horizontal rule underneath. Optional metadata right-aligned on the
+same line. This is the primary structural pattern — borrowed from the website.
+
+### Data Panels / Cards
+
+1px border, squared corners. Uppercase mono header with rule. Key-value content pairs in monospace
+(label left, value right). Optional metadata footer (document ID, revision, classification).
+
+### Input Fields
+
+Flat surface background (one tier darker than page). 1px border. Label above in mono label style.
+All user input renders in monospace. Placeholder text in disabled color.
+
+### Metadata Rows
+
+Uppercase label above value in datasheet pattern: `APPEARANCE | COLLECTION | VERSION`. Used in theme
+specimen and settings views.
+
+## Anti-Patterns (Banned)
+
+- No rounded corners (0px border-radius is the rule — squared-off is more technical)
+- No soft drop shadows (depth through tonal layering only)
+- No gradients on surfaces
+- No saturated or neon accent colors in chrome
+- No pure black (`#000000`) or pure white (`#FFFFFF`)
+- No emoji in the interface
+- No decorative icons — prefer text labels or geometric glyphs
+- No "vibrant" colors in chrome — only theme content brings color
+- No centered hero layouts (prefer asymmetric, left-aligned)
+- No generic AI copywriting ("Elevate", "Seamless", "Next-Gen")
+- No filler UI text ("Scroll to explore", bouncing chevrons)
+
 ## Screens
 
-### Screen 1: Main View — Theme Browser
+### Main View — Theme Browser
 
-Three-panel layout, left to right.
+Split-panel layout. Left: search/filter bar + theme list grouped by collection. Right: selected
+theme preview with color swatches, metadata, and description. Bottom status bar with keyboard
+shortcuts and sync state. See `design/drafts/` for visual references.
 
-#### Left Panel — Theme Navigator
+### Setup Wizard / Settings
 
-- Header: "BLACK ATOM LIVERY" wordmark + version number
-- Subtitle: "Color Preservation System" (or similar — TBD)
-- Themes grouped by collection with uppercase mono collection headers (DEFAULT, JPN, TERRA)
-- Each theme: name + appearance indicator (light/dark icon)
-- Selected theme: left border accent (vertical bar)
-- Compact, scannable list — this panel is utility
-
-#### Center Panel — Theme Specimen
-
-- Theme name rendered large using display typeface — this is where the accent font lives
-- Collection name, appearance badge (bordered pill: `dark` / `light`)
-- ABOUT section: theme description in body text
-- Metadata row in datasheet pattern — uppercase label over value: APPEARANCE | COLLECTION | VARIANTS
-  | PRIMARIES
-- PALETTE section: color swatches as a row of squares with abbreviated role labels (bg, fg, acc,
-  prp, red, org, ylw, grn, cyn)
-- Optional: small syntax-highlighted code preview showing the theme in action
-- More whitespace and breathing room than side panels — "vault specimen" feel
-
-#### Right Panel — Adapter Status
-
-- Header: "ADAPTERS" with sync count ("4 synced")
-- Each adapter row: icon letter in bordered square (G, N, T, D, Z, L), app name, status label
-  (Synced / Coming soon), dimmed reload method (SIGUSR2, Socket, source, config)
-- Pure cockpit instrumentation — status readouts
-
-#### Bottom Bar
-
-- Minimal: sync status dot + "All adapters synced", timestamp "Applied 2 min ago"
-
-### Screen 2: Setup Wizard
-
-Step-by-step flow. Each step looks like a page in a technical manual.
-
-- Step indicator at top: `STEP 01 / 04` with title and horizontal rule
-- **Step 1 — DETECTION:** "Scanning for supported applications..." List of detected apps with
-  checkboxes, detected paths, and found/not-found status.
-- **Step 2 — CONFIGURATION:** Per enabled app: config path (editable input), validation status
-  (checkmark or warning icon).
-- **Step 3 — THEMES PATH:** Locate Black Atom theme directories for apps that need them (tmux,
-  lazygit). Path input or file browser.
-- **Step 4 — CONFIRMATION:** Summary of config to be written. Bordered box with config preview in
-  mono.
-- Navigation: `[ BACK ]` and `[ NEXT ]` buttons — squared-off, bordered, matches website link style.
-
-### Screen 3: Settings Page
-
-Single page, vertical scroll. Fully "datasheet" mode.
-
-- One bordered section per adapter
-- Each section contains: enabled toggle, config_path input, themes_path input (where applicable)
-- Collapsible "ADVANCED" subsection: match_pattern / replace_template overrides
-- Path inputs have validation indicator (checkmark/cross) and browse action
-- Reload method shown as dimmed label per adapter
-- Reset/clear section at bottom
+TBD — to be designed in a future iteration.
 
 ## Logo Direction
 
-A black dot (filled circle). Literal representation of "black atom." Already embedded in the
-wordmark as the "o" in "atom." Works at every scale: favicon, app icon, watermark, badge.
+No official logo yet. A black dot (filled circle). Literal representation of "black atom." Already
+embedded in the wordmark as the "o" in "atom." Works at every scale: favicon, app icon, watermark,
+badge.
 
 ## Light / Dark Mode
 
