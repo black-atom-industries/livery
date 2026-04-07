@@ -44,7 +44,7 @@ console.log();
 
 await run("Type check", ["deno", "task", "check"]);
 await run("Lint", ["deno", "lint"]);
-await run("Format", ["deno", "fmt"]);
+await run("Format check", ["deno", "fmt", "--check"]);
 await run("Tests", ["deno", "task", "test"]);
 
 console.log(green("✓ All frontend checks passed"));

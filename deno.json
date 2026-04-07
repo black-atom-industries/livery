@@ -19,8 +19,8 @@
         "vite:build": "deno run -A npm:vite build",
         "check": "deno check src/**/*.ts src/**/*.tsx",
         "test": "deno test -P",
-        "checks": "deno run -A scripts/checks-frontend.ts && deno run -A scripts/checks-backend.ts",
-        "install-hooks": "cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit && echo 'Hooks installed.'",
+        "checks": "deno run -A .githooks/checks-frontend.ts && deno run -A .githooks/checks-backend.ts",
+        "install-hooks": "git config core.hooksPath .githooks && echo 'Hooks installed.'",
         "test:perf-benchmark": "cd src-tauri && cargo run --bin perf-benchmark --release",
         "install:macos": "deno run -A npm:@tauri-apps/cli build && rm -rf /Applications/livery.app && cp -R src-tauri/target/release/bundle/macos/livery.app /Applications/livery.app"
     },
