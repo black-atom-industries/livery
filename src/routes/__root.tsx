@@ -4,6 +4,7 @@ import denoConfig from "../../deno.json" with { type: "json" };
 import { AppHeader } from "../components/app-header.tsx";
 import { AppFooter } from "../components/app-footer.tsx";
 import { ProgressBar } from "../components/progress-bar.tsx";
+import { themeToStyleSheet } from "../lib/tokens.ts";
 import { appStore } from "../store/app.ts";
 
 export const Route = createRootRoute({
@@ -12,9 +13,12 @@ export const Route = createRootRoute({
 
 function RootLayout() {
     const updaterResults = useStore(appStore, (s) => s.updaterResults);
+    const selectedTheme = useStore(appStore, (s) => s.selectedTheme);
 
     return (
         <div className="h-screen flex flex-col bg-neutral-950 text-neutral-100 font-mono">
+            <style id="black-atom-theme-tokens">{themeToStyleSheet(selectedTheme)}</style>
+
             <header className="shrink-0 px-6 py-4 border-b border-neutral-800">
                 <AppHeader version={denoConfig.version} />
             </header>
