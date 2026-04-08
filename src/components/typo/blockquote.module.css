@@ -1,0 +1,6 @@
+.root {
+    border-left: var(--border-size-3) solid var(--color-fg-accent);
+    padding-left: var(--size-4);
+    margin: var(--size-4) 0;
+    font-style: italic;
+}

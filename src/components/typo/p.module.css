@@ -1,0 +1,5 @@
+.root {
+    font-size: var(--font-size-fluid-0);
+    font-weight: var(--font-weight-4);
+    margin: 0 0 var(--size-4);
+}

@@ -10,3 +10,6 @@
 @import "open-props/zindex";
 @import "open-props/gradients";
 @import "open-props/durations";
+
+/* Typo */
+@import "./components/typo/colors.css";
