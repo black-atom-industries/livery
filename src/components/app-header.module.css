@@ -1,0 +1,20 @@
+.root {
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: var(--font-size-3);
+    font-weight: var(--font-weight-7);
+}
+
+.version {
+    font-size: var(--font-size-0);
+    font-weight: var(--font-weight-4);
+    color: var(--fg-subtle);
+}
+
+.subtitle {
+    font-size: var(--font-size-0);
+    color: var(--fg-subtle);
+}
