@@ -9,7 +9,7 @@ export const h4Variants = cva({
         color: colorVariants,
     },
     defaultVariants: {
-        color: "main",
+        color: "default",
     },
 });
 

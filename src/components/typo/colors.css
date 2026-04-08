@@ -1,20 +1,40 @@
 /* Shared color classes for all Typo components */
-.Typo--color-main {
-    color: var(--color-fg-main);
+.Typo--color-default {
+    color: var(--fg-default);
 }
 
-.Typo--color-support {
-    color: var(--color-fg-support);
-}
-
-.Typo--color-minor {
-    color: var(--color-fg-minor);
+.Typo--color-subtle {
+    color: var(--fg-subtle);
 }
 
 .Typo--color-accent {
-    color: var(--color-fg-accent);
+    color: var(--fg-accent);
 }
 
-.Typo--color-accentAlt {
-    color: var(--color-fg-accent-alt);
+.Typo--color-contrast {
+    color: var(--fg-contrast);
+}
+
+.Typo--color-disabled {
+    color: var(--fg-disabled);
+}
+
+.Typo--color-positive {
+    color: var(--fg-positive);
+}
+
+.Typo--color-negative {
+    color: var(--fg-negative);
+}
+
+.Typo--color-warn {
+    color: var(--fg-warn);
+}
+
+.Typo--color-info {
+    color: var(--fg-info);
+}
+
+.Typo--color-hint {
+    color: var(--fg-hint);
 }

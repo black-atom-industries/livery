@@ -9,7 +9,7 @@ export const blockquoteVariants = cva({
         color: colorVariants,
     },
     defaultVariants: {
-        color: "minor",
+        color: "subtle",
     },
 });
 

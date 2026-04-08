@@ -9,7 +9,7 @@ export const inlineCodeVariants = cva({
         color: colorVariants,
     },
     defaultVariants: {
-        color: "main",
+        color: "default",
     },
 });
 

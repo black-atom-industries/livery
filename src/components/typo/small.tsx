@@ -9,7 +9,7 @@ export const smallVariants = cva({
         color: colorVariants,
     },
     defaultVariants: {
-        color: "minor",
+        color: "subtle",
     },
 });
 

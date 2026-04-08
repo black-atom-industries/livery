@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Typo, typoColors } from "@/components/typo/index.ts";
 
 export const Route = createFileRoute("/dev/typography")({
     component: Component,
@@ -8,106 +9,85 @@ const sampleText = "The quick brown fox jumps over the lazy dog";
 
 function Component() {
     return (
-        <div>
-            <h1
-                style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    marginBottom: 24,
-                }}
-            >
-                Typography
-            </h1>
+        <div style={{ display: "flex", flexDirection: "column", gap: 48 }}>
+            <section>
+                <SectionLabel>Headings</SectionLabel>
+                <Typo.H1>{sampleText}</Typo.H1>
+                <Typo.H2>{sampleText}</Typo.H2>
+                <Typo.H3>{sampleText}</Typo.H3>
+                <Typo.H4>{sampleText}</Typo.H4>
+            </section>
 
-            <section style={{ marginBottom: 32 }}>
-                <h2
-                    style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.1em",
-                        color: "var(--fg-subtle)",
-                        marginBottom: 12,
-                    }}
-                >
-                    Monospace
-                </h2>
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 12,
-                        fontFamily: "var(--font-mono, ui-monospace, monospace)",
-                    }}
-                >
-                    {[10, 12, 14, 16, 20, 24].map((size) => (
-                        <div key={size}>
-                            <span
-                                style={{
-                                    fontSize: 10,
-                                    color: "var(--fg-subtle)",
-                                    display: "inline-block",
-                                    width: 40,
-                                }}
-                            >
-                                {size}px
-                            </span>
-                            <span style={{ fontSize: size }}>{sampleText}</span>
-                        </div>
-                    ))}
+            <section>
+                <SectionLabel>Body</SectionLabel>
+                <Typo.Lead>{sampleText}</Typo.Lead>
+                <Typo.P>{sampleText}</Typo.P>
+                <Typo.Small>{sampleText}</Typo.Small>
+            </section>
+
+            <section>
+                <SectionLabel>Inline</SectionLabel>
+                <Typo.P>
+                    Regular text with <Typo.Highlight>highlighted text</Typo.Highlight> and{" "}
+                    <Typo.InlineCode>inline code</Typo.InlineCode> in context.
+                </Typo.P>
+            </section>
+
+            <section>
+                <SectionLabel>Blockquote</SectionLabel>
+                <Typo.Blockquote>{sampleText}</Typo.Blockquote>
+            </section>
+
+            <section>
+                <SectionLabel>Lists</SectionLabel>
+                <div style={{ display: "flex", gap: 48 }}>
+                    <div>
+                        <Typo.H4>Unordered</Typo.H4>
+                        <Typo.UnorderedList>
+                            <li>First item</li>
+                            <li>Second item</li>
+                            <li>Third item</li>
+                        </Typo.UnorderedList>
+                    </div>
+                    <div>
+                        <Typo.H4>Ordered</Typo.H4>
+                        <Typo.OrderedList>
+                            <li>First item</li>
+                            <li>Second item</li>
+                            <li>Third item</li>
+                        </Typo.OrderedList>
+                    </div>
                 </div>
             </section>
 
-            <section style={{ marginBottom: 32 }}>
-                <h2
-                    style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.1em",
-                        color: "var(--fg-subtle)",
-                        marginBottom: 12,
-                    }}
-                >
-                    Color Roles
-                </h2>
+            <section>
+                <SectionLabel>Color Variants</SectionLabel>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {[
-                        { var: "--fg-default", label: "fg-default" },
-                        { var: "--fg-subtle", label: "fg-subtle" },
-                        { var: "--fg-accent", label: "fg-accent" },
-                        { var: "--fg-disabled", label: "fg-disabled" },
-                        { var: "--fg-contrast", label: "fg-contrast" },
-                    ].map((item) => (
-                        <div
-                            key={item.var}
-                            style={{ display: "flex", alignItems: "center", gap: 12 }}
-                        >
-                            <span
-                                style={{
-                                    fontSize: 10,
-                                    color: "var(--fg-subtle)",
-                                    width: 100,
-                                    fontFamily: "ui-monospace, monospace",
-                                }}
-                            >
-                                {item.label}
-                            </span>
-                            <span
-                                style={{
-                                    fontSize: 14,
-                                    color: `var(${item.var})`,
-                                    fontFamily: "ui-monospace, monospace",
-                                }}
-                            >
-                                {sampleText}
-                            </span>
-                        </div>
+                    {typoColors.map((color) => (
+                        <Typo.P key={color} color={color} style={{ margin: 0 }}>
+                            <Typo.Small color={color}>[{color}]</Typo.Small> {sampleText}
+                        </Typo.P>
                     ))}
                 </div>
             </section>
+        </div>
+    );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+    return (
+        <div
+            style={{
+                fontSize: 16,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                color: "var(--fg-subtle)",
+                marginBottom: 24,
+                borderBottom: "3px solid var(--fg-subtle)",
+            }}
+        >
+            {children}
         </div>
     );
 }

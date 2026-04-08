@@ -9,7 +9,7 @@ export const highlightVariants = cva({
         color: colorVariants,
     },
     defaultVariants: {
-        color: "accentAlt",
+        color: "accent",
     },
 });
 

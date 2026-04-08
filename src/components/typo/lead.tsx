@@ -9,7 +9,7 @@ export const leadVariants = cva({
         color: colorVariants,
     },
     defaultVariants: {
-        color: "support",
+        color: "subtle",
     },
 });
 
