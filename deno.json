@@ -60,6 +60,7 @@
         }
     },
     "imports": {
+        "@/": "./src/",
         "@base-ui/react": "npm:@base-ui/react@^1",
         "@black-atom/core": "jsr:@black-atom/core@^0.4.0",
         "cva": "npm:cva@^1.0.0-beta.4",
