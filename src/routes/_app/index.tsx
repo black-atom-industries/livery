@@ -3,15 +3,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { themeMap } from "@black-atom/core";
-import { appStore } from "../store/app.ts";
-import { commands } from "../bindings.ts";
-import { applyTheme, createUpdaters, getEnabledApps } from "../lib/updaters.ts";
-import { getGroupedThemes } from "../lib/themes.ts";
-import { useConfig } from "../queries/use-config.ts";
-import { ThemeList } from "../components/theme-list.tsx";
-import { ThemeDetail } from "../components/theme-detail.tsx";
+import { appStore } from "../../store/app.ts";
+import { commands } from "../../bindings.ts";
+import { applyTheme, createUpdaters, getEnabledApps } from "../../lib/updaters.ts";
+import { getGroupedThemes } from "../../lib/themes.ts";
+import { useConfig } from "../../queries/use-config.ts";
+import { ThemeList } from "../../components/theme-list.tsx";
+import { ThemeDetail } from "../../components/theme-detail.tsx";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_app/")({
     component: Component,
 });
 
