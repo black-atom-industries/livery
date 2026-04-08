@@ -18,7 +18,7 @@
         "cache": "deno cache --reload .",
         "dev": "deno run -A npm:@tauri-apps/cli dev",
         "build": "deno run -A npm:@tauri-apps/cli build",
-        "vite:dev": "deno run -A npm:vite",
+        "vite:dev": "deno run -A npm:vite --port 1420",
         "vite:build": "deno run -A npm:vite build",
         "check": "deno check src/**/*.ts src/**/*.tsx",
         "test": "deno test -P",
@@ -26,7 +26,7 @@
         "install-hooks": "git config core.hooksPath .githooks && echo 'Hooks installed.'",
         "test:perf-benchmark": "cd src-tauri && cargo run --bin perf-benchmark --release",
         "install:macos": "deno run -A npm:@tauri-apps/cli build && rm -rf /Applications/livery.app && cp -R src-tauri/target/release/bundle/macos/livery.app /Applications/livery.app",
-        "dev:ui": "deno run -A npm:vite --open '/dev'"
+        "dev:ui": "deno run -A npm:vite --port 1430 --open '/dev'"
     },
     "nodeModulesDir": "auto",
     "lint": {
