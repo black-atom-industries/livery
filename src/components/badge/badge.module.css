@@ -1,0 +1,18 @@
+.root {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: var(--bg-default);
+    color: var(--fg-default);
+    border-radius: 0;
+    border: 1px dotted var(--fg-subtle);
+    text-decoration: underline;
+    text-decoration-color: var(--fg-accent);
+    user-select: none;
+}
