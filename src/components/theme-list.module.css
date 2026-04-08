@@ -1,0 +1,38 @@
+.group {
+    margin-bottom: var(--size-2);
+}
+
+.groupLabel {
+    padding: var(--size-1) var(--size-3);
+    font-size: var(--font-size-00);
+    color: var(--fg-disabled);
+    text-transform: uppercase;
+    letter-spacing: var(--font-letterspacing-3);
+}
+
+.item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: var(--size-1) var(--size-3);
+    font-size: var(--font-size-0);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    color: var(--fg-subtle);
+}
+
+.item:hover {
+    color: var(--fg-default);
+}
+
+.selected {
+    background-color: var(--bg-active);
+    color: var(--fg-default);
+}
+
+.icon {
+    margin-left: var(--size-2);
+    color: var(--fg-disabled);
+}
