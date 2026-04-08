@@ -1,6 +1,20 @@
+import { cva } from "cva";
 import { Progress } from "@base-ui/react/progress";
 import type { UpdateResult } from "../lib/updaters.ts";
 import { getProgressState } from "../lib/progress.ts";
+import styles from "./progress-bar.module.css";
+
+const indicatorVariants = cva({
+    base: styles.indicator,
+    variants: {
+        status: {
+            idle: styles.indicatorIdle,
+            running: styles.indicatorRunning,
+            done: styles.indicatorDone,
+            error: styles.indicatorError,
+        },
+    },
+});
 
 interface ProgressBarProps {
     results: UpdateResult[];
@@ -9,13 +23,6 @@ interface ProgressBarProps {
 export function ProgressBar({ results }: ProgressBarProps) {
     const { value, completedCount, total, currentLabel, status, totalDurationMs } =
         getProgressState(results);
-
-    const indicatorColor = {
-        idle: "bg-neutral-600",
-        running: "bg-amber-500",
-        done: "bg-green-500",
-        error: "bg-red-500",
-    }[status];
 
     const labelText = status === "running" && currentLabel
         ? `Applying ${currentLabel}...`
@@ -27,20 +34,21 @@ export function ProgressBar({ results }: ProgressBarProps) {
 
     return (
         <Progress.Root
-            className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1"
+            data-component="progress-bar"
+            className={styles.root}
             value={value}
             max={100}
         >
-            <Progress.Label className="text-xs text-neutral-400">
+            <Progress.Label className={styles.label}>
                 {labelText}
             </Progress.Label>
-            <span className="text-xs text-neutral-500 tabular-nums">
+            <span className={styles.counter}>
                 {completedCount} / {total}
                 {totalDurationMs != null && status !== "running" ? ` (${totalDurationMs}ms)` : ""}
             </span>
-            <Progress.Track className="col-span-full h-1 overflow-hidden rounded bg-neutral-800">
+            <Progress.Track className={styles.track}>
                 <Progress.Indicator
-                    className={`block h-full transition-all duration-300 ${indicatorColor}`}
+                    className={indicatorVariants({ status })}
                 />
             </Progress.Track>
         </Progress.Root>
