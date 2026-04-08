@@ -82,6 +82,7 @@
         "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4",
         "tailwindcss": "npm:tailwindcss@^4",
         "@tailwindcss/vite": "npm:@tailwindcss/vite@^4",
+        "open-props": "npm:open-props@^1",
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
         "@tauri-apps/cli": "npm:@tauri-apps/cli@^2"
     }

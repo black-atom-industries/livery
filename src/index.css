@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+/* Open Props */
+@import "open-props/normalize";
+@import "open-props/sizes";
+@import "open-props/borders";
+@import "open-props/fonts";
+@import "open-props/easings";
+@import "open-props/aspects";
+@import "open-props/zindex";
+@import "open-props/gradients";
+@import "open-props/durations";
