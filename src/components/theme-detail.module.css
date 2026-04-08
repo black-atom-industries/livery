@@ -1,0 +1,32 @@
+.empty {
+    color: var(--fg-disabled);
+    font-size: var(--font-size-0);
+}
+
+.heading {
+    font-size: var(--font-size-4);
+    font-weight: var(--font-weight-7);
+    margin-bottom: var(--size-1);
+}
+
+.badge {
+    font-size: var(--font-size-0);
+    font-weight: var(--font-weight-4);
+    padding: var(--size-1) var(--size-2);
+    border-radius: var(--radius-1);
+}
+
+.badgeDark {
+    background-color: var(--bg-active);
+    color: var(--fg-subtle);
+}
+
+.badgeLight {
+    background-color: var(--bg-contrast);
+    color: var(--fg-contrast);
+}
+
+.collection {
+    font-size: var(--font-size-0);
+    color: var(--fg-subtle);
+}
