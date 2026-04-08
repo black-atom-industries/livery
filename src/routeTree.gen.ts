@@ -10,11 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root.tsx'
 import { Route as SettingsRouteRouteImport } from './routes/settings/route.tsx'
+import { Route as DevRouteRouteImport } from './routes/dev/route.tsx'
 import { Route as IndexRouteImport } from './routes/index.tsx'
+import { Route as DevIndexRouteImport } from './routes/dev/index.tsx'
+import { Route as DevTypographyRouteImport } from './routes/dev/typography.tsx'
+import { Route as DevPrimitivesRouteImport } from './routes/dev/primitives.tsx'
 
 const SettingsRouteRoute = SettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevRouteRoute = DevRouteRouteImport.update({
+  id: '/dev',
+  path: '/dev',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,30 +31,70 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DevIndexRoute = DevIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DevRouteRoute,
+} as any)
+const DevTypographyRoute = DevTypographyRouteImport.update({
+  id: '/typography',
+  path: '/typography',
+  getParentRoute: () => DevRouteRoute,
+} as any)
+const DevPrimitivesRoute = DevPrimitivesRouteImport.update({
+  id: '/primitives',
+  path: '/primitives',
+  getParentRoute: () => DevRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dev': typeof DevRouteRouteWithChildren
   '/settings': typeof SettingsRouteRoute
+  '/dev/primitives': typeof DevPrimitivesRoute
+  '/dev/typography': typeof DevTypographyRoute
+  '/dev/': typeof DevIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/settings': typeof SettingsRouteRoute
+  '/dev/primitives': typeof DevPrimitivesRoute
+  '/dev/typography': typeof DevTypographyRoute
+  '/dev': typeof DevIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dev': typeof DevRouteRouteWithChildren
   '/settings': typeof SettingsRouteRoute
+  '/dev/primitives': typeof DevPrimitivesRoute
+  '/dev/typography': typeof DevTypographyRoute
+  '/dev/': typeof DevIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/settings'
+  fullPaths:
+    | '/'
+    | '/dev'
+    | '/settings'
+    | '/dev/primitives'
+    | '/dev/typography'
+    | '/dev/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/settings'
-  id: '__root__' | '/' | '/settings'
+  to: '/' | '/settings' | '/dev/primitives' | '/dev/typography' | '/dev'
+  id:
+    | '__root__'
+    | '/'
+    | '/dev'
+    | '/settings'
+    | '/dev/primitives'
+    | '/dev/typography'
+    | '/dev/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DevRouteRoute: typeof DevRouteRouteWithChildren
   SettingsRouteRoute: typeof SettingsRouteRoute
 }
 
@@ -58,6 +107,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dev': {
+      id: '/dev'
+      path: '/dev'
+      fullPath: '/dev'
+      preLoaderRoute: typeof DevRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,11 +121,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dev/': {
+      id: '/dev/'
+      path: '/'
+      fullPath: '/dev/'
+      preLoaderRoute: typeof DevIndexRouteImport
+      parentRoute: typeof DevRouteRoute
+    }
+    '/dev/typography': {
+      id: '/dev/typography'
+      path: '/typography'
+      fullPath: '/dev/typography'
+      preLoaderRoute: typeof DevTypographyRouteImport
+      parentRoute: typeof DevRouteRoute
+    }
+    '/dev/primitives': {
+      id: '/dev/primitives'
+      path: '/primitives'
+      fullPath: '/dev/primitives'
+      preLoaderRoute: typeof DevPrimitivesRouteImport
+      parentRoute: typeof DevRouteRoute
+    }
   }
 }
 
+interface DevRouteRouteChildren {
+  DevPrimitivesRoute: typeof DevPrimitivesRoute
+  DevTypographyRoute: typeof DevTypographyRoute
+  DevIndexRoute: typeof DevIndexRoute
+}
+
+const DevRouteRouteChildren: DevRouteRouteChildren = {
+  DevPrimitivesRoute: DevPrimitivesRoute,
+  DevTypographyRoute: DevTypographyRoute,
+  DevIndexRoute: DevIndexRoute,
+}
+
+const DevRouteRouteWithChildren = DevRouteRoute._addFileChildren(
+  DevRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DevRouteRoute: DevRouteRouteWithChildren,
   SettingsRouteRoute: SettingsRouteRoute,
 }
 export const routeTree = rootRouteImport
