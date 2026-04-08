@@ -5,6 +5,9 @@
         "jsx": "react-jsx",
         "jsxImportSource": "react",
         "jsxImportSourceTypes": "@types/react",
+        "types": [
+            "npm:vite/client"
+        ],
         "lib": [
             "deno.ns",
             "dom",
