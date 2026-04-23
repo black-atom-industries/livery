@@ -17,6 +17,15 @@ export const typoColors = [
 
 export type TypoColor = typeof typoColors[number];
 
+export const typoFonts = ["heading", "body", "mono"] as const;
+export type TypoFont = typeof typoFonts[number];
+
+export const fontVariants: Record<TypoFont, string> = {
+    heading: "Typo--font-heading",
+    body: "Typo--font-body",
+    mono: "Typo--font-mono",
+};
+
 export const colorVariants: Record<TypoColor, string> = {
     default: "Typo--color-default",
     subtle: "Typo--color-subtle",

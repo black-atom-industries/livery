@@ -1,4 +1,20 @@
-/* Shared color classes for all Typo components */
+/* Shared variant classes for all Typo components */
+
+/* Font variants */
+.Typo--font-heading {
+    font-family: var(--font-heading);
+}
+
+.Typo--font-body {
+    font-family: var(--font-body);
+}
+
+.Typo--font-mono {
+    font-family: var(--font-mono);
+    font-variation-settings: "MONO" 1, "CASL" 0;
+}
+
+/* Color variants */
 .Typo--color-default {
     color: var(--fg-default);
 }

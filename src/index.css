@@ -11,5 +11,19 @@
 @import "open-props/gradients";
 @import "open-props/durations";
 
+/* Fonts */
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/recursive/full.css";
+
 /* Typo */
-@import "./components/typo/colors.css";
+@import "./components/typo/variants.css";
+
+:root {
+    --font-heading: "Space Grotesk Variable", sans-serif;
+    --font-body: "Recursive Variable", sans-serif;
+    --font-mono: "Recursive Variable", monospace;
+}
+
+body {
+    font-family: var(--font-body);
+}

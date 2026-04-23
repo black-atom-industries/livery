@@ -10,7 +10,7 @@ import { listVariants, OrderedList, UnorderedList } from "./list.tsx";
 import { P, pVariants } from "./p.tsx";
 import { Small, smallVariants } from "./small.tsx";
 
-export { type TypoColor, typoColors } from "./colors.ts";
+export { type TypoColor, typoColors, type TypoFont, typoFonts } from "./variants.ts";
 
 export const Typo = {
     Blockquote,

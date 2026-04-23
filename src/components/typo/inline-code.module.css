@@ -1,6 +1,6 @@
 .root {
     font-size: var(--font-size-0);
-    background: var(--color-bg-support);
+    background: var(--bg-panel);
     padding: var(--size-1) var(--size-2);
-    border-radius: var(--radius-2);
+    border-radius: var(--radius-1);
 }
