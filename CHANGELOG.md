@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.0](https://github.com/black-atom-industries/livery/compare/v0.2.0...v0.3.0) (2026-04-27)
+
+
+### Features
+
+* add global shortcut to toggle window visibility ([1170141](https://github.com/black-atom-industries/livery/commit/117014153b14cdd1ce9308bfe7e13d3ecbdae0fe))
+* add global shortcut to toggle window visibility ([a6788a9](https://github.com/black-atom-industries/livery/commit/a6788a9f478f926e7cc66a3c27bb8df0449439b1))
+* add macOS install task and fix PATH for .app bundles [#41](https://github.com/black-atom-industries/livery/issues/41) ([e654a30](https://github.com/black-atom-industries/livery/commit/e654a301b7dbfe4e23db98350d41cf803c1cfe6d))
+* add macOS install task and fix PATH for .app bundles [#41](https://github.com/black-atom-industries/livery/issues/41) ([14eeb46](https://github.com/black-atom-industries/livery/commit/14eeb4697bc5662e2f274c3892083baafba61e8b))
+
+
+### Bug Fixes
+
+* **be:** skip obsidian reload when app is not running ([340d725](https://github.com/black-atom-industries/livery/commit/340d725a04661712058b06329784b386e95992f2))
+
+
+### Documentation
+
+* add ubiquitous language glossary for livery domain ([9dce97a](https://github.com/black-atom-industries/livery/commit/9dce97affe148a0df35bbf8a3ee8a60f2fb3cbaa))
+* add Update term to glossary ([ce766be](https://github.com/black-atom-industries/livery/commit/ce766be7bbd256c1f06eda54eefe180b8abc5ab9))
+* expand typography hierarchy and refine design system ([22152f1](https://github.com/black-atom-industries/livery/commit/22152f174e7fe548c18dc698ca27a9d6dabb32ae))
+* hint at glossary ([db7feba](https://github.com/black-atom-industries/livery/commit/db7feba0cc21d8300f4adbcbd42ae66d24c2b6d1))
+* reorganize design docs and consolidate drafts ([9048ae5](https://github.com/black-atom-industries/livery/commit/9048ae59d8327d8cf42bdec72f92d8bdada610bd))
+* sync project knowledge to v0.2.0 — add obsidian, jsonc, benchmark ([59f682b](https://github.com/black-atom-industries/livery/commit/59f682b0afd9cd7138ee11b108466511a81a6f5a))
+
 ## [0.2.0](https://github.com/black-atom-industries/livery/compare/v0.1.0...v0.2.0) (2026-03-22)
 
 
