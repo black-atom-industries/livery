@@ -12,7 +12,7 @@
         ]
     },
     "tasks": {
-        "cache": "deno cache --reload .",
+        "cache": "deno cache --reload src/",
         "dev": "deno run -A npm:@tauri-apps/cli dev",
         "build": "deno run -A npm:@tauri-apps/cli build",
         "vite:dev": "deno run -A npm:vite",
