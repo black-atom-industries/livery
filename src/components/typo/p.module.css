@@ -1,0 +1,27 @@
+.root {
+    --mono: "MONO" 0;
+
+    /* Monospace: Sans (natural-width) or Mono (fixed-width) */
+    /* --casl: "CASL" 0; */
+    --casl: "CASL" 1;
+
+    /* Casual: Linear to Casual */
+    --wght: "wght" 350;
+
+    /* Weight: Light to ExtraBlack; usually set with `font-weight` */
+    --slnt: "slnt" 0;
+
+    /* Slant: 0 to -15 degrees, auto cursive at -14 */
+    --CRSV: "CRSV" 0.5;
+
+    font-size: var(--font-size-fluid-0);
+
+    font-variation-settings:
+        var(--mono),
+        var(--casl),
+        var(--wght),
+        var(--slnt),
+        var(--CRSV);
+
+    margin: 0 0 var(--size-2);
+}

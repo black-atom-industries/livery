@@ -1,0 +1,47 @@
+.root {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--size-1) var(--size-3);
+}
+
+.label {
+    font-size: var(--font-size-00);
+    color: var(--fg-subtle);
+}
+
+.counter {
+    font-size: var(--font-size-00);
+    color: var(--fg-disabled);
+    font-variant-numeric: tabular-nums;
+}
+
+.track {
+    grid-column: 1 / -1;
+    height: var(--size-1);
+    overflow: hidden;
+    border-radius: var(--radius-1);
+    background-color: var(--bg-active);
+}
+
+.indicator {
+    display: block;
+    height: 100%;
+    transition: all var(--duration-gentle-1) var(--ease-3);
+}
+
+.indicatorIdle {
+    background-color: var(--bg-disabled);
+}
+
+.indicatorRunning {
+    background-color: var(--bg-warn);
+}
+
+.indicatorDone {
+    background-color: var(--bg-positive);
+}
+
+.indicatorError {
+    background-color: var(--bg-negative);
+}

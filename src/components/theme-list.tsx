@@ -1,4 +1,15 @@
+import { cva } from "cva";
 import type { ThemeGroup } from "../lib/themes.ts";
+import styles from "./theme-list.module.css";
+
+const itemVariants = cva({
+    base: styles.item,
+    variants: {
+        selected: {
+            true: styles.selected,
+        },
+    },
+});
 
 interface ThemeListProps {
     groups: ThemeGroup[];
@@ -10,7 +21,7 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
     let flatIndex = 0;
 
     return (
-        <div>
+        <div data-component="theme-list">
             {groups.map((group) => {
                 const items = group.themes.map((entry) => {
                     const index = flatIndex++;
@@ -26,22 +37,18 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
                                 : undefined}
                             type="button"
                             onClick={() => onSelect(index)}
-                            className={`block w-full text-left px-3 py-1 text-sm cursor-pointer ${
-                                isSelected
-                                    ? "bg-neutral-800 text-neutral-100"
-                                    : "text-neutral-400 hover:text-neutral-200"
-                            }`}
+                            className={itemVariants({ selected: isSelected })}
                         >
                             {isSelected ? "> " : "  "}
                             {name}
-                            <span className="ml-2 text-neutral-600">{icon}</span>
+                            <span className={styles.icon}>{icon}</span>
                         </button>
                     );
                 });
 
                 return (
-                    <div key={group.collectionKey} className="mb-2">
-                        <div className="px-3 py-1 text-xs text-neutral-600 uppercase tracking-wider">
+                    <div key={group.collectionKey} className={styles.group}>
+                        <div className={styles.groupLabel}>
                             {group.label} ({group.themes.length})
                         </div>
                         {items}

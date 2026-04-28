@@ -1,5 +1,5 @@
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 use yaml_edit::YamlFile;
@@ -70,14 +70,16 @@ pub fn patch_yaml_file(target_path: String, source_path: String) -> Result<(), S
     apply_overlay(&target_mapping, &source_mapping, &overlay)?;
 
     // Atomic write: temp file + persist
-    let parent = Path::new(&target_path)
+    // Use resolved_target (not target_path) so rename() writes through symlinks
+    // rather than replacing the symlink itself with a new regular file.
+    let parent = resolved_target
         .parent()
-        .ok_or(format!("No parent directory for {target_path}"))?;
+        .ok_or_else(|| format!("No parent directory for {target_path}"))?;
     let mut tmp = tempfile::NamedTempFile::new_in(parent)
         .map_err(|e| format!("Failed to create temp file: {e}"))?;
     tmp.write_all(target_file.to_string().as_bytes())
         .map_err(|e| format!("Failed to write temp file: {e}"))?;
-    tmp.persist(&target_path)
+    tmp.persist(&resolved_target)
         .map_err(|e| format!("Failed to persist to {target_path}: {e}"))?;
 
     Ok(())

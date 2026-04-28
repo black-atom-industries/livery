@@ -1,0 +1,16 @@
+.root {
+    padding-left: var(--size-6);
+    margin: var(--size-4) 0;
+}
+
+.root li {
+    margin-bottom: var(--size-2);
+}
+
+.unordered {
+    list-style-type: disc;
+}
+
+.ordered {
+    list-style-type: decimal;
+}

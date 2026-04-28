@@ -5,6 +5,9 @@
         "jsx": "react-jsx",
         "jsxImportSource": "react",
         "jsxImportSourceTypes": "@types/react",
+        "types": [
+            "npm:vite/client"
+        ],
         "lib": [
             "deno.ns",
             "dom",
@@ -15,14 +18,15 @@
         "cache": "deno cache --reload src/",
         "dev": "deno run -A npm:@tauri-apps/cli dev",
         "build": "deno run -A npm:@tauri-apps/cli build",
-        "vite:dev": "deno run -A npm:vite",
+        "vite:dev": "deno run -A npm:vite --port 1420",
         "vite:build": "deno run -A npm:vite build",
         "check": "deno check src/**/*.ts src/**/*.tsx",
         "test": "deno test -P",
         "checks": "deno run -A .githooks/checks-frontend.ts && deno run -A .githooks/checks-backend.ts",
         "install-hooks": "git config core.hooksPath .githooks && echo 'Hooks installed.'",
         "test:perf-benchmark": "cd src-tauri && cargo run --bin perf-benchmark --release",
-        "install:macos": "deno run -A npm:@tauri-apps/cli build && rm -rf /Applications/livery.app && cp -R src-tauri/target/release/bundle/macos/livery.app /Applications/livery.app"
+        "install:macos": "deno run -A npm:@tauri-apps/cli build && rm -rf /Applications/livery.app && cp -R src-tauri/target/release/bundle/macos/livery.app /Applications/livery.app",
+        "dev:ui": "deno run -A npm:vite --port 1430 --open '/dev'"
     },
     "nodeModulesDir": "auto",
     "lint": {
@@ -56,9 +60,14 @@
         }
     },
     "imports": {
+        "@/": "./src/",
         "@base-ui/react": "npm:@base-ui/react@^1",
         "@black-atom/core": "jsr:@black-atom/core@^0.4.0",
+        "cva": "npm:cva@^1.0.0-beta.4",
+        "clsx": "npm:clsx@^2.1.1",
         "@deno/vite-plugin": "npm:@deno/vite-plugin@^1",
+        "@fontsource-variable/recursive": "npm:@fontsource-variable/recursive@^5",
+        "@fontsource-variable/space-grotesk": "npm:@fontsource-variable/space-grotesk@^5",
         "@std/assert": "jsr:@std/assert@^1.0.0",
         "@std/path": "jsr:@std/path@^1.0.0",
         "@tanstack/store": "npm:@tanstack/store@^0.9",
@@ -78,6 +87,7 @@
         "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4",
         "tailwindcss": "npm:tailwindcss@^4",
         "@tailwindcss/vite": "npm:@tailwindcss/vite@^4",
+        "open-props": "npm:open-props@^1",
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
         "@tauri-apps/cli": "npm:@tauri-apps/cli@^2"
     }
