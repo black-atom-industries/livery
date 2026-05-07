@@ -7,6 +7,10 @@
 @import "@fontsource-variable/space-grotesk";
 @import "@fontsource-variable/recursive/full.css";
 
+html {
+    font-size: 125%; /* 19px — readability bump for desktop use */
+}
+
 body {
     font-family: var(--lvr-font-family-body);
 }
