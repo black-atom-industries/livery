@@ -22,6 +22,7 @@ function DevOverview() {
         <div>
             <h1
                 style={{
+                    fontFamily: "var(--lvr-font-family-heading)",
                     fontSize: 14,
                     fontWeight: 600,
                     textTransform: "uppercase",
@@ -42,7 +43,7 @@ function DevOverview() {
                             padding: "12px 16px",
                             border: "1px solid var(--border-default, var(--primary-d20))",
                             textDecoration: "none",
-                            color: "var(--fg-default)",
+                            color: "var(--lvr-color-fg-default)",
                         }}
                     >
                         <div
@@ -55,7 +56,7 @@ function DevOverview() {
                         >
                             {s.label}
                         </div>
-                        <div style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 4 }}>
+                        <div style={{ fontSize: 11, color: "var(--lvr-color-fg-subtle)", marginTop: 4 }}>
                             {s.description}
                         </div>
                     </Link>

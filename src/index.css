@@ -1,15 +1,12 @@
 @import "tailwindcss";
 
-/* Open Props */
-@import "open-props/normalize";
-@import "open-props/sizes";
-@import "open-props/borders";
-@import "open-props/fonts";
-@import "open-props/easings";
-@import "open-props/aspects";
-@import "open-props/zindex";
-@import "open-props/gradients";
-@import "open-props/durations";
+/* Livery design token system — replaces Open Props */
+@import "./styles/variables/index.css";
 
-/* Typo */
-@import "./components/typo/colors.css";
+/* Fonts */
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/recursive/full.css";
+
+body {
+    font-family: var(--lvr-font-family-body);
+}

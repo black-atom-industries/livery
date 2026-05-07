@@ -6,7 +6,7 @@ export const Route = createRootRoute({
 
 function RootLayout() {
     return (
-        <div className="h-screen flex flex-col bg-neutral-950 text-neutral-100 font-mono">
+        <div className="h-screen flex flex-col bg-neutral-950 text-neutral-100" style={{ fontFamily: "var(--lvr-font-family-body)" }}>
             <Outlet />
         </div>
     );

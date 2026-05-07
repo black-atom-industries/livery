@@ -1,0 +1,13 @@
+/* =============================================================
+   Livery — Layer (z-index) tokens
+   Linear 1–5 scale for stacking contexts + an escape-hatch value.
+   ============================================================= */
+
+:root {
+  --lvr-layer-1: 1;
+  --lvr-layer-2: 2;
+  --lvr-layer-3: 3;
+  --lvr-layer-4: 4;
+  --lvr-layer-5: 5;
+  --lvr-layer-important: 999;
+}

@@ -1,0 +1,152 @@
+.TypoH1,
+.TypoH2,
+.TypoH3,
+.TypoH4,
+.TypoP,
+.TypoLead,
+.TypoSmall,
+.TypoBlockquote,
+.TypoInlineCode,
+.TypoHighlight,
+.TypoOrderedList,
+.TypoUnorderedList {
+  margin: 0;
+  letter-spacing: var(--lvr-font-letterspacing-normal);
+}
+
+.TypoH1 {
+  font-family: var(--lvr-font-family-heading);
+  font-size: var(--lvr-font-size-fluid-3);
+  font-weight: var(--lvr-font-weight-8);
+  line-height: var(--lvr-font-lineheight-00);
+  letter-spacing: var(--lvr-font-letterspacing-tight);
+}
+
+.TypoH2 {
+  font-family: var(--lvr-font-family-heading);
+  font-size: var(--lvr-font-size-fluid-2);
+  font-weight: var(--lvr-font-weight-7);
+  line-height: var(--lvr-font-lineheight-0);
+  letter-spacing: var(--lvr-font-letterspacing-tight);
+}
+
+.TypoH3 {
+  font-family: var(--lvr-font-family-heading);
+  font-size: var(--lvr-font-size-5);
+  font-weight: var(--lvr-font-weight-6);
+  line-height: var(--lvr-font-lineheight-1);
+}
+
+.TypoH4 {
+  font-family: var(--lvr-font-family-heading);
+  font-size: var(--lvr-font-size-4);
+  font-weight: var(--lvr-font-weight-6);
+  line-height: var(--lvr-font-lineheight-1);
+}
+
+.TypoP {
+  font-family: var(--lvr-font-family-body);
+  font-size: var(--lvr-font-size-1);
+  font-weight: var(--lvr-font-weight-4);
+  line-height: var(--lvr-font-lineheight-3);
+}
+
+.TypoLead {
+  font-family: var(--lvr-font-family-body);
+  font-size: var(--lvr-font-size-3);
+  font-weight: var(--lvr-font-weight-4);
+  line-height: var(--lvr-font-lineheight-3);
+}
+
+.TypoSmall {
+  font-family: var(--lvr-font-family-body);
+  font-size: var(--lvr-font-size-0);
+  font-weight: var(--lvr-font-weight-4);
+  line-height: var(--lvr-font-lineheight-2);
+}
+
+.TypoBlockquote {
+  font-family: var(--lvr-font-family-body);
+  font-size: var(--lvr-font-size-2);
+  font-weight: var(--lvr-font-weight-4);
+  line-height: var(--lvr-font-lineheight-3);
+  font-style: italic;
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid var(--lvr-color-fg-hint);
+}
+
+.TypoInlineCode {
+  font-family: var(--lvr-font-family-code);
+  font-variation-settings: "MONO" 1;
+  font-size: 0.9em;
+  font-weight: var(--lvr-font-weight-5);
+  line-height: inherit;
+  padding: 0.125em 0.375em;
+  border-radius: 0.25rem;
+  background-color: color-mix(in oklch, var(--lvr-color-fg-default) 12%, transparent);
+}
+
+.TypoHighlight {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: var(--lvr-font-weight-5);
+  line-height: inherit;
+  padding: 0.05em 0.25em;
+  border-radius: 0.2rem;
+  background-color: color-mix(in oklch, var(--lvr-color-bg-warn) 50%, transparent);
+}
+
+.TypoOrderedList,
+.TypoUnorderedList {
+  font-family: var(--lvr-font-family-body);
+  font-size: var(--lvr-font-size-1);
+  font-weight: var(--lvr-font-weight-4);
+  line-height: var(--lvr-font-lineheight-3);
+  padding: 0;
+  padding-inline-start: 1.5rem;
+}
+
+.TypoOrderedList {
+  list-style: decimal outside;
+}
+
+.TypoUnorderedList {
+  list-style: disc outside;
+}
+
+.TypoOrderedList > li + li,
+.TypoUnorderedList > li + li {
+  margin-top: 0.25rem;
+}
+
+/* Color variants via data-color attribute */
+[data-component^="Typo."][data-color="default"] {
+  color: var(--lvr-color-fg-default);
+}
+[data-component^="Typo."][data-color="subtle"] {
+  color: var(--lvr-color-fg-subtle);
+}
+[data-component^="Typo."][data-color="hint"] {
+  color: var(--lvr-color-fg-hint);
+}
+[data-component^="Typo."][data-color="accent"] {
+  color: var(--lvr-color-fg-accent);
+}
+[data-component^="Typo."][data-color="contrast"] {
+  color: var(--lvr-color-fg-contrast);
+}
+[data-component^="Typo."][data-color="disabled"] {
+  color: var(--lvr-color-fg-disabled);
+}
+[data-component^="Typo."][data-color="positive"] {
+  color: var(--lvr-color-fg-positive);
+}
+[data-component^="Typo."][data-color="negative"] {
+  color: var(--lvr-color-fg-negative);
+}
+[data-component^="Typo."][data-color="warn"] {
+  color: var(--lvr-color-fg-warn);
+}
+[data-component^="Typo."][data-color="info"] {
+  color: var(--lvr-color-fg-info);
+}

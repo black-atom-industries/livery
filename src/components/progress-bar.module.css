@@ -2,46 +2,48 @@
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
-    gap: var(--size-1) var(--size-3);
+    gap: var(--lvr-size-1) var(--lvr-size-3);
 }
 
 .label {
-    font-size: var(--font-size-00);
-    color: var(--fg-subtle);
+    font-family: var(--lvr-font-family-ui);
+    font-size: var(--lvr-font-size-00);
+    color: var(--lvr-color-fg-subtle);
 }
 
 .counter {
-    font-size: var(--font-size-00);
-    color: var(--fg-disabled);
+    font-family: var(--lvr-font-family-ui);
+    font-size: var(--lvr-font-size-00);
+    color: var(--lvr-color-fg-disabled);
     font-variant-numeric: tabular-nums;
 }
 
 .track {
     grid-column: 1 / -1;
-    height: var(--size-1);
+    height: var(--lvr-size-1);
     overflow: hidden;
-    border-radius: var(--radius-1);
-    background-color: var(--bg-active);
+    border-radius: var(--lvr-radius-1);
+    background-color: var(--lvr-color-bg-accent);
 }
 
 .indicator {
     display: block;
     height: 100%;
-    transition: all var(--duration-gentle-1) var(--ease-3);
+    transition: all var(--lvr-duration-gentle-1) var(--lvr-ease-3);
 }
 
 .indicatorIdle {
-    background-color: var(--bg-disabled);
+    background-color: var(--lvr-color-bg-disabled);
 }
 
 .indicatorRunning {
-    background-color: var(--bg-warn);
+    background-color: var(--lvr-color-bg-warn);
 }
 
 .indicatorDone {
-    background-color: var(--bg-positive);
+    background-color: var(--lvr-color-bg-positive);
 }
 
 .indicatorError {
-    background-color: var(--bg-negative);
+    background-color: var(--lvr-color-bg-negative);
 }

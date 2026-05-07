@@ -1,38 +1,40 @@
 .group {
-    margin-bottom: var(--size-2);
+    margin-bottom: var(--lvr-size-2);
 }
 
 .groupLabel {
-    padding: var(--size-1) var(--size-3);
-    font-size: var(--font-size-00);
-    color: var(--fg-disabled);
+    padding: var(--lvr-size-1) var(--lvr-size-3);
+    font-family: var(--lvr-font-family-ui);
+    font-size: var(--lvr-font-size-00);
+    font-weight: var(--lvr-font-weight-5);
+    color: var(--lvr-color-fg-disabled);
     text-transform: uppercase;
-    letter-spacing: var(--font-letterspacing-3);
+    letter-spacing: var(--lvr-font-letterspacing-wide);
 }
 
 .item {
     display: block;
     width: 100%;
     text-align: left;
-    padding: var(--size-1) var(--size-3);
-    font-size: var(--font-size-0);
+    padding: var(--lvr-size-1) var(--lvr-size-3);
+    font-size: var(--lvr-font-size-0);
     cursor: pointer;
     border: none;
     background: transparent;
     font-family: inherit;
-    color: var(--fg-subtle);
+    color: var(--lvr-color-fg-subtle);
 }
 
 .item:hover {
-    color: var(--fg-default);
+    color: var(--lvr-color-fg-default);
 }
 
 .selected {
-    background-color: var(--bg-active);
-    color: var(--fg-default);
+    background-color: var(--lvr-color-bg-accent);
+    color: var(--lvr-color-fg-default);
 }
 
 .icon {
-    margin-left: var(--size-2);
-    color: var(--fg-disabled);
+    margin-left: var(--lvr-size-2);
+    color: var(--lvr-color-fg-disabled);
 }

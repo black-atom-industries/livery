@@ -4,17 +4,18 @@
 }
 
 .title {
-    font-size: var(--font-size-3);
-    font-weight: var(--font-weight-7);
+    font-family: var(--lvr-font-family-heading);
+    font-size: var(--lvr-font-size-3);
+    font-weight: var(--lvr-font-weight-7);
 }
 
 .version {
-    font-size: var(--font-size-0);
-    font-weight: var(--font-weight-4);
-    color: var(--fg-subtle);
+    font-size: var(--lvr-font-size-0);
+    font-weight: var(--lvr-font-weight-4);
+    color: var(--lvr-color-fg-subtle);
 }
 
 .subtitle {
-    font-size: var(--font-size-0);
-    color: var(--fg-subtle);
+    font-size: var(--lvr-font-size-0);
+    color: var(--lvr-color-fg-subtle);
 }

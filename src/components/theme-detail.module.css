@@ -1,32 +1,33 @@
 .empty {
-    color: var(--fg-disabled);
-    font-size: var(--font-size-0);
+    color: var(--lvr-color-fg-disabled);
+    font-size: var(--lvr-font-size-0);
 }
 
 .heading {
-    font-size: var(--font-size-4);
-    font-weight: var(--font-weight-7);
-    margin-bottom: var(--size-1);
+    font-family: var(--lvr-font-family-heading);
+    font-size: var(--lvr-font-size-4);
+    font-weight: var(--lvr-font-weight-7);
+    margin-bottom: var(--lvr-size-1);
 }
 
 .badge {
-    font-size: var(--font-size-0);
-    font-weight: var(--font-weight-4);
-    padding: var(--size-1) var(--size-2);
-    border-radius: var(--radius-1);
+    font-size: var(--lvr-font-size-0);
+    font-weight: var(--lvr-font-weight-4);
+    padding: var(--lvr-size-1) var(--lvr-size-2);
+    border-radius: var(--lvr-radius-1);
 }
 
 .badgeDark {
-    background-color: var(--bg-active);
-    color: var(--fg-subtle);
+    background-color: var(--lvr-color-bg-accent);
+    color: var(--lvr-color-fg-subtle);
 }
 
 .badgeLight {
-    background-color: var(--bg-contrast);
-    color: var(--fg-contrast);
+    background-color: var(--lvr-color-bg-contrast);
+    color: var(--lvr-color-fg-contrast);
 }
 
 .collection {
-    font-size: var(--font-size-0);
-    color: var(--fg-subtle);
+    font-size: var(--lvr-font-size-0);
+    color: var(--lvr-color-fg-subtle);
 }

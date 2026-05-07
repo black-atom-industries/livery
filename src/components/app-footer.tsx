@@ -12,9 +12,9 @@ const SHORTCUTS: Shortcut[] = [
 
 export function AppFooter() {
     return (
-        <div className="flex gap-6">
+        <div className="flex gap-6" style={{ fontFamily: "var(--lvr-font-family-ui)" }}>
             {SHORTCUTS.map((s) => (
-                <span key={s.key}>
+                <span key={s.key} style={{ fontSize: "var(--lvr-font-size-00)" }}>
                     <kbd className="text-neutral-300">{s.key}</kbd>{" "}
                     <span className="text-neutral-500">{s.label}</span>
                 </span>

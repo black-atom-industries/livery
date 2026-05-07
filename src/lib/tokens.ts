@@ -2,35 +2,33 @@ import type { ThemeDefinition } from "@black-atom/core";
 
 /**
  * Maps a ThemeDefinition's UI colors to CSS custom property declarations.
- * Components consume these as var(--bg-default), var(--fg-subtle), etc.
+ * Components consume these as var(--lvr-color-bg-default), var(--lvr-color-fg-default), etc.
  */
 export function themeToCustomProperties(theme: ThemeDefinition): Record<string, string> {
     return {
         // Backgrounds
-        "--bg-default": theme.ui.bg.default,
-        "--bg-panel": theme.ui.bg.panel,
-        "--bg-float": theme.ui.bg.float,
-        "--bg-active": theme.ui.bg.active,
-        "--bg-hover": theme.ui.bg.hover,
-        "--bg-selection": theme.ui.bg.selection,
-        "--bg-disabled": theme.ui.bg.disabled,
-        "--bg-contrast": theme.ui.bg.contrast,
-        "--bg-positive": theme.ui.bg.positive,
-        "--bg-negative": theme.ui.bg.negative,
-        "--bg-warn": theme.ui.bg.warn,
-        "--bg-info": theme.ui.bg.info,
+        "--lvr-color-bg-default": theme.ui.bg.default,
+        "--lvr-color-bg-subtle": theme.ui.bg.panel,
+        "--lvr-color-bg-hint": theme.ui.bg.float,
+        "--lvr-color-bg-accent": theme.ui.bg.active,
+        "--lvr-color-bg-contrast": theme.ui.bg.contrast,
+        "--lvr-color-bg-disabled": theme.ui.bg.disabled,
+        "--lvr-color-bg-positive": theme.ui.bg.positive,
+        "--lvr-color-bg-negative": theme.ui.bg.negative,
+        "--lvr-color-bg-warn": theme.ui.bg.warn,
+        "--lvr-color-bg-info": theme.ui.bg.info,
 
         // Foregrounds
-        "--fg-default": theme.ui.fg.default,
-        "--fg-subtle": theme.ui.fg.subtle,
-        "--fg-accent": theme.ui.fg.accent,
-        "--fg-contrast": theme.ui.fg.contrast,
-        "--fg-disabled": theme.ui.fg.disabled,
-        "--fg-positive": theme.ui.fg.positive,
-        "--fg-negative": theme.ui.fg.negative,
-        "--fg-warn": theme.ui.fg.warn,
-        "--fg-info": theme.ui.fg.info,
-        "--fg-hint": theme.ui.fg.hint,
+        "--lvr-color-fg-default": theme.ui.fg.default,
+        "--lvr-color-fg-subtle": theme.ui.fg.subtle,
+        "--lvr-color-fg-hint": theme.ui.fg.hint,
+        "--lvr-color-fg-accent": theme.ui.fg.accent,
+        "--lvr-color-fg-contrast": theme.ui.fg.contrast,
+        "--lvr-color-fg-disabled": theme.ui.fg.disabled,
+        "--lvr-color-fg-positive": theme.ui.fg.positive,
+        "--lvr-color-fg-negative": theme.ui.fg.negative,
+        "--lvr-color-fg-warn": theme.ui.fg.warn,
+        "--lvr-color-fg-info": theme.ui.fg.info,
     };
 }
 
