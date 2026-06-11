@@ -45,8 +45,25 @@ fn is_valid_theme_key(key: &str) -> bool {
             .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
 }
 
+/// Check whether a file name matches Neovim's server socket naming convention:
+/// `<appname>.<pid>.<instance>`, e.g. `nvim.12345.0` or `nvim-edit.12345.0`.
+/// The appname segment varies with `$NVIM_APPNAME`, so only the trailing
+/// `.<pid>.<instance>` (both numeric) is checked.
+fn is_nvim_socket_name(name: &str) -> bool {
+    let mut parts = name.rsplitn(3, '.');
+    let (Some(instance), Some(pid), Some(appname)) = (parts.next(), parts.next(), parts.next())
+    else {
+        return false;
+    };
+    !appname.is_empty()
+        && !pid.is_empty()
+        && !instance.is_empty()
+        && pid.chars().all(|c| c.is_ascii_digit())
+        && instance.chars().all(|c| c.is_ascii_digit())
+}
+
 /// Find all Neovim server sockets in the given tmpdir.
-/// Neovim auto-creates sockets at $TMPDIR/nvim.<user>/*/nvim.*
+/// Neovim auto-creates sockets at $TMPDIR/nvim.<user>/*/<appname>.<pid>.<instance>
 // TODO: Also check $XDG_RUNTIME_DIR on Linux for nvim sockets
 fn find_nvim_sockets(tmpdir: &Path) -> Vec<PathBuf> {
     let mut sockets = Vec::new();
@@ -78,7 +95,7 @@ fn find_nvim_sockets(tmpdir: &Path) -> Vec<PathBuf> {
                     .map(|n| n.to_string_lossy().to_string())
                     .unwrap_or_default();
 
-                if socket_name.starts_with("nvim.") {
+                if is_nvim_socket_name(&socket_name) {
                     sockets.push(socket_path);
                 }
             }
@@ -172,4 +189,25 @@ fn reload(theme_key: &str, max_sockets: Option<usize>) -> Result<(), String> {
     );
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_nvim_socket_name() {
+        assert!(is_nvim_socket_name("nvim.12345.0"));
+        assert!(is_nvim_socket_name("nvim-edit.12345.0"));
+        assert!(is_nvim_socket_name("lazyvim.1.0"));
+    }
+
+    #[test]
+    fn test_is_nvim_socket_name_rejects_non_sockets() {
+        assert!(!is_nvim_socket_name("nvim"));
+        assert!(!is_nvim_socket_name("nvim.lock"));
+        assert!(!is_nvim_socket_name("nvim..0"));
+        assert!(!is_nvim_socket_name(".12345.0"));
+        assert!(!is_nvim_socket_name("nvim.12345.abc"));
+    }
 }
