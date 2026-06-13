@@ -6,6 +6,7 @@ import { AppFooter } from "../../components/app-footer.tsx";
 import { ProgressBar } from "../../components/progress-bar.tsx";
 import { themeToStyleSheet } from "../../lib/tokens.ts";
 import { appStore } from "../../store/app.ts";
+import styles from "./route.module.css";
 
 export const Route = createFileRoute("/_app")({
     component: AppLayout,
@@ -18,22 +19,20 @@ function AppLayout() {
     return (
         <>
             <style id="black-atom-theme-tokens">{themeToStyleSheet(currentTheme)}</style>
-
-            <header className="shrink-0 px-6 py-4 border-b border-neutral-800">
-                <AppHeader version={denoConfig.version} />
-            </header>
-
-            <main className="flex-1 min-h-0">
-                <Outlet />
-            </main>
-
-            <div className="shrink-0 px-6 py-2 border-t border-neutral-800">
-                <ProgressBar results={updaterResults} />
+            <div className={styles.root}>
+                <header className={styles.header}>
+                    <AppHeader version={denoConfig.version} />
+                </header>
+                <main className={styles.main}>
+                    <Outlet />
+                </main>
+                <div className={styles.progress}>
+                    <ProgressBar results={updaterResults} />
+                </div>
+                <footer className={styles.footer}>
+                    <AppFooter />
+                </footer>
             </div>
-
-            <footer className="shrink-0 px-6 py-2 border-t border-neutral-800 text-xs text-neutral-500">
-                <AppFooter />
-            </footer>
         </>
     );
 }

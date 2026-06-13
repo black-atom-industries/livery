@@ -5,7 +5,7 @@
 .groupLabel {
     padding: var(--lvr-size-1) var(--lvr-size-3);
     font-family: var(--lvr-font-family-ui);
-    font-size: var(--lvr-font-size-00);
+    font-size: var(--lvr-font-size-0);
     font-weight: var(--lvr-font-weight-5);
     color: var(--lvr-color-fg-disabled);
     text-transform: uppercase;
@@ -13,11 +13,12 @@
 }
 
 .item {
-    display: block;
+    display: flex;
+    align-items: center;
     width: 100%;
     text-align: left;
     padding: var(--lvr-size-1) var(--lvr-size-3);
-    font-size: var(--lvr-font-size-0);
+    font-size: var(--lvr-font-size-1);
     cursor: pointer;
     border: none;
     background: transparent;
@@ -34,7 +35,23 @@
     color: var(--lvr-color-fg-default);
 }
 
+.cursor {
+    display: inline-flex;
+    align-items: center;
+    width: 14px;
+    margin-right: var(--lvr-size-1);
+    color: var(--lvr-color-fg-accent);
+    flex-shrink: 0;
+}
+
 .icon {
-    margin-left: var(--lvr-size-2);
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
     color: var(--lvr-color-fg-disabled);
+    flex-shrink: 0;
+}
+
+.selected .icon {
+    color: var(--lvr-color-fg-accent);
 }

@@ -4,10 +4,10 @@
    ============================================================= */
 
 :root {
-  --lvr-layer-1: 1;
-  --lvr-layer-2: 2;
-  --lvr-layer-3: 3;
-  --lvr-layer-4: 4;
-  --lvr-layer-5: 5;
-  --lvr-layer-important: 999;
+    --lvr-layer-1: 1;
+    --lvr-layer-2: 2;
+    --lvr-layer-3: 3;
+    --lvr-layer-4: 4;
+    --lvr-layer-5: 5;
+    --lvr-layer-important: 999;
 }

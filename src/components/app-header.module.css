@@ -1,3 +1,9 @@
+/* =============================================================
+   AppHeader — Application title bar
+   DESIGN.md: Display font for title, mono for version/subtitle.
+   Bottom border handled by App.Shell.
+   ============================================================= */
+
 .root {
     display: flex;
     flex-direction: column;
@@ -7,15 +13,23 @@
     font-family: var(--lvr-font-family-heading);
     font-size: var(--lvr-font-size-3);
     font-weight: var(--lvr-font-weight-7);
+    margin: 0;
 }
 
 .version {
+    font-family: var(--lvr-font-family-mono);
+    font-variation-settings: "MONO" 1;
     font-size: var(--lvr-font-size-0);
     font-weight: var(--lvr-font-weight-4);
     color: var(--lvr-color-fg-subtle);
 }
 
 .subtitle {
+    font-family: var(--lvr-font-family-mono);
+    font-variation-settings: "MONO" 1;
     font-size: var(--lvr-font-size-0);
-    color: var(--lvr-color-fg-subtle);
+    color: var(--lvr-color-fg-hint);
+    text-transform: uppercase;
+    letter-spacing: var(--lvr-font-letterspacing-wide);
+    margin: 0;
 }

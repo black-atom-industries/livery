@@ -1,0 +1,28 @@
+/* =============================================================
+   AppFooter — Keyboard shortcut bar
+   DESIGN.md: Monospace chrome labels, hint/subtle token colors.
+   ============================================================= */
+
+.root {
+    display: flex;
+    gap: var(--lvr-size-6);
+    font-family: var(--lvr-font-family-mono);
+    font-variation-settings: "MONO" 1;
+    font-size: var(--lvr-font-size-00);
+}
+
+.shortcut {
+    display: flex;
+    align-items: center;
+    gap: var(--lvr-size-2);
+}
+
+.keys {
+    color: var(--lvr-color-fg-subtle);
+}
+
+.label {
+    color: var(--lvr-color-fg-hint);
+    text-transform: uppercase;
+    letter-spacing: var(--lvr-font-letterspacing-wide);
+}

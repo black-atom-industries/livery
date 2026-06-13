@@ -56,7 +56,13 @@ function DevOverview() {
                         >
                             {s.label}
                         </div>
-                        <div style={{ fontSize: 11, color: "var(--lvr-color-fg-subtle)", marginTop: 4 }}>
+                        <div
+                            style={{
+                                fontSize: 11,
+                                color: "var(--lvr-color-fg-subtle)",
+                                marginTop: 4,
+                            }}
+                        >
                             {s.description}
                         </div>
                     </Link>

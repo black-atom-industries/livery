@@ -5,19 +5,19 @@
    ============================================================= */
 
 :root {
-  /* Border widths */
-  --lvr-border-size-1: 1px;
-  --lvr-border-size-2: 2px;
-  --lvr-border-size-3: 5px;
-  --lvr-border-size-4: 10px;
-  --lvr-border-size-5: 25px;
+    /* Border widths */
+    --lvr-border-size-1: 1px;
+    --lvr-border-size-2: 2px;
+    --lvr-border-size-3: 5px;
+    --lvr-border-size-4: 10px;
+    --lvr-border-size-5: 25px;
 
-  /* Corner radii */
-  --lvr-radius-1: 2px;
-  --lvr-radius-2: 5px;
-  --lvr-radius-3: 1rem;
-  --lvr-radius-4: 2rem;
-  --lvr-radius-5: 4rem;
-  --lvr-radius-6: 8rem;
-  --lvr-radius-round: 1e5px;
+    /* Corner radii */
+    --lvr-radius-1: 2px;
+    --lvr-radius-2: 5px;
+    --lvr-radius-3: 1rem;
+    --lvr-radius-4: 2rem;
+    --lvr-radius-5: 4rem;
+    --lvr-radius-6: 8rem;
+    --lvr-radius-round: 1e5px;
 }

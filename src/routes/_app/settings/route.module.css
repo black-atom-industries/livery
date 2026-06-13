@@ -1,0 +1,12 @@
+/* =============================================================
+   Settings route
+   Placeholder page — layout is handled by App.Shell.
+   ============================================================= */
+
+.root {
+    padding: var(--lvr-size-6);
+}
+
+.heading {
+    margin-bottom: var(--lvr-size-2);
+}

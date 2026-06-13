@@ -1,0 +1,27 @@
+{
+    "id": "63fb38ec",
+    "phase": "completed",
+    "pageUrl": "/",
+    "sourceFile": "src/components/layouts/split-panel.tsx",
+    "expectedVariants": 3,
+    "arrivedVariants": 3,
+    "visibleVariant": 2,
+    "paramValues": {
+        "show-swatches": true
+    },
+    "pendingEventSeq": null,
+    "pendingEvent": null,
+    "deliveryLease": null,
+    "checkpointRevision": 11,
+    "activeOwner": "6ec2b690",
+    "sourceMarkers": {},
+    "fallbackMode": null,
+    "annotationArtifacts": [],
+    "diagnostics": [
+        {
+            "error": "stale_checkpoint_ignored",
+            "revision": 1
+        }
+    ],
+    "updatedAt": "2026-05-07T15:48:34.866Z"
+}

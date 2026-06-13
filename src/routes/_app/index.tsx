@@ -10,6 +10,9 @@ import { getGroupedThemes } from "../../lib/themes.ts";
 import { useConfig } from "../../queries/use-config.ts";
 import { ThemeList } from "../../components/theme-list.tsx";
 import { ThemeDetail } from "../../components/theme-detail.tsx";
+import { App } from "../../components/layouts/app.ts";
+import { SectionHeader } from "../../components/primitives/section-header/section-header.tsx";
+import { Typo } from "../../components/typo/index.ts";
 
 export const Route = createFileRoute("/_app/")({
     component: Component,
@@ -72,22 +75,30 @@ function Component() {
     useHotkey("Enter", handleApplyTheme);
 
     return (
-        <div className="flex h-full">
-            <div className="w-1/2 overflow-y-auto border-r border-neutral-800 px-4 py-3">
-                <ThemeList
-                    groups={groups}
-                    selectedIndex={pickedIndex}
-                    onSelect={setPickedIndex}
-                />
-            </div>
-            <div className="w-1/2 overflow-y-auto px-6 py-3">
-                <ThemeDetail theme={pickedEntry} />
-                {currentTheme && (
-                    <div className="mt-6 text-sm text-green-400">
-                        Selected: {currentTheme.meta.name}
-                    </div>
-                )}
-            </div>
-        </div>
+        <App.SplitPanel
+            left={
+                <>
+                    <SectionHeader label="THEMES" />
+                    <ThemeList
+                        groups={groups}
+                        selectedIndex={pickedIndex}
+                        onSelect={setPickedIndex}
+                    />
+                </>
+            }
+            right={
+                <>
+                    <SectionHeader label="DETAIL" />
+                    <ThemeDetail theme={pickedEntry} />
+                    {currentTheme && (
+                        <div style={{ marginTop: "var(--lvr-size-6)" }}>
+                            <Typo.Small color="positive">
+                                Selected: {currentTheme.meta.name}
+                            </Typo.Small>
+                        </div>
+                    )}
+                </>
+            }
+        />
     );
 }

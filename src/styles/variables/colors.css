@@ -10,15 +10,15 @@
 
 /* Seed color-scheme so light-dark() resolves before provider JS runs. */
 :root {
-  color-scheme: light dark;
+    color-scheme: light dark;
 }
 
 [data-lvr-color-scheme="dark"] {
-  color-scheme: dark;
+    color-scheme: dark;
 }
 
 [data-lvr-color-scheme="light"] {
-  color-scheme: light;
+    color-scheme: light;
 }
 
 /* =============================================================
@@ -28,31 +28,31 @@
    ============================================================= */
 
 :root {
-  /* Surfaces — warm gray defaults (low chroma, warm hue ~30) */
-  --lvr-color-default-hue: 30;
-  --lvr-color-default-chroma: 0.005;
+    /* Surfaces — warm gray defaults (low chroma, warm hue ~30) */
+    --lvr-color-default-hue: 30;
+    --lvr-color-default-chroma: 0.005;
 
-  --lvr-color-subtle-hue: 30;
-  --lvr-color-subtle-chroma: 0.005;
+    --lvr-color-subtle-hue: 30;
+    --lvr-color-subtle-chroma: 0.005;
 
-  --lvr-color-hint-hue: 30;
-  --lvr-color-hint-chroma: 0.005;
+    --lvr-color-hint-hue: 30;
+    --lvr-color-hint-chroma: 0.005;
 
-  /* Intents */
-  --lvr-color-accent-hue: 145;
-  --lvr-color-accent-chroma: 0.13;
+    /* Intents */
+    --lvr-color-accent-hue: 145;
+    --lvr-color-accent-chroma: 0.13;
 
-  --lvr-color-positive-hue: 145;
-  --lvr-color-positive-chroma: 0.18;
+    --lvr-color-positive-hue: 145;
+    --lvr-color-positive-chroma: 0.18;
 
-  --lvr-color-negative-hue: 25;
-  --lvr-color-negative-chroma: 0.2;
+    --lvr-color-negative-hue: 25;
+    --lvr-color-negative-chroma: 0.2;
 
-  --lvr-color-warn-hue: 65;
-  --lvr-color-warn-chroma: 0.16;
+    --lvr-color-warn-hue: 65;
+    --lvr-color-warn-chroma: 0.16;
 
-  --lvr-color-info-hue: 220;
-  --lvr-color-info-chroma: 0.12;
+    --lvr-color-info-hue: 220;
+    --lvr-color-info-chroma: 0.12;
 }
 
 /* =============================================================
@@ -61,99 +61,99 @@
    ============================================================= */
 
 :root {
-  /* ======================= Backgrounds ======================= */
-  --lvr-color-bg-default: light-dark(
-    oklch(0.95 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
-    oklch(0.18 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
-  );
+    /* ======================= Backgrounds ======================= */
+    --lvr-color-bg-default: light-dark(
+        oklch(0.95 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
+        oklch(0.18 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
+    );
 
-  --lvr-color-bg-subtle: light-dark(
-    oklch(0.9 var(--lvr-color-subtle-chroma) var(--lvr-color-subtle-hue)),
-    oklch(0.22 var(--lvr-color-subtle-chroma) var(--lvr-color-subtle-hue))
-  );
+    --lvr-color-bg-subtle: light-dark(
+        oklch(0.9 var(--lvr-color-subtle-chroma) var(--lvr-color-subtle-hue)),
+        oklch(0.22 var(--lvr-color-subtle-chroma) var(--lvr-color-subtle-hue))
+    );
 
-  --lvr-color-bg-hint: light-dark(
-    oklch(0.85 var(--lvr-color-hint-chroma) var(--lvr-color-hint-hue)),
-    oklch(0.28 var(--lvr-color-hint-chroma) var(--lvr-color-hint-hue))
-  );
+    --lvr-color-bg-hint: light-dark(
+        oklch(0.85 var(--lvr-color-hint-chroma) var(--lvr-color-hint-hue)),
+        oklch(0.28 var(--lvr-color-hint-chroma) var(--lvr-color-hint-hue))
+    );
 
-  --lvr-color-bg-accent: light-dark(
-    oklch(0.65 var(--lvr-color-accent-chroma) var(--lvr-color-accent-hue)),
-    oklch(0.65 var(--lvr-color-accent-chroma) var(--lvr-color-accent-hue))
-  );
+    --lvr-color-bg-accent: light-dark(
+        oklch(0.65 var(--lvr-color-accent-chroma) var(--lvr-color-accent-hue)),
+        oklch(0.65 var(--lvr-color-accent-chroma) var(--lvr-color-accent-hue))
+    );
 
-  --lvr-color-bg-contrast: light-dark(
-    oklch(0.15 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
-    oklch(0.95 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
-  );
+    --lvr-color-bg-contrast: light-dark(
+        oklch(0.15 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
+        oklch(0.95 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
+    );
 
-  --lvr-color-bg-disabled: light-dark(
-    oklch(0.85 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
-    oklch(0.25 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
-  );
+    --lvr-color-bg-disabled: light-dark(
+        oklch(0.85 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
+        oklch(0.25 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
+    );
 
-  --lvr-color-bg-positive: light-dark(
-    oklch(0.65 var(--lvr-color-positive-chroma) var(--lvr-color-positive-hue)),
-    oklch(0.45 var(--lvr-color-positive-chroma) var(--lvr-color-positive-hue))
-  );
+    --lvr-color-bg-positive: light-dark(
+        oklch(0.65 var(--lvr-color-positive-chroma) var(--lvr-color-positive-hue)),
+        oklch(0.45 var(--lvr-color-positive-chroma) var(--lvr-color-positive-hue))
+    );
 
-  --lvr-color-bg-negative: light-dark(
-    oklch(0.65 var(--lvr-color-negative-chroma) var(--lvr-color-negative-hue)),
-    oklch(0.45 var(--lvr-color-negative-chroma) var(--lvr-color-negative-hue))
-  );
+    --lvr-color-bg-negative: light-dark(
+        oklch(0.65 var(--lvr-color-negative-chroma) var(--lvr-color-negative-hue)),
+        oklch(0.45 var(--lvr-color-negative-chroma) var(--lvr-color-negative-hue))
+    );
 
-  --lvr-color-bg-warn: light-dark(
-    oklch(0.65 var(--lvr-color-warn-chroma) var(--lvr-color-warn-hue)),
-    oklch(0.45 var(--lvr-color-warn-chroma) var(--lvr-color-warn-hue))
-  );
+    --lvr-color-bg-warn: light-dark(
+        oklch(0.65 var(--lvr-color-warn-chroma) var(--lvr-color-warn-hue)),
+        oklch(0.45 var(--lvr-color-warn-chroma) var(--lvr-color-warn-hue))
+    );
 
-  --lvr-color-bg-info: light-dark(
-    oklch(0.65 var(--lvr-color-info-chroma) var(--lvr-color-info-hue)),
-    oklch(0.45 var(--lvr-color-info-chroma) var(--lvr-color-info-hue))
-  );
+    --lvr-color-bg-info: light-dark(
+        oklch(0.65 var(--lvr-color-info-chroma) var(--lvr-color-info-hue)),
+        oklch(0.45 var(--lvr-color-info-chroma) var(--lvr-color-info-hue))
+    );
 
-  /* ======================= Foregrounds ======================= */
+    /* ======================= Foregrounds ======================= */
 
-  --lvr-color-fg-default: light-dark(
-    oklch(0.15 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
-    oklch(0.95 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
-  );
+    --lvr-color-fg-default: light-dark(
+        oklch(0.15 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
+        oklch(0.95 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
+    );
 
-  --lvr-color-fg-subtle: color-mix(in oklch, var(--lvr-color-fg-default) 80%, transparent);
+    --lvr-color-fg-subtle: color-mix(in oklch, var(--lvr-color-fg-default) 80%, transparent);
 
-  --lvr-color-fg-hint: color-mix(in oklch, var(--lvr-color-fg-default) 60%, transparent);
+    --lvr-color-fg-hint: color-mix(in oklch, var(--lvr-color-fg-default) 60%, transparent);
 
-  --lvr-color-fg-contrast: light-dark(
-    oklch(0.95 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
-    oklch(0.15 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
-  );
+    --lvr-color-fg-contrast: light-dark(
+        oklch(0.95 var(--lvr-color-default-chroma) var(--lvr-color-default-hue)),
+        oklch(0.15 var(--lvr-color-default-chroma) var(--lvr-color-default-hue))
+    );
 
-  --lvr-color-fg-disabled: color-mix(in oklch, var(--lvr-color-fg-default) 40%, transparent);
+    --lvr-color-fg-disabled: color-mix(in oklch, var(--lvr-color-fg-default) 40%, transparent);
 
-  --lvr-color-fg-accent: light-dark(
-    oklch(0.55 var(--lvr-color-accent-chroma) var(--lvr-color-accent-hue)),
-    oklch(0.65 var(--lvr-color-accent-chroma) var(--lvr-color-accent-hue))
-  );
+    --lvr-color-fg-accent: light-dark(
+        oklch(0.55 var(--lvr-color-accent-chroma) var(--lvr-color-accent-hue)),
+        oklch(0.65 var(--lvr-color-accent-chroma) var(--lvr-color-accent-hue))
+    );
 
-  --lvr-color-fg-positive: light-dark(
-    oklch(0.55 var(--lvr-color-positive-chroma) var(--lvr-color-positive-hue)),
-    oklch(0.65 var(--lvr-color-positive-chroma) var(--lvr-color-positive-hue))
-  );
+    --lvr-color-fg-positive: light-dark(
+        oklch(0.55 var(--lvr-color-positive-chroma) var(--lvr-color-positive-hue)),
+        oklch(0.65 var(--lvr-color-positive-chroma) var(--lvr-color-positive-hue))
+    );
 
-  --lvr-color-fg-negative: light-dark(
-    oklch(0.55 var(--lvr-color-negative-chroma) var(--lvr-color-negative-hue)),
-    oklch(0.65 var(--lvr-color-negative-chroma) var(--lvr-color-negative-hue))
-  );
+    --lvr-color-fg-negative: light-dark(
+        oklch(0.55 var(--lvr-color-negative-chroma) var(--lvr-color-negative-hue)),
+        oklch(0.65 var(--lvr-color-negative-chroma) var(--lvr-color-negative-hue))
+    );
 
-  --lvr-color-fg-warn: light-dark(
-    oklch(0.55 var(--lvr-color-warn-chroma) var(--lvr-color-warn-hue)),
-    oklch(0.65 var(--lvr-color-warn-chroma) var(--lvr-color-warn-hue))
-  );
+    --lvr-color-fg-warn: light-dark(
+        oklch(0.55 var(--lvr-color-warn-chroma) var(--lvr-color-warn-hue)),
+        oklch(0.65 var(--lvr-color-warn-chroma) var(--lvr-color-warn-hue))
+    );
 
-  --lvr-color-fg-info: light-dark(
-    oklch(0.55 var(--lvr-color-info-chroma) var(--lvr-color-info-hue)),
-    oklch(0.65 var(--lvr-color-info-chroma) var(--lvr-color-info-hue))
-  );
+    --lvr-color-fg-info: light-dark(
+        oklch(0.55 var(--lvr-color-info-chroma) var(--lvr-color-info-hue)),
+        oklch(0.65 var(--lvr-color-info-chroma) var(--lvr-color-info-hue))
+    );
 }
 
 /* =============================================================
@@ -163,75 +163,201 @@
    ============================================================= */
 
 :root {
-  --lvr-shadow-color: oklch(0.15 0.01 265);
-  --lvr-shadow-strength: 1%;
-  --lvr-shadow-strength-3: calc(var(--lvr-shadow-strength) + 2%);
-  --lvr-shadow-strength-4: calc(var(--lvr-shadow-strength) + 3%);
-  --lvr-shadow-strength-5: calc(var(--lvr-shadow-strength) + 4%);
-  --lvr-shadow-strength-6: calc(var(--lvr-shadow-strength) + 5%);
-  --lvr-shadow-strength-7: calc(var(--lvr-shadow-strength) + 6%);
-  --lvr-shadow-strength-8: calc(var(--lvr-shadow-strength) + 7%);
-  --lvr-shadow-strength-10: calc(var(--lvr-shadow-strength) + 9%);
-  --lvr-inner-shadow-highlight: inset 0 -0.5px 0 0 #fff, inset 0 0.5px 0 0 #0001;
+    --lvr-shadow-color: oklch(0.15 0.01 265);
+    --lvr-shadow-strength: 1%;
+    --lvr-shadow-strength-3: calc(var(--lvr-shadow-strength) + 2%);
+    --lvr-shadow-strength-4: calc(var(--lvr-shadow-strength) + 3%);
+    --lvr-shadow-strength-5: calc(var(--lvr-shadow-strength) + 4%);
+    --lvr-shadow-strength-6: calc(var(--lvr-shadow-strength) + 5%);
+    --lvr-shadow-strength-7: calc(var(--lvr-shadow-strength) + 6%);
+    --lvr-shadow-strength-8: calc(var(--lvr-shadow-strength) + 7%);
+    --lvr-shadow-strength-10: calc(var(--lvr-shadow-strength) + 9%);
+    --lvr-inner-shadow-highlight: inset 0 -0.5px 0 0 #fff, inset 0 0.5px 0 0 #0001;
 
-  --lvr-shadow-1: 0 1px 2px -1px
-    color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-10), transparent);
-  --lvr-shadow-2:
-    0 3px 5px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-4), transparent),
-    0 7px 14px -5px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-6), transparent);
-  --lvr-shadow-3:
-    0 -1px 3px 0 color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-3), transparent),
-    0 1px 2px -5px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-3), transparent),
-    0 2px 5px -5px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-5), transparent),
-    0 4px 12px -5px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-6), transparent),
-    0 12px 15px -5px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-8), transparent);
-  --lvr-shadow-4:
-    0 -2px 5px 0 color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-3), transparent),
-    0 1px 1px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-4), transparent),
-    0 2px 2px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-4), transparent),
-    0 5px 5px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-5), transparent),
-    0 9px 9px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-6), transparent),
-    0 16px 16px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-7), transparent);
-  --lvr-shadow-5:
-    0 -1px 2px 0 color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-3), transparent),
-    0 2px 1px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-4), transparent),
-    0 5px 5px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-4), transparent),
-    0 10px 10px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-5), transparent),
-    0 20px 20px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-6), transparent),
-    0 40px 40px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-8), transparent);
-  --lvr-shadow-6:
-    0 -1px 2px 0 color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-3), transparent),
-    0 3px 2px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-4), transparent),
-    0 7px 5px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-4), transparent),
-    0 12px 10px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-5), transparent),
-    0 22px 18px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-6), transparent),
-    0 41px 33px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-7), transparent),
-    0 100px 80px -2px color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-8), transparent);
+    --lvr-shadow-1: 0 1px 2px -1px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-10),
+        transparent
+    );
+    --lvr-shadow-2:
+        0 3px 5px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-4),
+        transparent
+    ),
+        0 7px 14px -5px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-6),
+        transparent
+    );
+    --lvr-shadow-3:
+        0 -1px 3px 0 color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-3),
+        transparent
+    ),
+        0 1px 2px -5px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-3),
+        transparent
+    ),
+        0 2px 5px -5px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-5),
+        transparent
+    ),
+        0 4px 12px -5px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-6),
+        transparent
+    ),
+        0 12px 15px -5px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-8),
+        transparent
+    );
+    --lvr-shadow-4:
+        0 -2px 5px 0 color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-3),
+        transparent
+    ),
+        0 1px 1px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-4),
+        transparent
+    ),
+        0 2px 2px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-4),
+        transparent
+    ),
+        0 5px 5px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-5),
+        transparent
+    ),
+        0 9px 9px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-6),
+        transparent
+    ),
+        0 16px 16px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-7),
+        transparent
+    );
+    --lvr-shadow-5:
+        0 -1px 2px 0 color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-3),
+        transparent
+    ),
+        0 2px 1px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-4),
+        transparent
+    ),
+        0 5px 5px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-4),
+        transparent
+    ),
+        0 10px 10px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-5),
+        transparent
+    ),
+        0 20px 20px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-6),
+        transparent
+    ),
+        0 40px 40px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-8),
+        transparent
+    );
+    --lvr-shadow-6:
+        0 -1px 2px 0 color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-3),
+        transparent
+    ),
+        0 3px 2px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-4),
+        transparent
+    ),
+        0 7px 5px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-4),
+        transparent
+    ),
+        0 12px 10px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-5),
+        transparent
+    ),
+        0 22px 18px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-6),
+        transparent
+    ),
+        0 41px 33px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-7),
+        transparent
+    ),
+        0 100px 80px -2px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-8),
+        transparent
+    );
 
-  --lvr-inner-shadow-0: inset 0 0 0 1px
-    color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-10), transparent);
-  --lvr-inner-shadow-1:
-    inset 0 1px 2px 0 color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-10), transparent),
-    var(--lvr-inner-shadow-highlight);
-  --lvr-inner-shadow-2:
-    inset 0 1px 4px 0 color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-10), transparent),
-    var(--lvr-inner-shadow-highlight);
-  --lvr-inner-shadow-3:
-    inset 0 2px 8px 0 color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-10), transparent),
-    var(--lvr-inner-shadow-highlight);
-  --lvr-inner-shadow-4:
-    inset 0 2px 14px 0 color-mix(in oklch, var(--lvr-shadow-color) var(--lvr-shadow-strength-10), transparent),
-    var(--lvr-inner-shadow-highlight);
+    --lvr-inner-shadow-0: inset 0 0 0 1px color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-10),
+        transparent
+    );
+    --lvr-inner-shadow-1:
+        inset 0 1px 2px 0 color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-10),
+        transparent
+    ),
+        var(--lvr-inner-shadow-highlight);
+    --lvr-inner-shadow-2:
+        inset 0 1px 4px 0 color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-10),
+        transparent
+    ),
+        var(--lvr-inner-shadow-highlight);
+    --lvr-inner-shadow-3:
+        inset 0 2px 8px 0 color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-10),
+        transparent
+    ),
+        var(--lvr-inner-shadow-highlight);
+    --lvr-inner-shadow-4:
+        inset 0 2px 14px 0 color-mix(
+        in oklch,
+        var(--lvr-shadow-color) var(--lvr-shadow-strength-10),
+        transparent
+    ),
+        var(--lvr-inner-shadow-highlight);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-lvr-color-scheme="light"]) {
-    --lvr-shadow-strength: 25%;
-    --lvr-inner-shadow-highlight: inset 0 -0.5px 0 0 #fff1, inset 0 0.5px 0 0 #0007;
-  }
+    :root:not([data-lvr-color-scheme="light"]) {
+        --lvr-shadow-strength: 25%;
+        --lvr-inner-shadow-highlight: inset 0 -0.5px 0 0 #fff1, inset 0 0.5px 0 0 #0007;
+    }
 }
 
 [data-lvr-color-scheme="dark"] {
-  --lvr-shadow-strength: 25%;
-  --lvr-inner-shadow-highlight: inset 0 -0.5px 0 0 #fff1, inset 0 0.5px 0 0 #0007;
+    --lvr-shadow-strength: 25%;
+    --lvr-inner-shadow-highlight: inset 0 -0.5px 0 0 #fff1, inset 0 0.5px 0 0 #0007;
 }

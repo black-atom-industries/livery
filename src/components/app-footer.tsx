@@ -1,3 +1,5 @@
+import styles from "./app-footer.module.css";
+
 interface Shortcut {
     key: string;
     label: string;
@@ -12,11 +14,11 @@ const SHORTCUTS: Shortcut[] = [
 
 export function AppFooter() {
     return (
-        <div className="flex gap-6" style={{ fontFamily: "var(--lvr-font-family-ui)" }}>
+        <div className={styles.root}>
             {SHORTCUTS.map((s) => (
-                <span key={s.key} style={{ fontSize: "var(--lvr-font-size-00)" }}>
-                    <kbd className="text-neutral-300">{s.key}</kbd>{" "}
-                    <span className="text-neutral-500">{s.label}</span>
+                <span key={s.key} className={styles.shortcut}>
+                    <kbd className={styles.keys}>{s.key}</kbd>
+                    <span className={styles.label}>{s.label}</span>
                 </span>
             ))}
         </div>

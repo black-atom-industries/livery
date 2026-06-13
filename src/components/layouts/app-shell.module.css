@@ -1,0 +1,38 @@
+/* =============================================================
+   App.Shell — Outer application chrome
+   Full-height flex column. Header, main content, progress bar,
+   and footer slots separated by 1px borders in --lvr-color-bg-hint.
+   All colors via --lvr-* tokens — no hardcoded values.
+   ============================================================= */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--lvr-color-bg-default);
+    color: var(--lvr-color-fg-default);
+    font-family: var(--lvr-font-family-body);
+}
+
+.header {
+    flex-shrink: 0;
+    padding: var(--lvr-size-4) var(--lvr-size-6);
+    border-bottom: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+}
+
+.main {
+    flex: 1;
+    min-height: 0;
+}
+
+.progress {
+    flex-shrink: 0;
+    padding: var(--lvr-size-2) var(--lvr-size-6);
+    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+}
+
+.footer {
+    flex-shrink: 0;
+    padding: var(--lvr-size-2) var(--lvr-size-6);
+    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+}

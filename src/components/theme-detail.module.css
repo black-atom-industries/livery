@@ -1,33 +1,57 @@
+/* =============================================================
+   ThemeDetail — Datasheet card for selected theme
+   DESIGN.md: Data Panels / Cards pattern — 1px border, squared
+   corners, uppercase mono metadata rows.
+   ============================================================= */
+
 .empty {
-    color: var(--lvr-color-fg-disabled);
+    color: var(--lvr-color-fg-hint);
     font-size: var(--lvr-font-size-0);
+    font-family: var(--lvr-font-family-mono);
+    font-variation-settings: "MONO" 1;
 }
 
-.heading {
-    font-family: var(--lvr-font-family-heading);
-    font-size: var(--lvr-font-size-4);
-    font-weight: var(--lvr-font-weight-7);
+.card {
+    border: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--lvr-size-4);
+}
+
+.card > .header + p {
+    font-style: italic;
+    border-left: 2px solid var(--lvr-color-fg-accent);
+    padding-left: var(--lvr-size-3);
+    margin: var(--lvr-size-2) 0;
+}
+
+.header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--lvr-size-3);
     margin-bottom: var(--lvr-size-1);
 }
 
-.badge {
-    font-size: var(--lvr-font-size-0);
-    font-weight: var(--lvr-font-weight-4);
-    padding: var(--lvr-size-1) var(--lvr-size-2);
-    border-radius: var(--lvr-radius-1);
+.meta {
+    margin-top: var(--lvr-size-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--lvr-size-2);
 }
 
-.badgeDark {
-    background-color: var(--lvr-color-bg-accent);
-    color: var(--lvr-color-fg-subtle);
+.metaRow {
+    display: flex;
+    gap: var(--lvr-size-3);
+    font-family: var(--lvr-font-family-mono);
+    font-variation-settings: "MONO" 1;
+    font-size: var(--lvr-font-size-00);
 }
 
-.badgeLight {
-    background-color: var(--lvr-color-bg-contrast);
-    color: var(--lvr-color-fg-contrast);
+.metaLabel {
+    color: var(--lvr-color-fg-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-width: 10ch;
 }
 
-.collection {
-    font-size: var(--lvr-font-size-0);
+.metaValue {
     color: var(--lvr-color-fg-subtle);
 }

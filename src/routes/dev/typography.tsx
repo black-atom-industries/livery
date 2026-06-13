@@ -111,12 +111,10 @@ function Component() {
                         The quick brown fox jumps over the lazy dog
                     </Typo.P>
                     <Typo.P style={{ margin: 0, fontFamily: "var(--lvr-font-family-body)" }}>
-                        <Typo.Small>[body]</Typo.Small>{" "}
-                        The quick brown fox jumps over the lazy dog
+                        <Typo.Small>[body]</Typo.Small> The quick brown fox jumps over the lazy dog
                     </Typo.P>
                     <Typo.P style={{ margin: 0, fontFamily: "var(--lvr-font-family-code)" }}>
-                        <Typo.Small>[mono]</Typo.Small>{" "}
-                        The quick brown fox jumps over the lazy dog
+                        <Typo.Small>[mono]</Typo.Small> The quick brown fox jumps over the lazy dog
                     </Typo.P>
                 </div>
             </section>

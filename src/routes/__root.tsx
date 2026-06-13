@@ -1,4 +1,5 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { App } from "../components/layouts/app.ts";
 
 export const Route = createRootRoute({
     component: RootLayout,
@@ -6,8 +7,8 @@ export const Route = createRootRoute({
 
 function RootLayout() {
     return (
-        <div className="h-screen flex flex-col bg-neutral-950 text-neutral-100" style={{ fontFamily: "var(--lvr-font-family-body)" }}>
+        <App.Shell>
             <Outlet />
-        </div>
+        </App.Shell>
     );
 }

@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Typo } from "../../../components/typo/index.ts";
+import styles from "./route.module.css";
 
 export const Route = createFileRoute("/_app/settings")({
     component: SettingsRoute,
@@ -6,9 +8,11 @@ export const Route = createFileRoute("/_app/settings")({
 
 function SettingsRoute() {
     return (
-        <div className="p-6">
-            <h2 className="text-lg font-bold">Settings</h2>
-            <p className="mt-2 text-sm text-neutral-500">Coming soon.</p>
+        <div className={styles.root}>
+            <div className={styles.heading}>
+                <Typo.H2>Settings</Typo.H2>
+            </div>
+            <Typo.Small color="hint">Coming soon.</Typo.Small>
         </div>
     );
 }
