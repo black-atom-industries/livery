@@ -16,17 +16,20 @@
     },
     "tasks": {
         "cache": "deno cache --reload .",
-        "dev": "deno run -A npm:@tauri-apps/cli dev",
+        "dev": "sh scripts/dev-local.sh _dev",
         "build": "deno run -A npm:@tauri-apps/cli build",
         "vite:dev": "deno run -A npm:vite --port 1420",
         "vite:build": "deno run -A npm:vite build",
-        "check": "deno check src/**/*.ts src/**/*.tsx",
-        "test": "deno test -P",
+        "check": "sh scripts/dev-local.sh _check",
+        "test": "sh scripts/dev-local.sh _test",
         "checks": "deno run -A .githooks/checks-frontend.ts && deno run -A .githooks/checks-backend.ts",
         "install-hooks": "git config core.hooksPath .githooks && echo 'Hooks installed.'",
         "test:perf-benchmark": "cd src-tauri && cargo run --bin perf-benchmark --release",
         "install:macos": "deno run -A npm:@tauri-apps/cli build && rm -rf /Applications/livery.app && cp -R src-tauri/target/release/bundle/macos/livery.app /Applications/livery.app",
-        "dev:ui": "deno run -A npm:vite --port 1430 --open '/dev'"
+        "dev:ui": "deno run -A npm:vite --port 1430 --open '/dev'",
+        "_dev": "deno run -A npm:@tauri-apps/cli dev",
+        "_check": "deno check src/**/*.ts src/**/*.tsx",
+        "_test": "deno test -P"
     },
     "nodeModulesDir": "auto",
     "lint": {
@@ -62,7 +65,7 @@
     "imports": {
         "@/": "./src/",
         "@base-ui/react": "npm:@base-ui/react@^1",
-        "@black-atom/core": "jsr:@black-atom/core@^0.4.0",
+        "@black-atom/core": "../core/src/mod.ts",
         "cva": "npm:cva@^1.0.0-beta.4",
         "clsx": "npm:clsx@^2.1.1",
         "@deno/vite-plugin": "npm:@deno/vite-plugin@^1",
@@ -88,6 +91,7 @@
         "lucide-react": "npm:lucide-react@^0",
         "open-props": "npm:open-props@^1",
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
-        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2"
+        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2",
+        "culori": "npm:culori@4"
     }
 }

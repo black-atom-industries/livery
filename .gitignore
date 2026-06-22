@@ -9,3 +9,5 @@ src-tauri/target/
 /.DS_Store
 docs/plans/
 /plans
+deno.local.json
+deno.json.bak
