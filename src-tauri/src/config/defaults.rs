@@ -77,6 +77,16 @@ impl Default for Config {
                 replace_template: None,
             },
         );
+        apps.insert(
+            AppName::Helm,
+            AppConfig {
+                enabled: false,
+                config_path: "~/.config/black-atom/helm/config.yml".to_string(),
+                themes_path: None,
+                match_pattern: Some(r"^theme:\s*\S*$".to_string()),
+                replace_template: Some("theme: {themeKey}".to_string()),
+            },
+        );
         Config {
             system_appearance: true,
             keymappings: Keymappings::default(),

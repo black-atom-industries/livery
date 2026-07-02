@@ -167,6 +167,7 @@ pub fn dispatch_update(
         AppName::Nvim => nvim::update(app_str, app_config, ctx, None),
         AppName::Tmux => tmux::update(app_str, app_config, ctx),
         AppName::Delta => patch_text_updater(app_str, app_config, ctx),
+        AppName::Helm => patch_text_updater(app_str, app_config, ctx),
         AppName::Lazygit => lazygit::update(app_str, app_config, ctx),
         AppName::Zed => zed::update(app_str, app_config, ctx),
         AppName::Obsidian => obsidian::update(app_str, app_config, ctx),
