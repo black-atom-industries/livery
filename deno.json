@@ -65,7 +65,7 @@
     "imports": {
         "@/": "./src/",
         "@base-ui/react": "npm:@base-ui/react@^1",
-        "@black-atom/core": "../core/src/mod.ts",
+        "@black-atom/core": "jsr:@black-atom/core@^0.4.0",
         "cva": "npm:cva@^1.0.0-beta.4",
         "clsx": "npm:clsx@^2.1.1",
         "@deno/vite-plugin": "npm:@deno/vite-plugin@^1",
@@ -91,7 +91,6 @@
         "lucide-react": "npm:lucide-react@^0",
         "open-props": "npm:open-props@^1",
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
-        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2",
-        "culori": "npm:culori@4"
+        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2"
     }
 }
