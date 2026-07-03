@@ -1,0 +1,34 @@
+.root {
+    --nav-width: 20ch;
+    --aside-width: 30ch;
+
+    display: grid;
+    grid-template-columns: var(--nav-width) 1fr var(--aside-width);
+    min-height: 100%;
+    font-family: var(--lvr-font-family-ui);
+    background-color: var(--lvr-color-bg-default);
+    color: var(--lvr-color-fg-default);
+}
+
+.nav,
+.aside {
+    background-color: var(--lvr-color-bg-subtle);
+    color: var(--lvr-color-fg-default);
+
+    display: flex;
+    flex-direction: column;
+    padding: var(--lvr-size-2);
+    overflow: auto;
+}
+
+.nav {
+    border-right: var(--lvr-size-1) solid var(--lvr-color-fg-subtle);
+}
+
+.main {
+    padding: var(--lvr-size-4);
+}
+
+.aside {
+    border-left: var(--lvr-size-1) solid var(--lvr-color-fg-subtle);
+}

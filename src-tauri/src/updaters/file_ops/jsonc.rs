@@ -61,7 +61,8 @@ pub fn patch_jsonc_file(path: String, key_path: &str, value: &str) -> Result<(),
 
     // Direct write instead of atomic (tempfile + persist) because some apps
     // (e.g., Zed) watch the file inode and don't detect atomic renames.
-    std::fs::write(&path, root.to_string().as_bytes())
+    // Use resolved (not path) to write through symlinks rather than to the symlink path.
+    std::fs::write(&resolved, root.to_string().as_bytes())
         .map_err(|e| format!("Failed to write {path}: {e}"))?;
 
     Ok(())

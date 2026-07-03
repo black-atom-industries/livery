@@ -1,0 +1,23 @@
+/* =============================================================
+   App.SplitPanel — Two-panel layout
+   50/50 horizontal split with a 1px right border on the left panel.
+   All colors via --lvr-* tokens.
+   ============================================================= */
+
+.root {
+    display: flex;
+    height: 100%;
+}
+
+.left {
+    width: 50%;
+    overflow-y: auto;
+    border-right: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--lvr-size-3) var(--lvr-size-4);
+}
+
+.right {
+    width: 50%;
+    overflow-y: auto;
+    padding: var(--lvr-size-3) var(--lvr-size-6);
+}

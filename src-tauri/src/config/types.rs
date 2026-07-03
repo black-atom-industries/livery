@@ -13,6 +13,7 @@ pub enum AppName {
     Delta,
     Lazygit,
     Obsidian,
+    Helm,
 }
 
 impl AppName {
@@ -26,6 +27,7 @@ impl AppName {
             AppName::Delta,
             AppName::Lazygit,
             AppName::Obsidian,
+            AppName::Helm,
         ]
     }
 
@@ -38,6 +40,7 @@ impl AppName {
             AppName::Delta => "delta",
             AppName::Lazygit => "lazygit",
             AppName::Obsidian => "obsidian",
+            AppName::Helm => "helm",
         }
     }
 }

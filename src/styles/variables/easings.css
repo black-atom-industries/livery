@@ -1,0 +1,28 @@
+/* =============================================================
+   Livery — Easing tokens
+   Mirrors the open-props scale (props.easing.css).
+   Reference: https://github.com/argyleink/open-props/blob/main/src/props.easing.css
+   ============================================================= */
+
+:root {
+    /* Standard (ease out — decelerate into rest) */
+    --lvr-ease-1: cubic-bezier(0.25, 0, 0.5, 1);
+    --lvr-ease-2: cubic-bezier(0.25, 0, 0.4, 1);
+    --lvr-ease-3: cubic-bezier(0.25, 0, 0.3, 1);
+    --lvr-ease-4: cubic-bezier(0.25, 0, 0.2, 1);
+    --lvr-ease-5: cubic-bezier(0.25, 0, 0.1, 1);
+
+    /* Ease-in (accelerate into action) */
+    --lvr-ease-in-1: cubic-bezier(0.25, 0, 1, 1);
+    --lvr-ease-in-2: cubic-bezier(0.5, 0, 1, 1);
+    --lvr-ease-in-3: cubic-bezier(0.7, 0, 1, 1);
+    --lvr-ease-in-4: cubic-bezier(0.9, 0, 1, 1);
+    --lvr-ease-in-5: cubic-bezier(1, 0, 1, 1);
+
+    /* Ease-out (decelerate into rest) */
+    --lvr-ease-out-1: cubic-bezier(0, 0, 0.75, 1);
+    --lvr-ease-out-2: cubic-bezier(0, 0, 0.5, 1);
+    --lvr-ease-out-3: cubic-bezier(0, 0, 0.3, 1);
+    --lvr-ease-out-4: cubic-bezier(0, 0, 0.1, 1);
+    --lvr-ease-out-5: cubic-bezier(0, 0, 0.05, 1);
+}

@@ -1,0 +1,47 @@
+{
+    "id": "7172117f",
+    "phase": "completed",
+    "pageUrl": "/",
+    "sourceFile": "src/components/layouts/split-panel.tsx",
+    "expectedVariants": 3,
+    "arrivedVariants": 3,
+    "visibleVariant": 1,
+    "paramValues": {
+        "text-scale": 0.35
+    },
+    "pendingEventSeq": null,
+    "pendingEvent": null,
+    "deliveryLease": null,
+    "checkpointRevision": 11,
+    "activeOwner": "ca221098",
+    "sourceMarkers": {},
+    "fallbackMode": null,
+    "annotationArtifacts": [],
+    "diagnostics": [
+        {
+            "error": "stale_checkpoint_ignored",
+            "revision": 1
+        },
+        {
+            "error": "stale_checkpoint_ignored",
+            "revision": 1
+        },
+        {
+            "error": "stale_checkpoint_ignored",
+            "revision": 2
+        },
+        {
+            "error": "stale_checkpoint_ignored",
+            "revision": 3
+        },
+        {
+            "error": "stale_checkpoint_ignored",
+            "revision": 4
+        },
+        {
+            "error": "stale_checkpoint_ignored",
+            "revision": 5
+        }
+    ],
+    "updatedAt": "2026-05-07T15:42:29.637Z"
+}

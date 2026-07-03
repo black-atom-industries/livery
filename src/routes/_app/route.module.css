@@ -1,0 +1,34 @@
+/* =============================================================
+   _app/route — App chrome layout
+   Header, main content, progress bar, footer — all separated
+   by 1px borders. Rendered inside App.Shell from __root.
+   ============================================================= */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header {
+    flex-shrink: 0;
+    padding: var(--lvr-size-4) var(--lvr-size-6);
+    border-bottom: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+}
+
+.main {
+    flex: 1;
+    min-height: 0;
+}
+
+.progress {
+    flex-shrink: 0;
+    padding: var(--lvr-size-2) var(--lvr-size-6);
+    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+}
+
+.footer {
+    flex-shrink: 0;
+    padding: var(--lvr-size-2) var(--lvr-size-6);
+    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+}

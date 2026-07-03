@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use regex::Regex;
 
@@ -63,14 +63,16 @@ pub fn patch_text_file(
     let updated = regex.replace(&content, rendered.as_str()).to_string();
 
     // Atomic write: temp file + persist
-    let parent = Path::new(&path)
+    // Use resolved (not path) so rename() writes through symlinks
+    // rather than replacing the symlink itself with a new regular file.
+    let parent = resolved
         .parent()
-        .ok_or(format!("No parent directory for {path}"))?;
+        .ok_or_else(|| format!("No parent directory for {path}"))?;
     let mut tmp = tempfile::NamedTempFile::new_in(parent)
         .map_err(|e| format!("Failed to create temp file: {e}"))?;
     tmp.write_all(updated.as_bytes())
         .map_err(|e| format!("Failed to write temp file: {e}"))?;
-    tmp.persist(&path)
+    tmp.persist(&resolved)
         .map_err(|e| format!("Failed to persist to {path}: {e}"))?;
 
     Ok(())
