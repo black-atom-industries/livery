@@ -72,7 +72,7 @@ Visually: 1px border, monospace uppercase text, squared corners, small sizing.
 
 **Status**: Not started. Deferred to after the upcoming Claude Design pass — these specs predate
 that process and will likely be reworked once the design direction (search/filter, theme datasheet,
-settings, etc.) lands. Tracked in follow-up issue: TBD (link once created).
+settings, etc.) lands. Tracked in follow-up issue #48.
 
 **User stories**: 9, 10
 
