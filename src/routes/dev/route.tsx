@@ -13,6 +13,7 @@ const sections = [
     { to: "/dev", label: "Overview" },
     { to: "/dev/primitives", label: "Primitives" },
     { to: "/dev/typography", label: "Typography" },
+    { to: "/dev/components", label: "Components" },
 ] as const;
 
 const themes = Object.values(themeMap);

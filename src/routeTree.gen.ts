@@ -15,6 +15,7 @@ import { Route as DevIndexRouteImport } from './routes/dev/index.tsx'
 import { Route as AppIndexRouteImport } from './routes/_app/index.tsx'
 import { Route as DevTypographyRouteImport } from './routes/dev/typography.tsx'
 import { Route as DevPrimitivesRouteImport } from './routes/dev/primitives.tsx'
+import { Route as DevComponentsRouteImport } from './routes/dev/components.tsx'
 import { Route as AppSettingsRouteRouteImport } from './routes/_app/settings/route.tsx'
 
 const DevRouteRoute = DevRouteRouteImport.update({
@@ -46,6 +47,11 @@ const DevPrimitivesRoute = DevPrimitivesRouteImport.update({
   path: '/primitives',
   getParentRoute: () => DevRouteRoute,
 } as any)
+const DevComponentsRoute = DevComponentsRouteImport.update({
+  id: '/components',
+  path: '/components',
+  getParentRoute: () => DevRouteRoute,
+} as any)
 const AppSettingsRouteRoute = AppSettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -56,12 +62,14 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/dev': typeof DevRouteRouteWithChildren
   '/settings': typeof AppSettingsRouteRoute
+  '/dev/components': typeof DevComponentsRoute
   '/dev/primitives': typeof DevPrimitivesRoute
   '/dev/typography': typeof DevTypographyRoute
   '/dev/': typeof DevIndexRoute
 }
 export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRouteRoute
+  '/dev/components': typeof DevComponentsRoute
   '/dev/primitives': typeof DevPrimitivesRoute
   '/dev/typography': typeof DevTypographyRoute
   '/': typeof AppIndexRoute
@@ -72,6 +80,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteRouteWithChildren
   '/dev': typeof DevRouteRouteWithChildren
   '/_app/settings': typeof AppSettingsRouteRoute
+  '/dev/components': typeof DevComponentsRoute
   '/dev/primitives': typeof DevPrimitivesRoute
   '/dev/typography': typeof DevTypographyRoute
   '/_app/': typeof AppIndexRoute
@@ -83,16 +92,24 @@ export interface FileRouteTypes {
     | '/'
     | '/dev'
     | '/settings'
+    | '/dev/components'
     | '/dev/primitives'
     | '/dev/typography'
     | '/dev/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/settings' | '/dev/primitives' | '/dev/typography' | '/' | '/dev'
+  to:
+    | '/settings'
+    | '/dev/components'
+    | '/dev/primitives'
+    | '/dev/typography'
+    | '/'
+    | '/dev'
   id:
     | '__root__'
     | '/_app'
     | '/dev'
     | '/_app/settings'
+    | '/dev/components'
     | '/dev/primitives'
     | '/dev/typography'
     | '/_app/'
@@ -148,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevPrimitivesRouteImport
       parentRoute: typeof DevRouteRoute
     }
+    '/dev/components': {
+      id: '/dev/components'
+      path: '/components'
+      fullPath: '/dev/components'
+      preLoaderRoute: typeof DevComponentsRouteImport
+      parentRoute: typeof DevRouteRoute
+    }
     '/_app/settings': {
       id: '/_app/settings'
       path: '/settings'
@@ -173,12 +197,14 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 )
 
 interface DevRouteRouteChildren {
+  DevComponentsRoute: typeof DevComponentsRoute
   DevPrimitivesRoute: typeof DevPrimitivesRoute
   DevTypographyRoute: typeof DevTypographyRoute
   DevIndexRoute: typeof DevIndexRoute
 }
 
 const DevRouteRouteChildren: DevRouteRouteChildren = {
+  DevComponentsRoute: DevComponentsRoute,
   DevPrimitivesRoute: DevPrimitivesRoute,
   DevTypographyRoute: DevTypographyRoute,
   DevIndexRoute: DevIndexRoute,

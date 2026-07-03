@@ -15,6 +15,11 @@ const sections = [
         label: "Typography",
         description: "Font families and type scale",
     },
+    {
+        to: "/dev/components" as const,
+        label: "Components",
+        description: "AppHeader, AppFooter, ProgressBar, ThemeList, ThemeDetail",
+    },
 ];
 
 function DevOverview() {
