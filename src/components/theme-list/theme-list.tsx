@@ -1,6 +1,6 @@
 import { ChevronRight, Moon, Sun } from "lucide-react";
 import { cva } from "cva";
-import type { ThemeGroup } from "../lib/themes.ts";
+import type { ThemeGroup } from "../../lib/themes.ts";
 import styles from "./theme-list.module.css";
 
 const itemVariants = cva({

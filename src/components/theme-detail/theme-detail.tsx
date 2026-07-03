@@ -1,6 +1,6 @@
 import type { ThemeDefinition } from "@black-atom/core";
-import { Badge } from "./primitives/badge/badge.tsx";
-import { Typo } from "./typo/index.ts";
+import { Badge } from "../primitives/badge/badge.tsx";
+import { Typo } from "../typo/index.ts";
 import styles from "./theme-detail.module.css";
 
 interface ThemeDetailProps {

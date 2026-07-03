@@ -1,7 +1,7 @@
 import { cva } from "cva";
 import { Progress } from "@base-ui/react/progress";
-import type { UpdateResult } from "../lib/updaters.ts";
-import { getProgressState } from "../lib/progress.ts";
+import type { UpdateResult } from "../../lib/updaters.ts";
+import { getProgressState } from "../../lib/progress.ts";
 import styles from "./progress-bar.module.css";
 
 const indicatorVariants = cva({
