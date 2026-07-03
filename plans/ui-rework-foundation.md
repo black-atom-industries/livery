@@ -52,21 +52,27 @@ Visually: 1px border, monospace uppercase text, squared corners, small sizing.
 
 ### Acceptance criteria
 
-- [ ] CSS Modules working in Vite config (`.module.css` imports resolve)
-- [ ] CVA installed and usable (`cva`, `cx`, `VariantProps` imports work)
-- [ ] Token mapping module imports `@black-atom/core` and generates CSS custom properties
-- [ ] CSS variables set on `:root` or container (`--bg-default`, `--fg-default`, `--fg-subtle`,
+- [x] CSS Modules working in Vite config (`.module.css` imports resolve)
+- [x] CVA installed and usable (`cva`, `cx`, `VariantProps` imports work)
+- [x] Token mapping module imports `@black-atom/core` and generates CSS custom properties
+- [x] CSS variables set on `:root` or container (`--bg-default`, `--fg-default`, `--fg-subtle`,
       etc.)
-- [ ] Storybook running OR `/dev` route rendering components
-- [ ] Global decorator/wrapper allows switching between core themes (all collections/appearances)
-- [ ] `components/badge/` folder with `badge.tsx`, `badge.module.css`, `index.ts`, story file
-- [ ] Badge renders with `data-component="badge"` on root element
-- [ ] Badge has CVA variants for appearance (`light`, `dark`) with distinct visual treatment
-- [ ] Badge consumes CSS custom properties from the token system (no hardcoded colors)
+- [x] Storybook running OR `/dev` route rendering components — `/dev` route chosen, Storybook
+      abandoned (CJS/ESM + Deno friction)
+- [x] Global decorator/wrapper allows switching between core themes (all collections/appearances)
+- [x] `components/badge/` folder with `badge.tsx`, `badge.module.css`, `index.ts` — story file N/A,
+      showcased via `/dev/primitives` instead
+- [x] Badge renders with `data-component="badge"` on root element
+- [x] Badge has CVA variants for appearance (`light`, `dark`) with distinct visual treatment
+- [x] Badge consumes CSS custom properties from the token system (no hardcoded colors)
 
 ---
 
-## Phase 2: Button + ColorSwatch
+## Phase 2: Button + ColorSwatch — DEFERRED
+
+**Status**: Not started. Deferred to after the upcoming Claude Design pass — these specs predate
+that process and will likely be reworked once the design direction (search/filter, theme datasheet,
+settings, etc.) lands. Tracked in follow-up issue: TBD (link once created).
 
 **User stories**: 9, 10
 
@@ -120,15 +126,15 @@ Each gets a proper component folder, CSS Module, data attribute, and story/dev e
 
 ### Acceptance criteria
 
-- [ ] All 5 components use CSS Modules, zero Tailwind classes remain in any source file
-- [ ] Old flat component files deleted, all components live in folder convention
-- [ ] Each component has its own folder with `.module.css` and story/dev entry
-- [ ] AppHeader matches design language (mono wordmark, version label, horizontal rule)
-- [ ] AppFooter shows keyboard hints in monospace, sync status
-- [ ] ThemeList renders collection groups with uppercase mono headers and theme counts
-- [ ] ThemeDetail shows theme name in display font, metadata rows, placeholder for swatches
-- [ ] ProgressBar uses square status pips and mono labels
-- [ ] All components have `data-component` attributes
+- [x] All 5 components use CSS Modules, zero Tailwind classes remain in any source file
+- [x] Old flat component files deleted, all components live in folder convention
+- [x] Each component has its own folder with `.module.css` and dev entry (via `/dev/components`)
+- [x] AppHeader matches design language (mono wordmark, version label, horizontal rule)
+- [x] AppFooter shows keyboard hints in monospace, sync status
+- [x] ThemeList renders collection groups with uppercase mono headers and theme counts
+- [x] ThemeDetail shows theme name in display font, metadata rows, placeholder for swatches
+- [x] ProgressBar uses square status pips and mono labels
+- [x] All components have `data-component` attributes
 
 ---
 
@@ -143,9 +149,9 @@ update documentation to reflect the new styling system.
 
 ### Acceptance criteria
 
-- [ ] `tailwindcss` and `@tailwindcss/vite` removed from `deno.json`
-- [ ] Tailwind import removed from `src/index.css` (or file removed/replaced)
-- [ ] Vite config no longer references Tailwind plugin
-- [ ] `src/AGENTS.md` updated: "Styling: CSS Modules + CVA" (not Tailwind)
-- [ ] App builds and runs cleanly with no Tailwind references
-- [ ] No Tailwind utility classes remain anywhere in the codebase
+- [x] `tailwindcss` and `@tailwindcss/vite` removed from `deno.json`
+- [x] Tailwind import removed from `src/index.css` (or file removed/replaced)
+- [x] Vite config no longer references Tailwind plugin
+- [x] `src/AGENTS.md` updated: "Styling: CSS Modules + CVA" (not Tailwind)
+- [x] App builds and runs cleanly with no Tailwind references
+- [x] No Tailwind utility classes remain anywhere in the codebase

@@ -7,7 +7,7 @@ _what_ to do, then delegates to Rust via `invoke()`.
 
 - **Runtime:** Deno
 - **Framework:** React (via Vite + `@deno/vite-plugin`)
-- **Styling:** CSS Modules with `--lvr-*` CSS custom properties
+- **Styling:** CSS Modules + CVA, `--lvr-*` CSS custom properties for design tokens
 - **State:** TanStack Query (server state), TanStack Store (client state)
 - **Routing:** TanStack Router
 
@@ -16,10 +16,12 @@ _what_ to do, then delegates to Rust via `invoke()`.
 > Full frontend conventions are pending — see
 > [DEV-318](https://linear.app/black-atom-industries/issue/DEV-318).
 
-- **Containers** (`src/containers/`): Own state, fetch data, orchestrate logic.
-- **Components** (`src/components/`): Receive props, render UI. No data fetching.
+- **Routes** (`src/routes/`): Own state, fetch data, orchestrate logic — the route component is the
+  container.
+- **Components** (`src/components/`): Receive props, render UI. No data fetching. Folder convention:
+  `components/<name>/<name>.tsx` + `<name>.module.css` + `index.ts` barrel.
 - **Layouts** (`src/components/layouts/`): Page-level structure shells.
-- One component/container per file. File name matches export.
+- One component per file. File name matches export.
 - `kebab-case` for all files and directories.
 - `.ts` for pure logic, `.tsx` for JSX.
 - `deno fmt` — 4-space indent, double quotes, semicolons, 100 char width.

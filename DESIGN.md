@@ -23,13 +23,13 @@ color themes across developer tools.
   sparingly — the exception, not the default.
 - **Body (TBD — IBM Plex Sans or Geist):** Descriptions, documentation, multi-sentence content.
   Relaxed leading, max 65ch width. Neutral and readable for sustained reading.
-- **Mono (JetBrains Mono / Berkeley Mono):** ALL labels, navigation, status text, section headers,
-  form fields, metadata, keyboard shortcuts. Uppercase with letterspacing for section headers. This
-  is the default voice of the interface — anything that is part of the chrome uses monospace.
-  Berkeley Mono (TX-02) is the visual target, but its license prohibits app bundling and
-  redistribution (EULA §1.14, §9). Licensing inquiry pending (black-atom-industries/ui#5). JetBrains
-  Mono is the fallback. IoskeleyMono (SIL OFL) is an open-source Berkeley Mono approximation worth
-  evaluating.
+- **Mono (JetBrains Mono — interim):** ALL labels, navigation, status text, section headers, form
+  fields, metadata, keyboard shortcuts. Uppercase with letterspacing for section headers. This is
+  the default voice of the interface — anything that is part of the chrome uses monospace. Berkeley
+  Mono (TX-02) was the original visual target, but its license prohibits app bundling and
+  redistribution (EULA §1.14, §9) — licensing inquiry (black-atom-industries/ui#5) did not resolve,
+  so JetBrains Mono ships as the interim mono voice. Full type-stack refinement (mono + body) is
+  deferred to the upcoming Claude Design pass.
 
 **Hierarchy through contrast:** Pair massive display headlines with tiny monospace metadata labels
 to create the "technical datasheet" effect.
