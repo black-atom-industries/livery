@@ -4,6 +4,7 @@
 /* Fonts */
 @import "@fontsource-variable/space-grotesk";
 @import "@fontsource-variable/recursive/full.css";
+@import "@fontsource-variable/jetbrains-mono";
 
 html {
     font-size: 100%; /* 19px — readability bump for desktop use */

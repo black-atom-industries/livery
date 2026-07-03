@@ -8,7 +8,7 @@
 :root {
     /* Base families — brand typefaces */
     --lvr-font-family-sans: "Recursive Variable", sans-serif;
-    --lvr-font-family-mono: "Recursive Variable", monospace;
+    --lvr-font-family-mono: "JetBrains Mono Variable", monospace;
 
     /* Semantic aliases — Typography components consume these. */
     --lvr-font-family-heading: "Space Grotesk Variable", sans-serif;

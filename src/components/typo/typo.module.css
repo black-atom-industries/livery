@@ -77,7 +77,6 @@
 
 .TypoInlineCode {
     font-family: var(--lvr-font-family-code);
-    font-variation-settings: "MONO" 1;
     font-size: 0.9em;
     font-weight: var(--lvr-font-weight-5);
     line-height: inherit;
