@@ -10,7 +10,7 @@ interface Props {
 
 export function ThemeProvider({ theme, children }: Props) {
     return (
-        <div data-component="ThemeProvider" data-theme={theme.meta.key} className={styles.root}>
+        <div data-component="theme-provider" data-theme={theme.meta.key} className={styles.root}>
             <style>{themeToStyleSheet(theme)}</style>
 
             {children}

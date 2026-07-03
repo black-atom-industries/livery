@@ -14,7 +14,7 @@ const SHORTCUTS: Shortcut[] = [
 
 export function AppFooter() {
     return (
-        <div className={styles.root}>
+        <div data-component="app-footer" className={styles.root}>
             {SHORTCUTS.map((s) => (
                 <span key={s.key} className={styles.shortcut}>
                     <kbd className={styles.keys}>{s.key}</kbd>

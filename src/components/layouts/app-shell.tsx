@@ -21,7 +21,7 @@ interface AppShellProps {
  */
 export function AppShell({ header, progress, footer, children }: AppShellProps) {
     return (
-        <div className={styles.root}>
+        <div data-layout="app-shell" className={styles.root}>
             {header && <header className={styles.header}>{header}</header>}
             <main className={styles.main}>{children}</main>
             {progress && <div className={styles.progress}>{progress}</div>}

@@ -17,7 +17,7 @@ interface SplitPanelProps {
  */
 export function SplitPanel({ left, right }: SplitPanelProps) {
     return (
-        <div className={styles.root}>
+        <div data-layout="split-panel" className={styles.root}>
             <div className={styles.left}>{left}</div>
             <div className={styles.right}>{right}</div>
         </div>

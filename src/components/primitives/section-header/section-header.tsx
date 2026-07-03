@@ -16,7 +16,7 @@ interface SectionHeaderProps {
  */
 export function SectionHeader({ label, meta }: SectionHeaderProps) {
     return (
-        <div className={styles.root}>
+        <div data-component="section-header" className={styles.root}>
             <div className={styles.row}>
                 <span className={styles.label}>{label}</span>
                 {meta && <span className={styles.meta}>{meta}</span>}

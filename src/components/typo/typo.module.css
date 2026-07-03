@@ -82,7 +82,7 @@
     font-weight: var(--lvr-font-weight-5);
     line-height: inherit;
     padding: 0.125em 0.375em;
-    border-radius: 0.25rem;
+    border-radius: 0;
     background-color: color-mix(in oklch, var(--lvr-color-fg-default) 12%, transparent);
 }
 
@@ -92,7 +92,7 @@
     font-weight: var(--lvr-font-weight-5);
     line-height: inherit;
     padding: 0.05em 0.25em;
-    border-radius: 0.2rem;
+    border-radius: 0;
     background-color: color-mix(in oklch, var(--lvr-color-bg-warn) 50%, transparent);
 }
 
