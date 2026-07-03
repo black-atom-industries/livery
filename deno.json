@@ -15,7 +15,7 @@
         ]
     },
     "tasks": {
-        "cache": "deno cache --reload .",
+        "cache": "deno cache --reload src/",
         "dev": "sh scripts/dev-local.sh _dev",
         "build": "deno run -A npm:@tauri-apps/cli build",
         "vite:dev": "deno run -A npm:vite --port 1420",
