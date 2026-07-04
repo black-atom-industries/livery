@@ -163,6 +163,12 @@ function Component() {
                                 setQuery(value);
                                 setPickedIndex(0);
                             }}
+                            onSubmit={() => {
+                                // Hand key control back to the list, cursor
+                                // on the first match.
+                                setPickedIndex(0);
+                                promptInputRef.current?.blur();
+                            }}
                             count={`${themes.length}/${allThemes.length}`}
                         />
                     </div>
