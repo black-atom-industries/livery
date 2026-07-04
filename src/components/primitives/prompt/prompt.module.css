@@ -47,6 +47,22 @@
     flex: none;
 }
 
+/* Input + caret as one gapless unit, so the root's flex gap never opens
+   space between the typed text and the block caret. */
+.typing {
+    display: flex;
+    align-items: center;
+    flex: none;
+    min-width: 0;
+}
+
+.typingIdle {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
 .count {
     margin-left: auto;
     font-size: var(--ba-font-size-1);

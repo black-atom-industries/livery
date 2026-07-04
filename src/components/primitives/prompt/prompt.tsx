@@ -50,20 +50,24 @@ export function Prompt(
             className={promptVariants({ focused: showCaret, className })}
         >
             <span className={styles.glyph}>»</span>
-            <input
-                ref={inputRef}
-                className={styles.input}
-                style={showCaret ? { width: `${text.length}ch`, flex: "none" } : undefined}
-                type="text"
-                value={text}
-                placeholder={showCaret ? "" : placeholder ?? "search theme names — /"}
-                onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-                onFocus={() => setHasFocus(true)}
-                onBlur={() => setHasFocus(false)}
-                onKeyDown={onSubmit ? (e) => e.key === "Enter" && onSubmit() : undefined}
-                readOnly={!onChange}
-            />
-            {showCaret ? <span className={styles.caret} /> : null}
+            <span className={showCaret ? styles.typing : styles.typingIdle}>
+                <input
+                    ref={inputRef}
+                    className={styles.input}
+                    style={showCaret
+                        ? { width: `calc(${text.length}ch + 1px)`, flex: "none" }
+                        : undefined}
+                    type="text"
+                    value={text}
+                    placeholder={showCaret ? "" : placeholder ?? "search theme names — /"}
+                    onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+                    onFocus={() => setHasFocus(true)}
+                    onBlur={() => setHasFocus(false)}
+                    onKeyDown={onSubmit ? (e) => e.key === "Enter" && onSubmit() : undefined}
+                    readOnly={!onChange}
+                />
+                {showCaret ? <span className={styles.caret} /> : null}
+            </span>
             {count ? <span className={styles.count}>{count}</span> : null}
         </div>
     );
