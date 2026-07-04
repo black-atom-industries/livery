@@ -24,7 +24,7 @@ body { margin: 0; background: #131109; }
   <div style="display:flex;flex-direction:column;gap:8px">
     <div style="font-size:12px;letter-spacing:0.18em;color:#857D6E">BLACK ATOM INDUSTRIES · LIVERY · UI DESIGN BOARD</div>
     <div style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:#EDE9E2;letter-spacing:-0.01em">LIVERY — WARM PRECISION</div>
-    <div style="font-size:12px;color:#B8B1A4;max-width:84ch;line-height:1.6">Type: Space Grotesk (display) · Iosevka (mono/UI) · IBM Plex Sans (body). Index: <a href="#2a" style="color:#63AD79">2a</a> main view (dark + light) · <a href="#2b" style="color:#63AD79">2b</a> filter popup · <a href="#3a" style="color:#63AD79">3a</a> adapter settings · <a href="#3b" style="color:#63AD79">3b</a> general settings · <a href="#3c" style="color:#63AD79">3c</a> apply progress · <a href="#3d" style="color:#63AD79">3d</a> empty &amp; error · <a href="#3e" style="color:#63AD79">3e</a> component inventory · <a href="#4a" style="color:#63AD79">4a</a> color model / token map.</div>
+    <div style="font-size:12px;color:#B8B1A4;max-width:84ch;line-height:1.6">Type: Space Grotesk (display) · Iosevka (mono/UI) · IBM Plex Sans (body). Index: <a href="#2a" style="color:#63AD79">2a</a> main view (dark + light) · <a href="#2b" style="color:#63AD79">2b</a> filter popup · <a href="#3a" style="color:#63AD79">3a</a> adapter settings · <a href="#3b" style="color:#63AD79">3b</a> general settings · <a href="#3f" style="color:#63AD79">3f</a> apply rail · <a href="#3d" style="color:#63AD79">3d</a> empty &amp; error · <a href="#3e" style="color:#63AD79">3e</a> component inventory · <a href="#4a" style="color:#63AD79">4a</a> color model / token map.</div>
   </div>
 
   <!-- ============================================================ 00 · COLOR MODEL -->
@@ -636,79 +636,238 @@ body { margin: 0; background: #131109; }
     </div>
   </div>
 
-  <!-- ============================================================ 05 · APPLY PROGRESS -->
-  <div id="3c" style="display:flex;flex-direction:column;gap:16px">
+  <!-- ============================================================ 3F · APPLY RAIL -->
+  <div id="3f" style="display:flex;flex-direction:column;gap:16px">
     <div style="display:flex;align-items:baseline;gap:16px">
-      <a href="#3c" style="text-decoration:none;background:#EDE9E2;color:#1D1A17;font-size:12px;font-weight:700;padding:3px 8px">3C</a>
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:#EDE9E2">APPLY PROGRESS — STATUS STRIP STATES</span>
-      <span style="font-size:11px;color:#857D6E;letter-spacing:0.08em">LIVES ABOVE THE APP FOOTER · ONE PIP PER ADAPTER · SQUARE PIPS ONLY</span>
+      <a href="#3f" style="text-decoration:none;background:#EDE9E2;color:#1D1A17;font-size:12px;font-weight:700;padding:3px 8px">3F</a>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:#EDE9E2">APPLY RAIL — RIGHT-DOCKED VERTICAL STATUS ASIDE</span>
+      <span style="font-size:11px;color:#857D6E;letter-spacing:0.08em">REPLACES THE HORIZONTAL APPLYSTRIP · SCALES VERTICALLY AS ADAPTER COUNT GROWS · ONE ROW PER ADAPTER</span>
     </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
 
-      <!-- running -->
-      <div style="flex:none;width:1080px;background:#1D1A17;border:1px solid #3C362C;color:#EDE9E2;display:flex;flex-direction:column">
-        <div style="display:flex;align-items:center;gap:16px;padding:12px 20px">
-          <span style="font-size:10px;letter-spacing:0.14em;color:#857D6E;width:190px">APPLYING KOYO YORU</span>
-          <div style="display:flex;gap:14px;font-size:10px;flex:1">
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>nvim</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>tmux</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>ghostty</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#EDE9E2"><span style="width:8px;height:8px;background:#EDE9E2"></span>delta ▶</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#57503F"><span style="width:8px;height:8px;border:1px solid #3C362C"></span>lazygit</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#57503F"><span style="width:8px;height:8px;border:1px solid #3C362C"></span>obsidian</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#57503F"><span style="width:8px;height:8px;border:1px solid #3C362C"></span>helm</span>
+    <!-- rationale + anatomy + behavior -->
+    <div style="flex:none;box-sizing:border-box;width:1082px;background:#1D1A17;border:1px solid #3C362C;color:#EDE9E2;padding:24px;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.7;color:#B8B1A4;max-width:82ch">The horizontal <span style="font-family:'Iosevka',monospace">ApplyStrip</span> wraps its <span style="font-family:'Iosevka',monospace">StatusPip</span> row once the adapter count climbs — 8 today, more shipping. The rail moves the same feedback onto a vertical axis: it docks right (<span style="font-family:'Iosevka',monospace">280px</span>, hard 1px left seam) and compresses the theme-detail pane while <span style="font-family:'Iosevka',monospace">phase != picking</span>. New adapters extend the stack downward, never overflow.</div>
+
+      <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:10px;letter-spacing:0.14em;color:#857D6E">ANATOMY · AdapterStatusRow</span><span style="flex:1;border-bottom:1px solid #2E2922"></span><span style="font-size:10px;color:#57503F">components/display/AdapterStatusRow</span></div>
+      <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:none;width:300px;border:1px solid #2E2922">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 16px;background:#252119;border-left:2px solid #63AD79;padding-left:14px">
+            <span style="width:8px;height:8px;background:#63AD79"></span>
+            <span style="flex:1;font-size:12px;color:#EDE9E2">ghostty</span>
+            <span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">61ms</span>
           </div>
-          <span style="font-size:11px;color:#B8B1A4">3/7</span>
         </div>
-        <div style="height:3px;background:#2E2922;margin:0 20px 12px"><div style="height:3px;background:#63AD79;width:43%"></div></div>
-      </div>
-
-      <!-- success -->
-      <div style="flex:none;width:1080px;background:#1D1A17;border:1px solid #3C362C;color:#EDE9E2">
-        <div style="display:flex;align-items:center;gap:16px;padding:12px 20px">
-          <span style="font-size:10px;letter-spacing:0.14em;color:#63AD79;width:190px">■ APPLIED — KOYO YORU</span>
-          <div style="display:flex;gap:14px;font-size:10px;flex:1;color:#63AD79">
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:#63AD79"></span>nvim</span>
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:#63AD79"></span>tmux</span>
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:#63AD79"></span>ghostty</span>
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:#63AD79"></span>delta</span>
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:#63AD79"></span>lazygit</span>
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:#63AD79"></span>obsidian</span>
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;background:#63AD79"></span>helm</span>
-          </div>
-          <span style="font-size:11px;color:#63AD79">7/7 OK · 412 MS</span>
+        <div style="flex:1;min-width:360px;display:flex;flex-direction:column;gap:5px;font-size:11px;color:#857D6E;line-height:1.6">
+          <div style="display:flex;gap:10px"><span style="color:#63AD79;width:96px;flex:none">◧ StatusPip</span><span>8px square · pending (hollow) / running (cream) / ok (green) / warn (amber) / error (rust)</span></div>
+          <div style="display:flex;gap:10px"><span style="color:#63AD79;width:96px;flex:none">◧ name</span><span>mono, lowercase, adapter key · flexes to fill</span></div>
+          <div style="display:flex;gap:10px"><span style="color:#63AD79;width:96px;flex:none">◧ duration</span><span>right-aligned, tabular · <span style="font-family:'Iosevka',monospace;color:#B8B1A4">—</span> while pending/running</span></div>
+          <div style="display:flex;gap:10px"><span style="color:#63AD79;width:96px;flex:none">◧ cursor</span><span>2px positive left edge + subtle fill · rows ordered by run sequence</span></div>
         </div>
       </div>
 
-      <!-- partial failure -->
-      <div style="flex:none;width:1080px;background:#1D1A17;border:1px solid #3C362C;color:#EDE9E2;display:flex;flex-direction:column">
-        <div style="display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid #3C362C">
-          <span style="font-size:10px;letter-spacing:0.14em;color:#C4694F;width:190px">■ APPLIED WITH ERRORS</span>
-          <div style="display:flex;gap:14px;font-size:10px;flex:1">
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>nvim</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>tmux</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>ghostty</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>delta</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>lazygit</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#C4694F"><span style="width:8px;height:8px;background:#C4694F"></span>obsidian</span>
-            <span style="display:flex;align-items:center;gap:5px;color:#63AD79"><span style="width:8px;height:8px;background:#63AD79"></span>helm</span>
+      <div style="display:flex;align-items:baseline;gap:8px;padding-top:2px"><span style="font-size:10px;letter-spacing:0.14em;color:#857D6E">BEHAVIOR · DISMISS &amp; PERSISTENCE — RESOLVED</span><span style="flex:1;border-bottom:1px solid #2E2922"></span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;font-size:11px;line-height:1.6">
+        <div style="display:flex;flex-direction:column;gap:5px"><span style="color:#63AD79;letter-spacing:0.1em">CLEAN SUCCESS → AUTO-DISMISS</span><span style="color:#857D6E">Rail holds the <span style="font-family:'Iosevka',monospace">■ APPLIED</span> beat ~1.2s, then collapses (150ms ease-out width) back to the detail pane. Nothing to acknowledge.</span></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><span style="color:#C4694F;letter-spacing:0.1em">ERROR / DEGRADED → PERSIST</span><span style="color:#857D6E">Rail stays open until <span style="font-family:'Iosevka',monospace">esc</span>. A fault is never dismissed on a timer — it needs a decision (retry / open settings).</span></div>
+        <div style="display:flex;flex-direction:column;gap:5px"><span style="color:#857D6E;letter-spacing:0.1em">AFTER DISMISS → FOOTER PIP</span><span style="color:#857D6E">The last result lives on as a single <span style="font-family:'Iosevka',monospace">StatusPip</span> in the app footer. Clean pip is quiet; a fault pip carries <span style="font-family:'Iosevka',monospace">a REOPEN</span> and reopens the rail.</span></div>
+      </div>
+    </div>
+
+    <!-- state frames -->
+    <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+
+      <!-- ============ RUNNING ============ -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:10px;letter-spacing:0.14em;color:#857D6E">STATE · RUNNING</span><span style="font-size:10px;color:#57503F">rail live · detail pane compressed</span></div>
+        <div style="flex:none;width:900px;height:420px;background:#1D1A17;border:1px solid #3C362C;color:#EDE9E2;display:flex;flex-direction:column">
+          <!-- app header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid #3C362C">
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.02em">BLACK AT<span style="display:inline-block;width:0.62em;height:0.62em;border-radius:50%;background:#EDE9E2;margin:0 0.03em"></span>M LIVERY</span>
+            <span style="font-size:10px;color:#857D6E;letter-spacing:0.1em">PHASE · APPLYING</span>
           </div>
-          <span style="font-size:11px;color:#C4694F">6/7 OK · 1 ERROR</span>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 280px;min-height:0">
+            <!-- compressed detail pane -->
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px;opacity:0.45">
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;line-height:1">KOYO YORU</div>
+              <div style="font-size:10px;letter-spacing:0.14em;color:#857D6E">JPN · DARK · DOC LVR-JPN-KY-D</div>
+              <div style="display:flex;flex-direction:column;gap:2px;padding-top:4px">
+                <div style="height:34px;background:#96A9C6"></div>
+                <div style="height:34px;background:#7FA99A"></div>
+                <div style="height:34px;background:#A97BA2"></div>
+              </div>
+            </div>
+            <!-- rail -->
+            <div style="border-left:1px solid #3C362C;display:flex;flex-direction:column;min-height:0">
+              <div style="padding:12px 18px 12px;border-bottom:1px solid #2E2922;display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:10px;letter-spacing:0.14em;color:#857D6E">APPLYING KOYO YORU</span>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#B8B1A4;font-variant-numeric:tabular-nums"><span>4/8</span><span style="color:#857D6E">312 MS</span></div>
+                <div style="height:3px;background:#2E2922"><div style="height:3px;background:#63AD79;width:50%"></div></div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">system</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">8ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">nvim</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">92ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">tmux</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">40ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">ghostty</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">61ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px 7px 16px;background:#252119;border-left:2px solid #63AD79"><span style="width:8px;height:8px;background:#EDE9E2"></span><span style="flex:1;font-size:12px;color:#EDE9E2">delta ▶</span><span style="font-size:11px;color:#57503F;font-variant-numeric:tabular-nums">—</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;border:1px solid #3C362C;box-sizing:border-box"></span><span style="flex:1;font-size:12px;color:#57503F">lazygit</span><span style="font-size:11px;color:#57503F;font-variant-numeric:tabular-nums">—</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;border:1px solid #3C362C;box-sizing:border-box"></span><span style="flex:1;font-size:12px;color:#57503F">zed</span><span style="font-size:11px;color:#57503F;font-variant-numeric:tabular-nums">—</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;border:1px solid #3C362C;box-sizing:border-box"></span><span style="flex:1;font-size:12px;color:#57503F">obsidian</span><span style="font-size:11px;color:#57503F;font-variant-numeric:tabular-nums">—</span></div>
+              </div>
+              <div style="padding:9px 18px;border-top:1px solid #2E2922;font-size:9px;letter-spacing:0.08em;color:#57503F">j/k ROWS · ⏎ DETAILS · r RETRY · esc DISMISS</div>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 20px;background:#252119">
-          <span style="font-size:10px;letter-spacing:0.12em;color:#C4694F">OBSIDIAN — ERROR</span>
-          <span style="font-size:11px;color:#B8B1A4;flex:1">config not found at ~/.config/obsidian/themes/black-atom.css — check THEMES_PATH in settings</span>
-          <span style="border:1px solid #857D6E;color:#EDE9E2;padding:5px 12px;font-size:10px;letter-spacing:0.1em;cursor:pointer">[ r RETRY FAILED ]</span>
-          <span style="border:1px solid #3C362C;color:#B8B1A4;padding:5px 12px;font-size:10px;letter-spacing:0.1em;cursor:pointer">[ d DETAILS ]</span>
-          <span style="border:1px solid #3C362C;color:#B8B1A4;padding:5px 12px;font-size:10px;letter-spacing:0.1em;cursor:pointer">[ s OPEN SETTINGS ]</span>
-          <span style="font-size:10px;color:#57503F;cursor:pointer">esc DISMISS</span>
+      </div>
+
+      <!-- ============ SUCCESS ============ -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:10px;letter-spacing:0.14em;color:#63AD79">STATE · SUCCESS</span><span style="font-size:10px;color:#57503F">holds the beat, then auto-dismisses</span></div>
+        <div style="flex:none;width:900px;height:420px;background:#1D1A17;border:1px solid #3C362C;color:#EDE9E2;display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid #3C362C">
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.02em">BLACK AT<span style="display:inline-block;width:0.62em;height:0.62em;border-radius:50%;background:#EDE9E2;margin:0 0.03em"></span>M LIVERY</span>
+            <span style="font-size:10px;color:#63AD79;letter-spacing:0.1em">PHASE · APPLIED</span>
+          </div>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 280px;min-height:0">
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px;opacity:0.45">
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;line-height:1">KOYO YORU</div>
+              <div style="font-size:10px;letter-spacing:0.14em;color:#857D6E">JPN · DARK · DOC LVR-JPN-KY-D</div>
+              <div style="display:flex;flex-direction:column;gap:2px;padding-top:4px">
+                <div style="height:34px;background:#96A9C6"></div>
+                <div style="height:34px;background:#7FA99A"></div>
+                <div style="height:34px;background:#A97BA2"></div>
+              </div>
+            </div>
+            <div style="border-left:1px solid #3C362C;display:flex;flex-direction:column;min-height:0">
+              <div style="padding:12px 18px 12px;border-bottom:1px solid #2E2922;display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:10px;letter-spacing:0.14em;color:#63AD79">■ APPLIED — KOYO YORU</span>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#63AD79;font-variant-numeric:tabular-nums"><span>8/8 OK</span><span>412 MS</span></div>
+                <div style="height:3px;background:#2E2922"><div style="height:3px;background:#63AD79;width:100%"></div></div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">system</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">8ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">nvim</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">92ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">tmux</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">40ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">ghostty</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">61ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">delta</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">33ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">lazygit</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">74ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">zed</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">56ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">obsidian</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">48ms</span></div>
+              </div>
+              <div style="padding:9px 18px;border-top:1px solid #2E2922;font-size:9px;letter-spacing:0.08em;color:#57503F">esc DISMISS · auto in 1.2s</div>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:2px;padding:12px 20px;background:#14100E;border-top:1px solid #2E2922;font-size:10px;line-height:1.7;color:#857D6E">
-          <div style="display:flex;justify-content:space-between;padding-bottom:6px"><span style="letter-spacing:0.14em;color:#57503F">DEBUG — OBSIDIAN · d COLLAPSE · y COPY</span><span style="color:#57503F">ERR LVR-102</span></div>
-          <div><span style="color:#57503F">12:04:31.208</span> updater start · theme_key=jpn-koyo-yoru appearance=dark</div>
-          <div><span style="color:#57503F">12:04:31.209</span> resolve THEMES_PATH → ~/.config/obsidian/themes/</div>
-          <div><span style="color:#C4694F">12:04:31.211</span> ENOENT: no such file or directory, open '…/black-atom.css'</div>
-          <div><span style="color:#57503F">12:04:31.211</span> updater exit · status=error · duration_ms=3</div>
+        <!-- collapsed footer pip (clean) -->
+        <div style="display:flex;flex-direction:column;gap:6px;width:900px">
+          <span style="font-size:10px;letter-spacing:0.12em;color:#857D6E">↳ AFTER AUTO-DISMISS · APP FOOTER STATUS PIP (QUIET)</span>
+          <div style="display:flex;align-items:center;gap:10px;background:#1D1A17;border:1px solid #3C362C;padding:9px 18px">
+            <span style="width:8px;height:8px;background:#63AD79"></span>
+            <span style="font-size:10px;letter-spacing:0.12em;color:#63AD79">APPLIED — KOYO YORU</span>
+            <span style="font-size:10px;color:#57503F;font-variant-numeric:tabular-nums">8/8 · 412MS</span>
+            <span style="margin-left:auto;font-size:10px;color:#57503F;letter-spacing:0.08em">j/k SELECT · / SEARCH · ⏎ APPLY</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PARTIAL FAILURE + EXPANDED ERROR ============ -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:10px;letter-spacing:0.14em;color:#C4694F">STATE · PARTIAL FAILURE — ERROR ROW EXPANDED</span><span style="font-size:10px;color:#57503F">persists · ⏎ on cursored row expands in place</span></div>
+        <div style="flex:none;width:900px;height:600px;background:#1D1A17;border:1px solid #3C362C;color:#EDE9E2;display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid #3C362C">
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.02em">BLACK AT<span style="display:inline-block;width:0.62em;height:0.62em;border-radius:50%;background:#EDE9E2;margin:0 0.03em"></span>M LIVERY</span>
+            <span style="font-size:10px;color:#C4694F;letter-spacing:0.1em">PHASE · APPLIED WITH ERRORS</span>
+          </div>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 280px;min-height:0">
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px;opacity:0.4">
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;line-height:1">KOYO YORU</div>
+              <div style="font-size:10px;letter-spacing:0.14em;color:#857D6E">JPN · DARK · DOC LVR-JPN-KY-D</div>
+              <div style="display:flex;flex-direction:column;gap:2px;padding-top:4px">
+                <div style="height:34px;background:#96A9C6"></div>
+                <div style="height:34px;background:#7FA99A"></div>
+                <div style="height:34px;background:#A97BA2"></div>
+              </div>
+            </div>
+            <div style="border-left:1px solid #3C362C;display:flex;flex-direction:column;min-height:0">
+              <div style="padding:12px 18px 12px;border-bottom:1px solid #2E2922;display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:10px;letter-spacing:0.14em;color:#C4694F">■ APPLIED WITH ERRORS</span>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#C4694F;font-variant-numeric:tabular-nums"><span>7/8 OK</span><span>1 ERROR</span></div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">system</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">8ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">nvim</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">92ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">tmux</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">40ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">ghostty</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">61ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">delta</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">33ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">lazygit</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">74ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">zed</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">56ms</span></div>
+                <!-- error row, cursored + expanded -->
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 18px 6px 16px;background:#252119;border-left:2px solid #C4694F"><span style="width:8px;height:8px;background:#C4694F"></span><span style="flex:1;font-size:12px;color:#EDE9E2">obsidian</span><span style="font-size:10px;color:#C4694F;letter-spacing:0.06em">ERR</span></div>
+                <div style="background:#14100E;border-top:1px solid #2E2922;border-bottom:1px solid #2E2922;padding:12px 18px;display:flex;flex-direction:column;gap:10px">
+                  <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;line-height:1.55;color:#B8B1A4">ENOENT: themes directory not found. Livery could not resolve the Obsidian vault — point THEMES_PATH at the vault or disable the adapter.</div>
+                  <div style="display:flex;flex-direction:column;gap:4px;font-size:10px">
+                    <div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#857D6E;letter-spacing:0.1em">PATH</span><span style="color:#B8B1A4;text-align:right;word-break:break-all">~/.config/obsidian/themes/black-atom.css</span></div>
+                    <div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#857D6E;letter-spacing:0.1em">CODE</span><span style="color:#C4694F">LVR-102</span></div>
+                  </div>
+                  <span style="align-self:flex-start;border:1px solid #857D6E;color:#EDE9E2;padding:5px 12px;font-size:10px;letter-spacing:0.1em;cursor:pointer">[ r RETRY FAILED ]</span>
+                </div>
+              </div>
+              <div style="padding:9px 18px;border-top:1px solid #2E2922;font-size:9px;letter-spacing:0.08em;color:#57503F">j/k ROWS · ⏎ COLLAPSE · r RETRY · esc DISMISS</div>
+            </div>
+          </div>
+        </div>
+        <!-- persisted footer pip (fault) -->
+        <div style="display:flex;flex-direction:column;gap:6px;width:900px">
+          <span style="font-size:10px;letter-spacing:0.12em;color:#857D6E">↳ AFTER esc · APP FOOTER STATUS PIP (FAULT PERSISTS)</span>
+          <div style="display:flex;align-items:center;gap:10px;background:#1D1A17;border:1px solid #3C362C;padding:9px 18px">
+            <span style="width:8px;height:8px;background:#C4694F"></span>
+            <span style="font-size:10px;letter-spacing:0.12em;color:#C4694F">7/8 APPLIED · 1 ERROR</span>
+            <span style="font-size:10px;color:#857D6E">obsidian</span>
+            <span style="margin-left:auto;border:1px solid #3C362C;color:#B8B1A4;padding:3px 10px;font-size:10px;letter-spacing:0.1em;cursor:pointer">[ a REOPEN RAIL ]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ DEGRADED ============ -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:10px;letter-spacing:0.14em;color:#C99A4E">STATE · DEGRADED</span><span style="font-size:10px;color:#57503F">applied but a live reload failed · persists</span></div>
+        <div style="flex:none;width:900px;height:440px;background:#1D1A17;border:1px solid #3C362C;color:#EDE9E2;display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid #3C362C">
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.02em">BLACK AT<span style="display:inline-block;width:0.62em;height:0.62em;border-radius:50%;background:#EDE9E2;margin:0 0.03em"></span>M LIVERY</span>
+            <span style="font-size:10px;color:#C99A4E;letter-spacing:0.1em">PHASE · APPLIED · DEGRADED</span>
+          </div>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 280px;min-height:0">
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px;opacity:0.45">
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;line-height:1">KOYO YORU</div>
+              <div style="font-size:10px;letter-spacing:0.14em;color:#857D6E">JPN · DARK · DOC LVR-JPN-KY-D</div>
+              <div style="display:flex;flex-direction:column;gap:2px;padding-top:4px">
+                <div style="height:34px;background:#96A9C6"></div>
+                <div style="height:34px;background:#7FA99A"></div>
+                <div style="height:34px;background:#A97BA2"></div>
+              </div>
+            </div>
+            <div style="border-left:1px solid #3C362C;display:flex;flex-direction:column;min-height:0">
+              <div style="padding:12px 18px 12px;border-bottom:1px solid #2E2922;display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:10px;letter-spacing:0.14em;color:#C99A4E">■ APPLIED · 1 DEGRADED</span>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#C99A4E;font-variant-numeric:tabular-nums"><span>8/8 OK</span><span>438 MS</span></div>
+                <div style="height:3px;background:#2E2922"><div style="height:3px;background:#C99A4E;width:100%"></div></div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">system</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">8ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">nvim</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">92ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">tmux</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">40ms</span></div>
+                <!-- degraded row (2-line: label row + truncated reason) -->
+                <div style="display:flex;flex-direction:column;gap:2px;padding:7px 18px 7px 16px;background:#252119;border-left:2px solid #C99A4E">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;background:#C99A4E"></span><span style="flex:1;font-size:12px;color:#EDE9E2">ghostty</span><span style="font-size:10px;color:#C99A4E;letter-spacing:0.06em">DEGRADED</span></div>
+                  <div style="padding-left:18px;font-size:10px;color:#857D6E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">config patched · live reload failed — restart ghostty</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">delta</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">33ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">lazygit</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">74ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">zed</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">56ms</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:7px 18px"><span style="width:8px;height:8px;background:#63AD79"></span><span style="flex:1;font-size:12px;color:#EDE9E2">obsidian</span><span style="font-size:11px;color:#857D6E;font-variant-numeric:tabular-nums">48ms</span></div>
+              </div>
+              <div style="padding:9px 18px;border-top:1px solid #2E2922;font-size:9px;letter-spacing:0.08em;color:#57503F">j/k ROWS · ⏎ DETAILS · esc DISMISS</div>
+            </div>
+          </div>
         </div>
       </div>
 
