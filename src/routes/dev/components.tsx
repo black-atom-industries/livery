@@ -14,8 +14,31 @@ import { ProgressBar } from "../../components/primitives/progress-bar/progress-b
 import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx";
 import { ThemeList } from "../../components/theme-list/index.ts";
 import { ThemeDetail } from "../../components/theme-detail/index.ts";
+import { AdapterRows } from "../../components/settings/adapter-rows/index.ts";
+import type { AdapterField } from "../../components/settings/adapter-rows/index.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";
 import type { UpdateResult } from "../../lib/updaters.ts";
+import type { AppConfig, AppName, Config } from "../../bindings.ts";
+
+const SETTINGS_ADAPTERS_FIXTURE: Config = {
+    system_appearance: false,
+    apps: {
+        nvim: { enabled: true, config_path: "~/.config/nvim/lua/theme.lua" },
+        ghostty: {
+            enabled: true,
+            config_path: "~/.config/ghostty/config",
+            themes_path: "~/.config/ghostty/themes",
+            match_pattern: "^theme = .*$",
+            replace_template: "theme = {theme_key}",
+        },
+        obsidian: { enabled: false, config_path: "~/.config/obsidian/themes/black-atom.css" },
+        tmux: { enabled: true, config_path: "~/.tmux.conf" },
+        zed: { enabled: true, config_path: "~/.config/zed/settings.json" },
+        delta: { enabled: true, config_path: "~/.gitconfig" },
+        lazygit: { enabled: true, config_path: "~/.config/lazygit/config.yml" },
+        helm: { enabled: true, config_path: "~/.config/helm/config.json" },
+    },
+};
 
 const APPLY_STRIP_FIXTURES: Record<string, UpdateResult[]> = {
     running: [
@@ -85,6 +108,9 @@ function Page() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [collectionValue, setCollectionValue] = useState("jpn");
     const [panelExpanded, setPanelExpanded] = useState(true);
+    const [settingsFixture, setSettingsFixture] = useState(SETTINGS_ADAPTERS_FIXTURE);
+    const [settingsExpandedApp, setSettingsExpandedApp] = useState<AppName | null>("ghostty");
+    const [settingsCursorIndex, setSettingsCursorIndex] = useState(1);
 
     return (
         <div>
@@ -205,6 +231,49 @@ function Page() {
                             <StatusPip intent="ok">OK</StatusPip>
                         </>
                     }
+                />
+            </div>
+
+            <SectionLabel>Settings — adapters panel</SectionLabel>
+            <div
+                style={{
+                    border: "1px solid var(--ba-color-fg-hint)",
+                    marginBottom: 32,
+                    padding: "24px 28px",
+                    maxWidth: 720,
+                }}
+            >
+                <AdapterRows
+                    apps={Object.entries(settingsFixture.apps) as [AppName, AppConfig][]}
+                    cursorIndex={settingsCursorIndex}
+                    expandedApp={settingsExpandedApp}
+                    onToggleEnabled={(appName) => {
+                        setSettingsFixture((prev) => ({
+                            ...prev,
+                            apps: {
+                                ...prev.apps,
+                                [appName]: {
+                                    ...prev.apps[appName],
+                                    enabled: prev.apps[appName].enabled === false,
+                                },
+                            },
+                        }));
+                    }}
+                    onToggleExpanded={(appName) => {
+                        setSettingsExpandedApp((current) => (current === appName ? null : appName));
+                        setSettingsCursorIndex(
+                            Object.keys(settingsFixture.apps).indexOf(appName),
+                        );
+                    }}
+                    onFieldCommit={(appName, field: AdapterField, value) => {
+                        setSettingsFixture((prev) => ({
+                            ...prev,
+                            apps: {
+                                ...prev.apps,
+                                [appName]: { ...prev.apps[appName], [field]: value },
+                            },
+                        }));
+                    }}
                 />
             </div>
 

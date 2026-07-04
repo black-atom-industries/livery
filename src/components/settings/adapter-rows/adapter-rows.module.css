@@ -1,0 +1,65 @@
+/* =============================================================
+   AdapterRows — SETTINGS · ADAPTERS panel
+   One DisclosurePanel per adapter; row anatomy per board 3a —
+   toggle, name (bold when enabled), path in hint fg, StatusPip.
+   ============================================================= */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ba-size-3);
+}
+
+.rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ba-size-2);
+}
+
+.rowSlot {
+    border: var(--ba-border-width) solid transparent;
+}
+
+.rowSlotCursored .panel {
+    border-color: var(--ba-color-fg-hint);
+}
+
+.panel {
+    font-family: var(--ba-font-mono);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: var(--ba-size-4);
+    min-width: 0;
+    flex: 1;
+}
+
+.name {
+    width: 90px;
+    flex-shrink: 0;
+    color: var(--ba-color-fg-subtle);
+}
+
+.nameEnabled {
+    width: 90px;
+    flex-shrink: 0;
+    font-weight: var(--ba-font-weight-bold);
+    color: var(--ba-color-fg-default);
+}
+
+.path {
+    color: var(--ba-color-fg-hint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.fieldGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ba-size-4);
+}

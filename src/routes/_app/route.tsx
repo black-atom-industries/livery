@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { collectionOrder, themeMap } from "@black-atom/core";
@@ -25,6 +25,12 @@ function AppLayout() {
     const phase = useStore(appStore, (s) => s.phase);
     const updaterResults = useStore(appStore, (s) => s.updaterResults);
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
+
+    const matches = useMatches();
+    const settingsMatch = matches.find((m) => m.routeId === "/_app/settings");
+    const isSettings = settingsMatch !== undefined;
+    const settingsSection = (settingsMatch?.search as { section?: string } | undefined)?.section ??
+        "adapters";
 
     const themeCount = useMemo(() => Object.keys(themeMap).length, []);
     const collectionCount = collectionOrder.length;
@@ -72,7 +78,9 @@ function AppLayout() {
                 <header className={styles.header}>
                     <AppHeader
                         version={denoConfig.version}
-                        context={`${themeCount} THEMES · ${collectionCount} COLLECTIONS · ENV ${env}`}
+                        context={isSettings
+                            ? `SETTINGS / ${settingsSection.toUpperCase()}`
+                            : `${themeCount} THEMES · ${collectionCount} COLLECTIONS · ENV ${env}`}
                     />
                 </header>
                 <main className={styles.main}>
@@ -89,16 +97,26 @@ function AppLayout() {
                 )}
                 <footer className={styles.footer}>
                     <AppFooter
-                        hints={
-                            <>
-                                <KeyHint keys="j/k">NAVIGATE</KeyHint>
-                                <KeyHint keys="/">SEARCH</KeyHint>
-                                <KeyHint keys="f">FILTERS</KeyHint>
-                                <KeyHint keys="⏎">APPLY</KeyHint>
-                                <KeyHint keys="s">SETTINGS</KeyHint>
-                                <KeyHint keys="q">QUIT</KeyHint>
-                            </>
-                        }
+                        hints={isSettings
+                            ? (
+                                <>
+                                    <KeyHint keys="j/k">ROWS</KeyHint>
+                                    <KeyHint keys="space">TOGGLE</KeyHint>
+                                    <KeyHint keys="⏎">EXPAND</KeyHint>
+                                    <KeyHint keys="e">EDIT FIELD</KeyHint>
+                                    <KeyHint keys="esc">BACK</KeyHint>
+                                </>
+                            )
+                            : (
+                                <>
+                                    <KeyHint keys="j/k">NAVIGATE</KeyHint>
+                                    <KeyHint keys="/">SEARCH</KeyHint>
+                                    <KeyHint keys="f">FILTERS</KeyHint>
+                                    <KeyHint keys="⏎">APPLY</KeyHint>
+                                    <KeyHint keys="s">SETTINGS</KeyHint>
+                                    <KeyHint keys="q">QUIT</KeyHint>
+                                </>
+                            )}
                         status={<StatusPip intent="ok">READY</StatusPip>}
                     />
                 </footer>
