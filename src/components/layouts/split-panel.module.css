@@ -1,23 +1,25 @@
 /* =============================================================
    App.SplitPanel — Two-panel layout
-   50/50 horizontal split with a 1px right border on the left panel.
+   Fixed 340px left rail + fluid right panel, hard 1px seam between.
    All colors via --ba-* tokens.
    ============================================================= */
 
 .root {
-    display: flex;
+    display: grid;
+    grid-template-columns: 340px 1fr;
     height: 100%;
 }
 
 .left {
-    width: 50%;
     overflow-y: auto;
-    border-right: var(--ba-border-subtle);
-    padding: var(--ba-size-4) var(--ba-size-4);
+    border-right: var(--ba-border);
+    padding: var(--ba-size-4) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ba-size-1);
 }
 
 .right {
-    width: 50%;
     overflow-y: auto;
-    padding: var(--ba-size-4) var(--ba-size-6);
+    padding: var(--ba-size-6) var(--ba-size-7);
 }

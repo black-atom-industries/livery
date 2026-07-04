@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-store";
+import { collectionOrder, themeMap } from "@black-atom/core";
 import denoConfig from "../../../deno.json" with { type: "json" };
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
@@ -18,12 +20,19 @@ function AppLayout() {
     const updaterResults = useStore(appStore, (s) => s.updaterResults);
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
 
+    const themeCount = useMemo(() => Object.keys(themeMap).length, []);
+    const collectionCount = collectionOrder.length;
+    const env = currentTheme.meta.appearance.toUpperCase();
+
     return (
         <>
             <style id="black-atom-theme-tokens">{themeToStyleSheet(currentTheme)}</style>
             <div className={styles.root}>
                 <header className={styles.header}>
-                    <AppHeader version={denoConfig.version} />
+                    <AppHeader
+                        version={denoConfig.version}
+                        context={`${themeCount} THEMES · ${collectionCount} COLLECTIONS · ENV ${env}`}
+                    />
                 </header>
                 <main className={styles.main}>
                     <Outlet />
@@ -36,7 +45,10 @@ function AppLayout() {
                         hints={
                             <>
                                 <KeyHint keys="j/k">NAVIGATE</KeyHint>
+                                <KeyHint keys="/">SEARCH</KeyHint>
+                                <KeyHint keys="f">FILTERS</KeyHint>
                                 <KeyHint keys="⏎">APPLY</KeyHint>
+                                <KeyHint keys="s">SETTINGS</KeyHint>
                                 <KeyHint keys="q">QUIT</KeyHint>
                             </>
                         }

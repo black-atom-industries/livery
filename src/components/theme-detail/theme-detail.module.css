@@ -1,7 +1,7 @@
 /* =============================================================
-   ThemeDetail — Datasheet card for selected theme
-   DESIGN.md: Data Panels / Cards pattern — 1px border, squared
-   corners, uppercase mono metadata rows.
+   ThemeDetail — Datasheet for the selected theme
+   Composed from primitives only: Typo, Badge, SectionHeader,
+   Swatch (band/cell), KVRow. No hex, no chrome color literals.
    ============================================================= */
 
 .empty {
@@ -11,47 +11,87 @@
     font-variation-settings: "MONO" 1;
 }
 
-.card {
-    border: var(--ba-border);
-    padding: var(--ba-size-4);
-}
-
-.card > .header + p {
-    font-style: italic;
-    border-left: 2px solid var(--ba-color-fg-positive);
-    padding-left: var(--ba-size-4);
-    margin: var(--ba-size-2) 0;
-}
-
-.header {
+.root {
     display: flex;
-    align-items: baseline;
-    gap: var(--ba-size-4);
-    margin-bottom: var(--ba-size-1);
+    flex-direction: column;
+    gap: var(--ba-size-6);
 }
 
-.meta {
-    margin-top: var(--ba-size-6);
+.headerRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ba-size-4);
+}
+
+.titleColumn {
     display: flex;
     flex-direction: column;
     gap: var(--ba-size-2);
 }
 
-.metaRow {
+.titleGroup {
     display: flex;
+    align-items: center;
     gap: var(--ba-size-4);
+}
+
+.name {
+    line-height: 1;
+}
+
+.collectionLine {
     font-family: var(--ba-font-mono);
-    font-variation-settings: "MONO" 1;
-    font-size: var(--ba-font-size-00);
-}
-
-.metaLabel {
+    font-size: var(--ba-font-size-1);
+    letter-spacing: var(--ba-font-letterspacing-label);
     color: var(--ba-color-fg-hint);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    min-width: 10ch;
 }
 
-.metaValue {
-    color: var(--ba-color-fg-subtle);
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ba-size-2);
+}
+
+.bands {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.primariesGrid {
+    display: flex;
+    gap: 2px;
+}
+
+.primariesGrid > * {
+    flex: 1;
+}
+
+.bottomGrid {
+    display: grid;
+    grid-template-columns: 1fr 250px;
+    gap: var(--ba-size-5);
+}
+
+.spec {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ba-size-2);
+}
+
+.kvRows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ba-size-2);
+}
+
+.docCode {
+    margin-top: auto;
+    font-family: var(--ba-font-mono);
+    font-size: var(--ba-font-size-00);
+    letter-spacing: 0.12em;
+    color: var(--ba-color-fg-hint);
+    border-top: var(--ba-border-subtle);
+    padding-top: var(--ba-size-2);
 }
