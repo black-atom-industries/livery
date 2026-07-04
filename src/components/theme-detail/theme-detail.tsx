@@ -36,6 +36,26 @@ const PRIMARY_KEYS = [
     "l40",
 ] as const;
 
+/** ANSI order per the board's PALETTE section: normal row, then dark row. */
+const PALETTE_KEYS = [
+    "black",
+    "red",
+    "green",
+    "yellow",
+    "blue",
+    "magenta",
+    "cyan",
+    "white",
+    "gray",
+    "darkRed",
+    "darkGreen",
+    "darkYellow",
+    "darkBlue",
+    "darkMagenta",
+    "darkCyan",
+    "lightGray",
+] as const;
+
 export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
     if (!theme) {
         return <div className={styles.empty}>No theme selected</div>;
@@ -48,12 +68,8 @@ export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
         initials(meta.name)
     }-${appearanceLetter} · REV 01`;
 
-    const accents = [
-        { label: "RED", color: palette.red },
-        { label: "YELLOW", color: palette.yellow },
-        { label: "GREEN", color: palette.green },
-        { label: "MAGENTA", color: palette.magenta },
-    ];
+    const accents = getAccentBands(theme);
+    const feedback = getFeedbackBands(theme);
 
     return (
         <div data-component="theme-detail" className={styles.root}>
@@ -82,8 +98,8 @@ export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
                             key={accent.label}
                             variant="band"
                             color={accent.color}
-                            label={`ACCENT · ${accent.label}`}
-                            tag={`DERIVED FROM PALETTE.${accent.label}`}
+                            label={accent.label}
+                            tag={accent.tag}
                         />
                     ))}
                 </div>
@@ -94,6 +110,30 @@ export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
                 <div className={styles.primariesGrid}>
                     {PRIMARY_KEYS.map((key) => (
                         <Swatch key={key} variant="cell" color={primaries[key]} />
+                    ))}
+                </div>
+            </div>
+
+            <div className={styles.section}>
+                <SectionHeader>PALETTE · ANSI 16</SectionHeader>
+                <div className={styles.paletteGrid}>
+                    {PALETTE_KEYS.map((key) => (
+                        <Swatch key={key} variant="cell" color={palette[key]} />
+                    ))}
+                </div>
+            </div>
+
+            <div className={styles.section}>
+                <SectionHeader>SEMANTIC · FEEDBACK</SectionHeader>
+                <div className={styles.bands}>
+                    {feedback.map((entry) => (
+                        <Swatch
+                            key={entry.label}
+                            variant="band"
+                            color={entry.color}
+                            label={entry.label}
+                            tag={entry.tag}
+                        />
                     ))}
                 </div>
             </div>
@@ -146,6 +186,56 @@ export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
             </div>
         </div>
     );
+}
+
+type ColorBand = { label: string; color: string; tag?: string };
+
+/**
+ * The theme's own accent colors. Published core 0.4.x predates
+ * `ThemeDefinition.accents`, so bundles built against it fall back to the
+ * board's ANSI derivation (tagged as such) — never hide the section,
+ * never show it empty.
+ */
+function getAccentBands(theme: ThemeDefinition): ColorBand[] {
+    const accents = (theme as Partial<ThemeDefinition>).accents;
+
+    if (accents) {
+        const entries = [accents.a10, accents.a20, accents.a30, accents.a40];
+
+        return entries.flatMap((color, i) =>
+            color ? [{ label: `ACCENT · ${String(i + 1).padStart(2, "0")}`, color }] : []
+        );
+    }
+
+    return (["red", "yellow", "green", "magenta"] as const).map((key) => ({
+        label: `ACCENT · ${key.toUpperCase()}`,
+        color: theme.palette[key],
+        tag: `DERIVED FROM PALETTE.${key.toUpperCase()}`,
+    }));
+}
+
+/**
+ * The theme's semantic feedback colors, with the same 0.4.x fallback —
+ * the `ui.fg` intents carry the equivalent values.
+ */
+function getFeedbackBands(theme: ThemeDefinition): ColorBand[] {
+    const feedback = (theme as Partial<ThemeDefinition>).feedback;
+
+    if (feedback) {
+        return [
+            { label: "SUCCESS", color: feedback.success },
+            { label: "WARNING", color: feedback.warning },
+            { label: "NEGATIVE", color: feedback.negative },
+            { label: "INFO", color: feedback.info },
+        ];
+    }
+
+    return [
+        { label: "SUCCESS", color: theme.ui.fg.positive, tag: "FROM UI.FG.POSITIVE" },
+        { label: "WARNING", color: theme.ui.fg.warn, tag: "FROM UI.FG.WARN" },
+        { label: "NEGATIVE", color: theme.ui.fg.negative, tag: "FROM UI.FG.NEGATIVE" },
+        { label: "INFO", color: theme.ui.fg.info, tag: "FROM UI.FG.INFO" },
+    ];
 }
 
 /** Two-letter initials from a theme name, e.g. "Koyo Yoru" -> "KY". */

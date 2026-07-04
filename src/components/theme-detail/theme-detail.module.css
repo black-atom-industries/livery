@@ -68,6 +68,12 @@
     flex: 1;
 }
 
+.paletteGrid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+}
+
 .bottomGrid {
     display: grid;
     grid-template-columns: 1fr 250px;
