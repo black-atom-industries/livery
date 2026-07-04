@@ -192,8 +192,13 @@ function SettingsRoute() {
                         cursorIndex={clampedCursor}
                         expandedApp={effectiveExpandedApp}
                         onToggleEnabled={toggleAppEnabled}
-                        onToggleExpanded={(appName) =>
-                            setExpandedApp((current) => (current === appName ? null : appName))}
+                        onToggleExpanded={(appName) => {
+                            // Mouse path: move the row cursor along — the
+                            // disclosure only renders on the cursored row.
+                            const index = appEntries.findIndex(([name]) => name === appName);
+                            if (index !== -1) setCursorIndex(index);
+                            setExpandedApp((current) => (current === appName ? null : appName));
+                        }}
                         onFieldCommit={commitAdapterField}
                         onTestApply={testApplyAdapter}
                         testApplyResults={testApplyResults}

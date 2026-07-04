@@ -13,8 +13,10 @@
         "windows": [
             {
                 "title": "Livery",
-                "width": 900,
-                "height": 600,
+                "width": 1280,
+                "height": 860,
+                "minWidth": 980,
+                "minHeight": 640,
                 "resizable": true,
                 "fullscreen": false
             }
