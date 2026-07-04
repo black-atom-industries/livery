@@ -172,7 +172,57 @@ function Component() {
                             count={`${themes.length}/${allThemes.length}`}
                         />
                     </div>
-                    <div className={styles.chips} ref={chipsRef}>
+                    <div
+                        className={styles.chips}
+                        ref={chipsRef}
+                        onKeyDown={(event) => {
+                            // Filter mode: hjkl/arrows rove between chips,
+                            // space/enter toggle (native click), esc leaves.
+                            // Handled keys stop here so the global list
+                            // hotkeys (j/k/enter) don't fire simultaneously.
+                            const chips = Array.from(
+                                chipsRef.current?.querySelectorAll("button") ?? [],
+                            );
+                            const current = chips.indexOf(
+                                document.activeElement as HTMLButtonElement,
+                            );
+                            if (current === -1) return;
+
+                            const prev = () => chips[Math.max(0, current - 1)]?.focus();
+                            const next = () =>
+                                chips[Math.min(chips.length - 1, current + 1)]?.focus();
+
+                            switch (event.key) {
+                                case "h":
+                                case "k":
+                                case "ArrowLeft":
+                                case "ArrowUp":
+                                    prev();
+                                    break;
+                                case "l":
+                                case "j":
+                                case "ArrowRight":
+                                case "ArrowDown":
+                                    next();
+                                    break;
+                                case "Escape":
+                                    (document.activeElement as HTMLElement)?.blur();
+                                    break;
+                                case " ":
+                                case "Enter":
+                                    // Native button activation toggles the
+                                    // chip — just keep it scoped.
+                                    break;
+                                default:
+                                    return;
+                            }
+                            event.preventDefault();
+                            event.stopPropagation();
+                            if (event.key === " " || event.key === "Enter") {
+                                (document.activeElement as HTMLButtonElement)?.click();
+                            }
+                        }}
+                    >
                         <div className={styles.chipGroup}>
                             <Chip
                                 active={collectionFilter === "all"}
@@ -190,7 +240,6 @@ function Component() {
                                 </Chip>
                             ))}
                         </div>
-                        <span className={styles.chipDivider} />
                         <div className={styles.chipGroup}>
                             <Chip
                                 active={appearanceFilter === "all"}

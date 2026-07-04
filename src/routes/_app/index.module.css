@@ -4,22 +4,16 @@
 
 .chips {
     display: flex;
-    align-items: center;
-    gap: var(--ba-size-5);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ba-size-2);
     padding: 0 var(--ba-size-5) var(--ba-size-3);
-    flex-wrap: wrap;
 }
 
 .chipGroup {
     display: flex;
     gap: var(--ba-size-2);
     flex-wrap: wrap;
-}
-
-.chipDivider {
-    width: 1px;
-    height: 16px;
-    background: var(--ba-color-border-default);
 }
 
 .list {
