@@ -37,7 +37,8 @@
             "src/routeTree.gen.ts",
             "src/bindings.ts",
             ".agents/",
-            ".claude/"
+            ".claude/",
+            "docs/design-system/reference/"
         ]
     },
     "fmt": {
@@ -52,7 +53,8 @@
             "src/routeTree.gen.ts",
             "src/bindings.ts",
             ".agents/",
-            ".claude/"
+            ".claude/",
+            "docs/design-system/reference/"
         ]
     },
     "test": {
