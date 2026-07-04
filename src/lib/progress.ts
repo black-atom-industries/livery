@@ -17,6 +17,24 @@ export interface ProgressState {
 
 const COMPLETED_STATUSES = new Set(["done", "skipped", "error"]);
 
+/** Names of updaters currently in the "error" status — the retry candidates. */
+export function getFailedUpdaters(results: UpdateResult[]): UpdateResult["app"][] {
+    return results.filter((r) => r.status === "error").map((r) => r.app);
+}
+
+/**
+ * Overlay a subset of updated results onto the full result set, matching by
+ * app name and preserving the original ordering. Used to fold a retry pass
+ * (run on failed updaters only) back into the full apply results.
+ */
+export function mergeUpdateResults(
+    results: UpdateResult[],
+    updates: UpdateResult[],
+): UpdateResult[] {
+    const updatesByApp = new Map(updates.map((u) => [u.app, u]));
+    return results.map((r) => updatesByApp.get(r.app) ?? r);
+}
+
 export function getProgressState(results: UpdateResult[]): ProgressState {
     if (results.length === 0) {
         return {

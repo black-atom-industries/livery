@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { collectionOrder, type ThemeCollectionKey, themeMap } from "@black-atom/core";
@@ -13,6 +13,7 @@ import { ThemeDetail } from "../../components/theme-detail/index.ts";
 import { App } from "../../components/layouts/app.ts";
 import { Prompt } from "../../components/primitives/prompt/prompt.tsx";
 import { Chip } from "../../components/primitives/chip/chip.tsx";
+import { EmptyState } from "../../components/empty-state/index.ts";
 import styles from "./index.module.css";
 
 export const Route = createFileRoute("/_app/")({
@@ -23,6 +24,7 @@ type AppearanceFilter = "all" | "dark" | "light";
 
 function Component() {
     const config = useConfig();
+    const navigate = useNavigate();
 
     const allGroups = useMemo(() => getGroupedThemes(themeMap), []);
     const allThemes = useMemo(() => allGroups.flatMap((g) => g.themes), [allGroups]);
@@ -103,6 +105,21 @@ function Component() {
     };
 
     useHotkey("Enter", handleApplyTheme);
+
+    const configSettled = !config.query.isPending;
+    const hasNoAdapters = configSettled &&
+        (config.query.isError || config.enabledApps.length === 0);
+
+    if (hasNoAdapters) {
+        return (
+            <EmptyState
+                eyebrow={`${allThemes.length} THEMES INDEXED · 0 APPLIED`}
+                headline="PICK A LIVERY, PAINT THE COCKPIT"
+                body="Select any theme with j/k and press ⏎ — Livery repaints every enabled tool in one pass. Nothing is written until you apply. No adapters are enabled yet — check settings."
+                onOpenSettings={() => navigate({ to: "/settings" })}
+            />
+        );
+    }
 
     return (
         <App.SplitPanel

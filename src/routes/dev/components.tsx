@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { themeMap } from "@black-atom/core";
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
+import { ApplyStrip } from "../../components/apply-strip/index.ts";
+import { EmptyState } from "../../components/empty-state/index.ts";
 import { Button } from "../../components/primitives/button/button.tsx";
 import { Chip } from "../../components/primitives/chip/chip.tsx";
 import { DisclosurePanel } from "../../components/primitives/disclosure-panel/disclosure-panel.tsx";
@@ -14,6 +16,42 @@ import { ThemeList } from "../../components/theme-list/index.ts";
 import { ThemeDetail } from "../../components/theme-detail/index.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";
 import type { UpdateResult } from "../../lib/updaters.ts";
+
+const APPLY_STRIP_FIXTURES: Record<string, UpdateResult[]> = {
+    running: [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "tmux", status: "done", duration_ms: 8 },
+        { app: "ghostty", status: "done", duration_ms: 15 },
+        { app: "delta", status: "running", duration_ms: null },
+        { app: "lazygit", status: "pending", duration_ms: null },
+        { app: "obsidian", status: "pending", duration_ms: null },
+        { app: "helm", status: "pending", duration_ms: null },
+    ],
+    success: [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "tmux", status: "done", duration_ms: 8 },
+        { app: "ghostty", status: "done", duration_ms: 15 },
+        { app: "delta", status: "done", duration_ms: 60 },
+        { app: "lazygit", status: "done", duration_ms: 92 },
+        { app: "obsidian", status: "done", duration_ms: 110 },
+        { app: "helm", status: "done", duration_ms: 115 },
+    ],
+    partialFailure: [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "tmux", status: "done", duration_ms: 8 },
+        { app: "ghostty", status: "done", duration_ms: 15 },
+        { app: "delta", status: "done", duration_ms: 60 },
+        { app: "lazygit", status: "done", duration_ms: 92 },
+        {
+            app: "obsidian",
+            status: "error",
+            message:
+                "config not found at ~/.config/obsidian/themes/black-atom.css — check THEMES_PATH in settings",
+            duration_ms: 3,
+        },
+        { app: "helm", status: "done", duration_ms: 115 },
+    ],
+};
 
 export const Route = createFileRoute("/dev/components")({
     component: Page,
@@ -200,6 +238,59 @@ function Page() {
             </div>
             <div style={{ marginBottom: 32 }}>
                 <ProgressBar results={PROGRESS_FIXTURES[progressState]} />
+            </div>
+
+            <SectionLabel>ApplyStrip — running</SectionLabel>
+            <div
+                style={{
+                    border: "1px solid var(--ba-color-fg-hint)",
+                    marginBottom: 32,
+                    padding: "12px 20px",
+                }}
+            >
+                <ApplyStrip themeName="KOYO YORU" results={APPLY_STRIP_FIXTURES.running} />
+            </div>
+
+            <SectionLabel>ApplyStrip — success</SectionLabel>
+            <div
+                style={{
+                    border: "1px solid var(--ba-color-fg-hint)",
+                    marginBottom: 32,
+                    padding: "12px 20px",
+                }}
+            >
+                <ApplyStrip themeName="KOYO YORU" results={APPLY_STRIP_FIXTURES.success} />
+            </div>
+
+            <SectionLabel>ApplyStrip — partial failure + retry</SectionLabel>
+            <div
+                style={{
+                    border: "1px solid var(--ba-color-fg-hint)",
+                    marginBottom: 32,
+                    padding: "12px 20px",
+                }}
+            >
+                <ApplyStrip
+                    themeName="KOYO YORU"
+                    results={APPLY_STRIP_FIXTURES.partialFailure}
+                    onRetryFailed={() => {}}
+                />
+            </div>
+
+            <SectionLabel>EmptyState — first run, no adapters</SectionLabel>
+            <div
+                style={{
+                    border: "1px solid var(--ba-color-fg-hint)",
+                    marginBottom: 32,
+                    padding: 28,
+                }}
+            >
+                <EmptyState
+                    eyebrow={`${themes.length} THEMES INDEXED · 0 APPLIED`}
+                    headline="PICK A LIVERY, PAINT THE COCKPIT"
+                    body="Select any theme with j/k and press ⏎ — Livery repaints every enabled tool in one pass. Nothing is written until you apply. No adapters are enabled yet — check settings."
+                    onOpenSettings={() => {}}
+                />
             </div>
 
             <SectionLabel>ThemeList + ThemeDetail</SectionLabel>
