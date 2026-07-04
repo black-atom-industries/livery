@@ -1,15 +1,15 @@
 .group {
-    margin-bottom: var(--lvr-size-2);
+    margin-bottom: var(--ba-size-2);
 }
 
 .groupLabel {
-    padding: var(--lvr-size-1) var(--lvr-size-3);
-    font-family: var(--lvr-font-family-ui);
-    font-size: var(--lvr-font-size-0);
-    font-weight: var(--lvr-font-weight-5);
-    color: var(--lvr-color-fg-disabled);
+    padding: var(--ba-size-1) var(--ba-size-4);
+    font-family: var(--ba-font-mono);
+    font-size: var(--ba-font-size-0);
+    font-weight: var(--ba-font-weight-medium);
+    color: var(--ba-color-fg-disabled);
     text-transform: uppercase;
-    letter-spacing: var(--lvr-font-letterspacing-wide);
+    letter-spacing: var(--ba-font-letterspacing-label);
 }
 
 .item {
@@ -17,30 +17,30 @@
     align-items: center;
     width: 100%;
     text-align: left;
-    padding: var(--lvr-size-1) var(--lvr-size-3);
-    font-size: var(--lvr-font-size-1);
+    padding: var(--ba-size-1) var(--ba-size-4);
+    font-size: var(--ba-font-size-1);
     cursor: pointer;
     border: none;
     background: transparent;
     font-family: inherit;
-    color: var(--lvr-color-fg-subtle);
+    color: var(--ba-color-fg-subtle);
 }
 
 .item:hover {
-    color: var(--lvr-color-fg-default);
+    color: var(--ba-color-fg-default);
 }
 
 .selected {
-    background-color: var(--lvr-color-bg-accent);
-    color: var(--lvr-color-fg-default);
+    background-color: var(--ba-color-bg-hint);
+    color: var(--ba-color-fg-default);
 }
 
 .cursor {
     display: inline-flex;
     align-items: center;
     width: 14px;
-    margin-right: var(--lvr-size-1);
-    color: var(--lvr-color-fg-accent);
+    margin-right: var(--ba-size-1);
+    color: var(--ba-color-fg-positive);
     flex-shrink: 0;
 }
 
@@ -48,10 +48,10 @@
     display: inline-flex;
     align-items: center;
     margin-left: auto;
-    color: var(--lvr-color-fg-disabled);
+    color: var(--ba-color-fg-disabled);
     flex-shrink: 0;
 }
 
 .selected .icon {
-    color: var(--lvr-color-fg-accent);
+    color: var(--ba-color-fg-positive);
 }

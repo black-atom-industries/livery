@@ -1,7 +1,7 @@
 /* Black Atom design tokens (--ba-*) — mirrors docs/design-system/reference/tokens/ */
 @import "./styles/tokens/index.css";
 
-/* Legacy token layer (--lvr-*) — removed at the end of the #51 migration */
+/* Legacy token layer (lvr) — removed at the end of the #51 migration */
 @import "./styles/variables/index.css";
 
 /* Fonts — the three voices: Space Grotesk (display), Iosevka (mono/UI), IBM Plex Sans (body).
@@ -33,7 +33,7 @@ body {
 }
 
 body {
-    font-family: var(--lvr-font-family-body);
+    font-family: var(--ba-font-mono);
 }
 
 #root {

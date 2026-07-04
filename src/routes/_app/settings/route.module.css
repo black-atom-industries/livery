@@ -4,9 +4,9 @@
    ============================================================= */
 
 .root {
-    padding: var(--lvr-size-6);
+    padding: var(--ba-size-6);
 }
 
 .heading {
-    margin-bottom: var(--lvr-size-2);
+    margin-bottom: var(--ba-size-2);
 }

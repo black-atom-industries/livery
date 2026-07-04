@@ -7,7 +7,7 @@ _what_ to do, then delegates to Rust via `invoke()`.
 
 - **Runtime:** Deno
 - **Framework:** React (via Vite + `@deno/vite-plugin`)
-- **Styling:** CSS Modules + CVA, `--lvr-*` CSS custom properties for design tokens
+- **Styling:** CSS Modules + CVA, `--ba-*` CSS custom properties for design tokens
 - **State:** TanStack Query (server state), TanStack Store (client state)
 - **Routing:** TanStack Router
 

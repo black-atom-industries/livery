@@ -27,7 +27,7 @@ function DevOverview() {
         <div>
             <h1
                 style={{
-                    fontFamily: "var(--lvr-font-family-heading)",
+                    fontFamily: "var(--ba-font-display)",
                     fontSize: 14,
                     fontWeight: 600,
                     textTransform: "uppercase",
@@ -48,7 +48,7 @@ function DevOverview() {
                             padding: "12px 16px",
                             border: "1px solid var(--border-default, var(--primary-d20))",
                             textDecoration: "none",
-                            color: "var(--lvr-color-fg-default)",
+                            color: "var(--ba-color-fg-default)",
                         }}
                     >
                         <div
@@ -64,7 +64,7 @@ function DevOverview() {
                         <div
                             style={{
                                 fontSize: 11,
-                                color: "var(--lvr-color-fg-subtle)",
+                                color: "var(--ba-color-fg-subtle)",
                                 marginTop: 4,
                             }}
                         >

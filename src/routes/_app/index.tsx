@@ -91,7 +91,7 @@ function Component() {
                     <SectionHeader label="DETAIL" />
                     <ThemeDetail theme={pickedEntry} />
                     {currentTheme && (
-                        <div style={{ marginTop: "var(--lvr-size-6)" }}>
+                        <div style={{ marginTop: "var(--ba-size-6)" }}>
                             <Typo.Small color="positive">
                                 Selected: {currentTheme.meta.name}
                             </Typo.Small>

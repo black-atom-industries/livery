@@ -10,7 +10,7 @@ function Page() {
         <div>
             <h1
                 style={{
-                    fontFamily: "var(--lvr-font-family-heading)",
+                    fontFamily: "var(--ba-font-display)",
                     fontSize: 14,
                     fontWeight: 600,
                     textTransform: "uppercase",
@@ -24,12 +24,12 @@ function Page() {
             <section style={{ marginBottom: 32 }}>
                 <h2
                     style={{
-                        fontFamily: "var(--lvr-font-family-ui)",
+                        fontFamily: "var(--ba-font-mono)",
                         fontSize: 10,
                         fontWeight: 600,
                         textTransform: "uppercase",
                         letterSpacing: "0.1em",
-                        color: "var(--lvr-color-fg-subtle)",
+                        color: "var(--ba-color-fg-subtle)",
                         marginBottom: 12,
                     }}
                 >

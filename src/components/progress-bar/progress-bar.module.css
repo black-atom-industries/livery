@@ -2,48 +2,47 @@
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
-    gap: var(--lvr-size-1) var(--lvr-size-3);
+    gap: var(--ba-size-1) var(--ba-size-4);
 }
 
 .label {
-    font-family: var(--lvr-font-family-ui);
-    font-size: var(--lvr-font-size-00);
-    color: var(--lvr-color-fg-subtle);
+    font-family: var(--ba-font-mono);
+    font-size: var(--ba-font-size-00);
+    color: var(--ba-color-fg-subtle);
 }
 
 .counter {
-    font-family: var(--lvr-font-family-ui);
-    font-size: var(--lvr-font-size-00);
-    color: var(--lvr-color-fg-disabled);
+    font-family: var(--ba-font-mono);
+    font-size: var(--ba-font-size-00);
+    color: var(--ba-color-fg-disabled);
     font-variant-numeric: tabular-nums;
 }
 
 .track {
     grid-column: 1 / -1;
-    height: var(--lvr-size-1);
+    height: var(--ba-size-bar);
     overflow: hidden;
-    border-radius: var(--lvr-radius-1);
-    background-color: var(--lvr-color-bg-accent);
+    background-color: var(--ba-color-bg-hint);
 }
 
 .indicator {
     display: block;
     height: 100%;
-    transition: all var(--lvr-duration-gentle-1) var(--lvr-ease-3);
+    transition: all var(--ba-duration-3) var(--ba-ease-linear);
 }
 
 .indicatorIdle {
-    background-color: var(--lvr-color-bg-disabled);
+    background-color: var(--ba-color-bg-disabled);
 }
 
 .indicatorRunning {
-    background-color: var(--lvr-color-bg-warn);
+    background-color: var(--ba-color-fg-warn);
 }
 
 .indicatorDone {
-    background-color: var(--lvr-color-bg-positive);
+    background-color: var(--ba-color-fg-positive);
 }
 
 .indicatorError {
-    background-color: var(--lvr-color-bg-negative);
+    background-color: var(--ba-color-fg-negative);
 }

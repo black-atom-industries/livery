@@ -43,7 +43,7 @@ function Page() {
         <div>
             <h1
                 style={{
-                    fontFamily: "var(--lvr-font-family-heading)",
+                    fontFamily: "var(--ba-font-display)",
                     fontSize: 14,
                     fontWeight: 600,
                     textTransform: "uppercase",
@@ -55,12 +55,12 @@ function Page() {
             </h1>
 
             <SectionLabel>AppHeader</SectionLabel>
-            <div style={{ border: "1px solid var(--lvr-color-fg-hint)", marginBottom: 32 }}>
+            <div style={{ border: "1px solid var(--ba-color-fg-hint)", marginBottom: 32 }}>
                 <AppHeader version="dev" />
             </div>
 
             <SectionLabel>AppFooter</SectionLabel>
-            <div style={{ border: "1px solid var(--lvr-color-fg-hint)", marginBottom: 32 }}>
+            <div style={{ border: "1px solid var(--ba-color-fg-hint)", marginBottom: 32 }}>
                 <AppFooter />
             </div>
 
@@ -74,17 +74,17 @@ function Page() {
                         type="button"
                         onClick={() => setProgressState(key)}
                         style={{
-                            fontFamily: "var(--lvr-font-family-mono)",
+                            fontFamily: "var(--ba-font-mono)",
                             fontSize: 11,
                             textTransform: "uppercase",
                             padding: "4px 10px",
-                            border: "1px solid var(--lvr-color-fg-hint)",
+                            border: "1px solid var(--ba-color-fg-hint)",
                             background: progressState === key
-                                ? "var(--lvr-color-bg-accent)"
+                                ? "var(--ba-color-bg-hint)"
                                 : "transparent",
                             color: progressState === key
-                                ? "var(--lvr-color-fg-accent)"
-                                : "var(--lvr-color-fg-subtle)",
+                                ? "var(--ba-color-fg-positive)"
+                                : "var(--ba-color-fg-subtle)",
                             cursor: "pointer",
                         }}
                     >
@@ -100,7 +100,7 @@ function Page() {
             <div
                 style={{
                     display: "flex",
-                    border: "1px solid var(--lvr-color-fg-hint)",
+                    border: "1px solid var(--ba-color-fg-hint)",
                     height: 320,
                     marginBottom: 32,
                 }}
@@ -109,7 +109,7 @@ function Page() {
                     style={{
                         width: "50%",
                         overflow: "auto",
-                        borderRight: "1px solid var(--lvr-color-fg-hint)",
+                        borderRight: "1px solid var(--ba-color-fg-hint)",
                     }}
                 >
                     <ThemeList
@@ -130,12 +130,12 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
         <div
             style={{
-                fontFamily: "var(--lvr-font-family-ui)",
+                fontFamily: "var(--ba-font-mono)",
                 fontSize: 11,
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
-                color: "var(--lvr-color-fg-subtle)",
+                color: "var(--ba-color-fg-subtle)",
                 marginBottom: 12,
             }}
         >

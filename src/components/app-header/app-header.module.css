@@ -10,26 +10,26 @@
 }
 
 .title {
-    font-family: var(--lvr-font-family-heading);
-    font-size: var(--lvr-font-size-3);
-    font-weight: var(--lvr-font-weight-7);
+    font-family: var(--ba-font-display);
+    font-size: var(--ba-font-size-5);
+    font-weight: var(--ba-font-weight-bold);
     margin: 0;
 }
 
 .version {
-    font-family: var(--lvr-font-family-mono);
+    font-family: var(--ba-font-mono);
     font-variation-settings: "MONO" 1;
-    font-size: var(--lvr-font-size-0);
-    font-weight: var(--lvr-font-weight-4);
-    color: var(--lvr-color-fg-subtle);
+    font-size: var(--ba-font-size-0);
+    font-weight: var(--ba-font-weight-regular);
+    color: var(--ba-color-fg-subtle);
 }
 
 .subtitle {
-    font-family: var(--lvr-font-family-mono);
+    font-family: var(--ba-font-mono);
     font-variation-settings: "MONO" 1;
-    font-size: var(--lvr-font-size-0);
-    color: var(--lvr-color-fg-hint);
+    font-size: var(--ba-font-size-0);
+    color: var(--ba-color-fg-hint);
     text-transform: uppercase;
-    letter-spacing: var(--lvr-font-letterspacing-wide);
+    letter-spacing: var(--ba-font-letterspacing-label);
     margin: 0;
 }

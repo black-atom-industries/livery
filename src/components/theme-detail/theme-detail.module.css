@@ -5,53 +5,53 @@
    ============================================================= */
 
 .empty {
-    color: var(--lvr-color-fg-hint);
-    font-size: var(--lvr-font-size-0);
-    font-family: var(--lvr-font-family-mono);
+    color: var(--ba-color-fg-hint);
+    font-size: var(--ba-font-size-0);
+    font-family: var(--ba-font-mono);
     font-variation-settings: "MONO" 1;
 }
 
 .card {
-    border: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
-    padding: var(--lvr-size-4);
+    border: var(--ba-border);
+    padding: var(--ba-size-4);
 }
 
 .card > .header + p {
     font-style: italic;
-    border-left: 2px solid var(--lvr-color-fg-accent);
-    padding-left: var(--lvr-size-3);
-    margin: var(--lvr-size-2) 0;
+    border-left: 2px solid var(--ba-color-fg-positive);
+    padding-left: var(--ba-size-4);
+    margin: var(--ba-size-2) 0;
 }
 
 .header {
     display: flex;
     align-items: baseline;
-    gap: var(--lvr-size-3);
-    margin-bottom: var(--lvr-size-1);
+    gap: var(--ba-size-4);
+    margin-bottom: var(--ba-size-1);
 }
 
 .meta {
-    margin-top: var(--lvr-size-5);
+    margin-top: var(--ba-size-6);
     display: flex;
     flex-direction: column;
-    gap: var(--lvr-size-2);
+    gap: var(--ba-size-2);
 }
 
 .metaRow {
     display: flex;
-    gap: var(--lvr-size-3);
-    font-family: var(--lvr-font-family-mono);
+    gap: var(--ba-size-4);
+    font-family: var(--ba-font-mono);
     font-variation-settings: "MONO" 1;
-    font-size: var(--lvr-font-size-00);
+    font-size: var(--ba-font-size-00);
 }
 
 .metaLabel {
-    color: var(--lvr-color-fg-hint);
+    color: var(--ba-color-fg-hint);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     min-width: 10ch;
 }
 
 .metaValue {
-    color: var(--lvr-color-fg-subtle);
+    color: var(--ba-color-fg-subtle);
 }

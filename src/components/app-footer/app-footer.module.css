@@ -5,24 +5,24 @@
 
 .root {
     display: flex;
-    gap: var(--lvr-size-6);
-    font-family: var(--lvr-font-family-mono);
+    gap: var(--ba-size-6);
+    font-family: var(--ba-font-mono);
     font-variation-settings: "MONO" 1;
-    font-size: var(--lvr-font-size-00);
+    font-size: var(--ba-font-size-00);
 }
 
 .shortcut {
     display: flex;
     align-items: center;
-    gap: var(--lvr-size-2);
+    gap: var(--ba-size-2);
 }
 
 .keys {
-    color: var(--lvr-color-fg-subtle);
+    color: var(--ba-color-fg-subtle);
 }
 
 .label {
-    color: var(--lvr-color-fg-hint);
+    color: var(--ba-color-fg-hint);
     text-transform: uppercase;
-    letter-spacing: var(--lvr-font-letterspacing-wide);
+    letter-spacing: var(--ba-font-letterspacing-label);
 }

@@ -12,7 +12,7 @@ interface SectionHeaderProps {
  *
  * Matches the DESIGN.md "Section Headers" pattern: mono font, uppercase,
  * wide letter-spacing, optional right-aligned metadata, and a 1px rule
- * in --lvr-color-bg-hint.
+ * in --ba-color-border-subtle.
  */
 export function SectionHeader({ label, meta }: SectionHeaderProps) {
     return (

@@ -12,8 +12,8 @@
 
 .header {
     flex-shrink: 0;
-    padding: var(--lvr-size-4) var(--lvr-size-6);
-    border-bottom: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--ba-size-4) var(--ba-size-6);
+    border-bottom: var(--ba-border-subtle);
 }
 
 .main {
@@ -23,12 +23,12 @@
 
 .progress {
     flex-shrink: 0;
-    padding: var(--lvr-size-2) var(--lvr-size-6);
-    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--ba-size-2) var(--ba-size-6);
+    border-top: var(--ba-border-subtle);
 }
 
 .footer {
     flex-shrink: 0;
-    padding: var(--lvr-size-2) var(--lvr-size-6);
-    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--ba-size-2) var(--ba-size-6);
+    border-top: var(--ba-border-subtle);
 }
