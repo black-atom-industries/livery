@@ -78,3 +78,28 @@
     font-size: var(--ba-font-size-0);
     color: var(--ba-color-fg-hint);
 }
+
+.warnRow {
+    display: flex;
+    align-items: center;
+    gap: var(--ba-size-4);
+    padding: var(--ba-size-2) var(--ba-size-4);
+    background: var(--ba-color-bg-subtle);
+    border: var(--ba-border-subtle);
+}
+
+.warnLabel {
+    flex-shrink: 0;
+    font-size: var(--ba-font-size-1);
+    letter-spacing: var(--ba-font-letterspacing-label);
+    color: var(--ba-color-fg-warn);
+    text-transform: uppercase;
+}
+
+.warnMessage {
+    font-size: var(--ba-font-size-1);
+    color: var(--ba-color-fg-hint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

@@ -6,13 +6,23 @@ import { ProgressBar } from "../primitives/progress-bar/progress-bar.tsx";
 import { Button } from "../primitives/button/button.tsx";
 import styles from "./apply-strip.module.css";
 
-const PIP_INTENT: Record<UpdateStatus, "pending" | "running" | "ok" | "error" | "off"> = {
+const PIP_INTENT: Record<UpdateStatus, "pending" | "running" | "ok" | "error" | "warn" | "off"> = {
     pending: "pending",
     running: "running",
     done: "ok",
     error: "error",
     skipped: "off",
 };
+
+/**
+ * A skip carrying a message is a degraded result (e.g. "config patched,
+ * live reload failed") — it must read as attention, never as silence.
+ * A bare skip (app disabled) stays quiet.
+ */
+function pipIntent(result: UpdateResult) {
+    if (result.status === "skipped" && result.message) return "warn";
+    return PIP_INTENT[result.status];
+}
 
 interface ApplyStripProps {
     /** Theme name shown in the status line, e.g. "KOYO YORU". */
@@ -52,7 +62,7 @@ export function ApplyStrip({ themeName, results, onRetryFailed }: ApplyStripProp
                 <span className={styles.statusLine} data-status={status}>{statusLine}</span>
                 <div className={styles.pips}>
                     {results.map((result) => (
-                        <StatusPip key={result.app} intent={PIP_INTENT[result.status]}>
+                        <StatusPip key={result.app} intent={pipIntent(result)}>
                             {result.app}
                         </StatusPip>
                     ))}
@@ -68,6 +78,16 @@ export function ApplyStrip({ themeName, results, onRetryFailed }: ApplyStripProp
                     onRetry={onRetryFailed}
                 />
             ))}
+            {results
+                .filter((r) => r.status === "skipped" && r.message)
+                .map((result) => (
+                    <div key={result.app} className={styles.warnRow}>
+                        <span className={styles.warnLabel}>
+                            {result.app.toUpperCase()} — DEGRADED
+                        </span>
+                        <span className={styles.warnMessage}>{result.message}</span>
+                    </div>
+                ))}
         </div>
     );
 }
