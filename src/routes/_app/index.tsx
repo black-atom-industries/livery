@@ -63,36 +63,86 @@ function Component() {
     const clampedIndex = Math.min(pickedIndex, Math.max(0, themes.length - 1));
     const pickedEntry = themes[clampedIndex];
 
-    const moveUp = () => setPickedIndex((i) => Math.max(0, i - 1));
-    const moveDown = () => setPickedIndex((i) => Math.min(themes.length - 1, i + 1));
+    // Filter mode: a state-driven cursor over the chips (rendered via the
+    // Chip `focused` prop) — deliberately not DOM focus, which WebKit's
+    // focus-visible heuristics render unreliably.
+    const filterChips = useMemo(() => [
+        {
+            label: "ALL",
+            isActive: collectionFilter === "all",
+            toggle: () => setCollectionFilter("all"),
+        },
+        ...collectionOrder.map((key) => ({
+            label: key.toUpperCase(),
+            isActive: collectionFilter === key,
+            toggle: () => setCollectionFilter(key),
+        })),
+        {
+            label: "\u25d0 ALL",
+            isActive: appearanceFilter === "all",
+            toggle: () => setAppearanceFilter("all"),
+        },
+        {
+            label: "\u25cf DARK",
+            isActive: appearanceFilter === "dark",
+            toggle: () => setAppearanceFilter("dark"),
+        },
+        {
+            label: "\u25cb LIGHT",
+            isActive: appearanceFilter === "light",
+            toggle: () => setAppearanceFilter("light"),
+        },
+    ], [collectionFilter, appearanceFilter]);
+    const collectionChips = filterChips.slice(0, collectionOrder.length + 1);
+    const appearanceChips = filterChips.slice(collectionOrder.length + 1);
+
+    const [filterCursor, setFilterCursor] = useState<number | null>(null);
+    const inFilterMode = filterCursor !== null;
+
+    const moveUp = () =>
+        inFilterMode
+            ? setFilterCursor((c) => Math.max(0, (c ?? 0) - 1))
+            : setPickedIndex((i) => Math.max(0, i - 1));
+    const moveDown = () =>
+        inFilterMode
+            ? setFilterCursor((c) => Math.min(filterChips.length - 1, (c ?? 0) + 1))
+            : setPickedIndex((i) => Math.min(themes.length - 1, i + 1));
 
     // Arrow keys
     useHotkey("ArrowUp", moveUp);
     useHotkey("ArrowDown", moveDown);
+    useHotkey("ArrowLeft", () => inFilterMode && moveUp());
+    useHotkey("ArrowRight", () => inFilterMode && moveDown());
 
     // Vim navigation
     useHotkey("K", moveUp);
     useHotkey("J", moveDown);
-    useHotkeySequence(["G", "G"], () => setPickedIndex(0));
-    useHotkey("Shift+G", () => setPickedIndex(themes.length - 1));
+    useHotkey("H", () => inFilterMode && moveUp());
+    useHotkey("L", () => inFilterMode && moveDown());
+    useHotkeySequence(["G", "G"], () => !inFilterMode && setPickedIndex(0));
+    useHotkey("Shift+G", () => !inFilterMode && setPickedIndex(themes.length - 1));
 
     // Search, filters, settings, quit — the footer's advertised vocabulary
     const promptInputRef = useRef<HTMLInputElement>(null);
-    const chipsRef = useRef<HTMLDivElement>(null);
 
     useHotkey("/", (event) => {
         event.preventDefault();
+        setFilterCursor(null);
         promptInputRef.current?.focus();
     });
-    useHotkey("F", () => {
-        chipsRef.current?.querySelector("button")?.focus();
+    useHotkey("F", () => setFilterCursor((c) => (c === null ? 0 : null)));
+    useHotkey("Space", () => {
+        if (filterCursor !== null) filterChips[filterCursor]?.toggle();
     });
     useHotkey("S", () => navigate({ to: "/settings" }));
     useHotkey("Q", () => {
         // Only meaningful inside the Tauri shell; a plain browser has no window handle.
         getCurrentWindow().close().catch(() => {});
     });
-    useHotkey("Escape", () => setQuery(""));
+    useHotkey("Escape", () => {
+        if (filterCursor !== null) setFilterCursor(null);
+        else setQuery("");
+    });
 
     const handleApplyTheme = async () => {
         if (phase === "applying") return;
@@ -123,7 +173,13 @@ function Component() {
         }
     };
 
-    useHotkey("Enter", handleApplyTheme);
+    useHotkey("Enter", () => {
+        if (filterCursor !== null) {
+            filterChips[filterCursor]?.toggle();
+            return;
+        }
+        handleApplyTheme();
+    });
 
     const configSettled = !config.query.isPending;
     const hasNoAdapters = configSettled &&
@@ -172,93 +228,30 @@ function Component() {
                             count={`${themes.length}/${allThemes.length}`}
                         />
                     </div>
-                    <div
-                        className={styles.chips}
-                        ref={chipsRef}
-                        onKeyDown={(event) => {
-                            // Filter mode: hjkl/arrows rove between chips,
-                            // space/enter toggle (native click), esc leaves.
-                            // Handled keys stop here so the global list
-                            // hotkeys (j/k/enter) don't fire simultaneously.
-                            const chips = Array.from(
-                                chipsRef.current?.querySelectorAll("button") ?? [],
-                            );
-                            const current = chips.indexOf(
-                                document.activeElement as HTMLButtonElement,
-                            );
-                            if (current === -1) return;
-
-                            const prev = () => chips[Math.max(0, current - 1)]?.focus();
-                            const next = () =>
-                                chips[Math.min(chips.length - 1, current + 1)]?.focus();
-
-                            switch (event.key) {
-                                case "h":
-                                case "k":
-                                case "ArrowLeft":
-                                case "ArrowUp":
-                                    prev();
-                                    break;
-                                case "l":
-                                case "j":
-                                case "ArrowRight":
-                                case "ArrowDown":
-                                    next();
-                                    break;
-                                case "Escape":
-                                    (document.activeElement as HTMLElement)?.blur();
-                                    break;
-                                case " ":
-                                case "Enter":
-                                    // Native button activation toggles the
-                                    // chip — just keep it scoped.
-                                    break;
-                                default:
-                                    return;
-                            }
-                            event.preventDefault();
-                            event.stopPropagation();
-                            if (event.key === " " || event.key === "Enter") {
-                                (document.activeElement as HTMLButtonElement)?.click();
-                            }
-                        }}
-                    >
+                    <div className={styles.chips}>
                         <div className={styles.chipGroup}>
-                            <Chip
-                                active={collectionFilter === "all"}
-                                onClick={() => setCollectionFilter("all")}
-                            >
-                                ALL
-                            </Chip>
-                            {collectionOrder.map((key) => (
+                            {collectionChips.map((chip, i) => (
                                 <Chip
-                                    key={key}
-                                    active={collectionFilter === key}
-                                    onClick={() => setCollectionFilter(key)}
+                                    key={chip.label}
+                                    active={chip.isActive}
+                                    focused={filterCursor === i}
+                                    onClick={chip.toggle}
                                 >
-                                    {key.toUpperCase()}
+                                    {chip.label}
                                 </Chip>
                             ))}
                         </div>
                         <div className={styles.chipGroup}>
-                            <Chip
-                                active={appearanceFilter === "all"}
-                                onClick={() => setAppearanceFilter("all")}
-                            >
-                                ◐ ALL
-                            </Chip>
-                            <Chip
-                                active={appearanceFilter === "dark"}
-                                onClick={() => setAppearanceFilter("dark")}
-                            >
-                                ● DARK
-                            </Chip>
-                            <Chip
-                                active={appearanceFilter === "light"}
-                                onClick={() => setAppearanceFilter("light")}
-                            >
-                                ○ LIGHT
-                            </Chip>
+                            {appearanceChips.map((chip, i) => (
+                                <Chip
+                                    key={chip.label}
+                                    active={chip.isActive}
+                                    focused={filterCursor === collectionChips.length + i}
+                                    onClick={chip.toggle}
+                                >
+                                    {chip.label}
+                                </Chip>
+                            ))}
                         </div>
                     </div>
                     <div className={styles.list}>
