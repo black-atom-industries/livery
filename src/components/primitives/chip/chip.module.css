@@ -14,13 +14,29 @@
     transition: background var(--ba-duration-1) var(--ba-ease);
 }
 
-/* Plain :focus (not :focus-visible): roving filter navigation moves focus
-   programmatically, which WebKit's focus-visible heuristic doesn't count —
-   the keyboard cursor must always be visible. */
+/* Hover = one surface tier lighter (states spec). */
+.root:hover {
+    background: var(--ba-color-bg-subtle);
+    color: var(--ba-color-fg-default);
+}
+
+/* Keyboard cursor / focus: hint surface + positive outline. The surface
+   change matters — a 1px outline alone is invisible in near-monochrome
+   themes. Plain :focus (not :focus-visible): programmatic focus moves
+   don't satisfy WebKit's focus-visible heuristic. */
 .root:focus,
 .root[data-focused] {
+    background: var(--ba-color-bg-hint);
+    color: var(--ba-color-fg-default);
     outline: var(--ba-focus-outline);
     outline-offset: var(--ba-focus-offset);
+}
+
+.active:hover,
+.active:focus,
+.active[data-focused] {
+    background: var(--ba-color-bg-contrast);
+    color: var(--ba-color-fg-contrast);
 }
 
 .active {
