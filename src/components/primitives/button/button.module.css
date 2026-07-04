@@ -1,0 +1,52 @@
+.root {
+    font-family: var(--ba-font-mono);
+    font-size: var(--ba-font-size-1);
+    letter-spacing: var(--ba-font-letterspacing-chip);
+    text-transform: uppercase;
+    padding: 6px 14px;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--ba-color-fg-default);
+    transition: background var(--ba-duration-1) var(--ba-ease);
+}
+
+.root:focus-visible {
+    outline: var(--ba-focus-outline);
+    outline-offset: var(--ba-focus-offset);
+}
+
+.root:disabled {
+    background: var(--ba-color-bg-disabled);
+    color: var(--ba-color-fg-disabled);
+    border-color: transparent;
+    font-weight: var(--ba-font-weight-regular);
+    cursor: default;
+}
+
+.intentPrimary {
+    background: var(--ba-color-bg-contrast);
+    color: var(--ba-color-fg-contrast);
+    font-weight: var(--ba-font-weight-bold);
+}
+
+.intentSecondary {
+    border: var(--ba-border-strong);
+}
+
+.intentSecondary:not(:disabled):hover,
+.intentGhost:not(:disabled):hover {
+    background: var(--ba-color-bg-subtle);
+}
+
+.intentGhost {
+    color: var(--ba-color-fg-subtle);
+}
+
+.hotkey {
+    color: var(--ba-color-fg-positive);
+}
+
+.root:disabled .hotkey {
+    color: inherit;
+}
