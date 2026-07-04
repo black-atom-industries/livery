@@ -1,4 +1,3 @@
-import { ChevronRight, Moon, Sun } from "lucide-react";
 import { cva } from "cva";
 import type { ThemeGroup } from "../../lib/themes.ts";
 import styles from "./theme-list.module.css";
@@ -28,7 +27,7 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
                     const index = flatIndex++;
                     const isSelected = index === selectedIndex;
                     const name = entry.meta.name;
-                    const AppearanceIcon = entry.meta.appearance === "dark" ? Moon : Sun;
+                    const appearanceTag = entry.meta.appearance === "dark" ? "D" : "L";
 
                     return (
                         <button
@@ -41,11 +40,11 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
                             className={itemVariants({ selected: isSelected })}
                         >
                             <span className={styles.cursor}>
-                                {isSelected && <ChevronRight size={14} />}
+                                {isSelected && "›"}
                             </span>
                             {name}
                             <span className={styles.icon}>
-                                <AppearanceIcon size={12} />
+                                {appearanceTag}
                             </span>
                         </button>
                     );

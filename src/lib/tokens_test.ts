@@ -39,11 +39,3 @@ Deno.test("light themes emit color-scheme: light", () => {
 
     assertStringIncludes(themeToStyleSheet(light), "color-scheme: light;");
 });
-
-// Removed together with src/styles/variables/ at the end of the #51 migration.
-Deno.test("legacy --lvr-* tokens are still emitted during the migration", () => {
-    const props = themeToCustomProperties(theme);
-
-    assertEquals(props["--lvr-color-bg-default"], theme.ui.bg.default);
-    assertEquals(props["--lvr-color-fg-accent"], theme.ui.fg.accent);
-});

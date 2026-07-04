@@ -1,9 +1,6 @@
 /* Black Atom design tokens (--ba-*) — mirrors docs/design-system/reference/tokens/ */
 @import "./styles/tokens/index.css";
 
-/* Legacy token layer (lvr) — removed at the end of the #51 migration */
-@import "./styles/variables/index.css";
-
 /* Fonts — the three voices: Space Grotesk (display), Iosevka (mono/UI), IBM Plex Sans (body).
    Static weights, so family names match the design tokens verbatim ("Space Grotesk", not
    "Space Grotesk Variable"). Weights per tokens: regular 400 · medium 500 · bold 700. */
@@ -16,11 +13,6 @@
 @import "@fontsource/ibm-plex-sans/400.css";
 @import "@fontsource/ibm-plex-sans/500.css";
 @import "@fontsource/ibm-plex-sans/700.css";
-
-/* Legacy fonts — removed at the end of the #51 migration */
-@import "@fontsource-variable/space-grotesk";
-@import "@fontsource-variable/recursive/full.css";
-@import "@fontsource-variable/jetbrains-mono";
 
 html {
     font-size: 100%; /* 19px — readability bump for desktop use */
