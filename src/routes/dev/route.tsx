@@ -78,7 +78,7 @@ function Component() {
                                 textTransform: "uppercase",
                                 letterSpacing: "0.1em",
                                 color: "var(--ba-color-fg-subtle)",
-                                borderBottom: "1px solid var(--border-default, var(--primary-d20))",
+                                borderBottom: "var(--ba-border)",
                             }}
                         >
                             Theme

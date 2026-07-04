@@ -46,7 +46,7 @@ function DevOverview() {
                         style={{
                             display: "block",
                             padding: "12px 16px",
-                            border: "1px solid var(--border-default, var(--primary-d20))",
+                            border: "var(--ba-border)",
                             textDecoration: "none",
                             color: "var(--ba-color-fg-default)",
                         }}
