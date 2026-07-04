@@ -14,7 +14,10 @@
     transition: background var(--ba-duration-1) var(--ba-ease);
 }
 
-.root:focus-visible,
+/* Plain :focus (not :focus-visible): roving filter navigation moves focus
+   programmatically, which WebKit's focus-visible heuristic doesn't count —
+   the keyboard cursor must always be visible. */
+.root:focus,
 .root[data-focused] {
     outline: var(--ba-focus-outline);
     outline-offset: var(--ba-focus-offset);
