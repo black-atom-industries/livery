@@ -55,6 +55,26 @@
 | **Phase**      | The current UI state machine position — `"picking"` (user browsing themes), `"applying"` (updaters running), or `"done"` (all updates finished) | Step, stage, screen         |
 | **ApplyTheme** | The frontend orchestration function that runs all UpdaterEntries sequentially, reporting progress via callbacks                                 | Run updaters, execute, sync |
 
+## Design Language
+
+> The full design spec lives in [`docs/design-system/`](docs/design-system/README.md) ("Warm
+> Precision"). These are the terms it establishes.
+
+| Term              | Definition                                                                                                                           | Aliases to avoid               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| **Chrome**        | Everything in the UI that is not theme content — bars, panels, labels, borders. Warm monochrome; re-tints with the selected theme    | UI shell, frame                |
+| **Voice**         | One of the three type roles: Display (Space Grotesk), Mono (Iosevka — the default interface voice), Body (IBM Plex Sans, prose only) | Font, typeface (for the role)  |
+| **Token**         | A `--ba-*` CSS custom property from `src/styles/tokens/` — the only way chrome expresses color, type, spacing, borders, motion       | Variable, CSS var              |
+| **Re-tint**       | The runtime override of chrome tokens with the selected theme's `ui` palette via ThemeProvider — the app wears the livery it applies | Theming, skinning              |
+| **Surface tier**  | One of the four tonal depth levels: recessed < default < subtle < hint. Depth comes only from these — no shadows                     | Elevation, layer (z-index ≠)   |
+| **Actuator**      | An interactive control in bracket notation — `[ LABEL ]`. The Button primitive renders actuators                                     | Button (in design discussions) |
+| **Pip**           | A small square status indicator: 8px StatusPip + mono label, or 4×7px mini palette pips on list rows. Always square, never a circle  | Dot, bullet, badge             |
+| **Datasheet**     | The composition pattern of the theme detail panel: display-voice name → swatch bands → KV rows → code preview → doc-code footer      | Detail view, preview panel     |
+| **Specimen**      | A /dev route section that renders one primitive or foundation in all its variants and states — the visual verification surface       | Story, demo                    |
+| **Motif**         | A recurring visual signature: bracket actuators, square pips, `»` prompts, `n/m` counters, hairline-ruled section labels, doc codes  | Pattern (reserve for code)     |
+| **Copy register** | The writing rules for chrome text: uppercase mono, `·` separators, `—` qualifiers, imperative impersonal voice, keys always named    | Tone, style guide              |
+| **Brand dot**     | The 0.62em filled circle standing in for the O in `BLACK AT●M` — the only circle (and only border-radius) in the system              | Logo, icon                     |
+
 ## Relationships
 
 - **Config** contains a map of **AppName** → **AppConfig** plus a **SystemAppearance** toggle
