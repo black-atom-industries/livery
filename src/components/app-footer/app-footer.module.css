@@ -1,28 +1,26 @@
 /* =============================================================
-   AppFooter — Keyboard shortcut bar
-   DESIGN.md: Monospace chrome labels, hint/subtle token colors.
+   AppFooter — Key vocabulary bar
+   Spec: docs/design-system/reference/components/containers/AppFooter.jsx
+   Composes KeyHint for the left slot; StatusPip (or similar) for the right.
    ============================================================= */
 
 .root {
     display: flex;
-    gap: var(--ba-size-6);
+    justify-content: space-between;
+    align-items: center;
     font-family: var(--ba-font-mono);
-    font-variation-settings: "MONO" 1;
-    font-size: var(--ba-font-size-00);
+    font-size: var(--ba-font-size-1);
+    color: var(--ba-color-fg-hint);
 }
 
-.shortcut {
+.hints {
+    display: flex;
+    gap: var(--ba-size-6);
+    white-space: nowrap;
+}
+
+.status {
     display: flex;
     align-items: center;
     gap: var(--ba-size-2);
-}
-
-.keys {
-    color: var(--ba-color-fg-subtle);
-}
-
-.label {
-    color: var(--ba-color-fg-hint);
-    text-transform: uppercase;
-    letter-spacing: var(--ba-font-letterspacing-label);
 }

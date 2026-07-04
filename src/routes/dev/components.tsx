@@ -3,7 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { themeMap } from "@black-atom/core";
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
+import { Button } from "../../components/primitives/button/button.tsx";
+import { Chip } from "../../components/primitives/chip/chip.tsx";
+import { DisclosurePanel } from "../../components/primitives/disclosure-panel/index.ts";
+import { Dialog } from "../../components/primitives/dialog/index.ts";
+import { KeyHint } from "../../components/primitives/key-hint/key-hint.tsx";
 import { ProgressBar } from "../../components/primitives/progress-bar/progress-bar.tsx";
+import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx";
 import { ThemeList } from "../../components/theme-list/index.ts";
 import { ThemeDetail } from "../../components/theme-detail/index.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";
@@ -38,6 +44,9 @@ const PROGRESS_FIXTURES: Record<string, UpdateResult[]> = {
 function Page() {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [progressState, setProgressState] = useState<keyof typeof PROGRESS_FIXTURES>("running");
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [collectionValue, setCollectionValue] = useState("jpn");
+    const [panelExpanded, setPanelExpanded] = useState(true);
 
     return (
         <div>
@@ -55,13 +64,110 @@ function Page() {
             </h1>
 
             <SectionLabel>AppHeader</SectionLabel>
-            <div style={{ border: "1px solid var(--ba-color-fg-hint)", marginBottom: 32 }}>
-                <AppHeader version="dev" />
+            <div
+                style={{
+                    border: "1px solid var(--ba-color-fg-hint)",
+                    marginBottom: 32,
+                    padding: "14px 20px",
+                }}
+            >
+                <AppHeader version="0.3.0" context="24 THEMES · 6 COLLECTIONS · ENV DARK" />
             </div>
 
             <SectionLabel>AppFooter</SectionLabel>
-            <div style={{ border: "1px solid var(--ba-color-fg-hint)", marginBottom: 32 }}>
-                <AppFooter />
+            <div
+                style={{
+                    border: "1px solid var(--ba-color-fg-hint)",
+                    marginBottom: 32,
+                    padding: "10px 20px",
+                }}
+            >
+                <AppFooter
+                    hints={
+                        <>
+                            <KeyHint keys="j/k">NAVIGATE</KeyHint>
+                            <KeyHint keys="/">SEARCH</KeyHint>
+                            <KeyHint keys="⏎">APPLY</KeyHint>
+                            <KeyHint keys="q">QUIT</KeyHint>
+                        </>
+                    }
+                    status={<StatusPip intent="ok">READY</StatusPip>}
+                />
+            </div>
+
+            <SectionLabel>Dialog</SectionLabel>
+            <div style={{ marginBottom: 32 }}>
+                <Button onClick={() => setDialogOpen(true)}>OPEN FILTERS</Button>
+                <Dialog
+                    open={dialogOpen}
+                    onClose={() => setDialogOpen(false)}
+                    title="FILTERS"
+                    footerLeft="12 THEMES MATCH"
+                    footerRight={
+                        <>
+                            <KeyHint keys="h/l ←→">MOVE</KeyHint> <KeyHint keys="⏎">DONE</KeyHint>
+                        </>
+                    }
+                >
+                    <Chip
+                        active={collectionValue === "all"}
+                        hotkey="1"
+                        onClick={() => setCollectionValue("all")}
+                    >
+                        ALL
+                    </Chip>{" "}
+                    <Chip
+                        active={collectionValue === "jpn"}
+                        hotkey="3"
+                        onClick={() => setCollectionValue("jpn")}
+                    >
+                        JPN
+                    </Chip>{" "}
+                    <Chip
+                        active={collectionValue === "terra"}
+                        hotkey="4"
+                        onClick={() => setCollectionValue("terra")}
+                    >
+                        TERRA
+                    </Chip>
+                </Dialog>
+            </div>
+
+            <SectionLabel>DisclosurePanel</SectionLabel>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
+                <DisclosurePanel
+                    expanded={panelExpanded}
+                    onToggle={() => setPanelExpanded((v) => !v)}
+                    header={
+                        <>
+                            <b style={{ width: 110 }}>ghostty</b>
+                            <span>~/.config/ghostty/config</span>
+                            <StatusPip intent="ok">OK</StatusPip>
+                        </>
+                    }
+                >
+                    <div
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr",
+                            gap: 14,
+                            padding: 16,
+                        }}
+                    >
+                        <div>CONFIG_PATH: ~/.config/ghostty/config</div>
+                        <div>MATCH_PATTERN: ^theme = .*$</div>
+                    </div>
+                </DisclosurePanel>
+                <DisclosurePanel
+                    expanded={false}
+                    header={
+                        <>
+                            <b style={{ width: 110 }}>nvim</b>
+                            <span>~/.config/nvim/…</span>
+                            <StatusPip intent="ok">OK</StatusPip>
+                        </>
+                    }
+                />
             </div>
 
             <SectionLabel>ProgressBar</SectionLabel>

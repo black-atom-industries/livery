@@ -1,26 +1,27 @@
 import styles from "./app-footer.module.css";
 
-interface Shortcut {
-    key: string;
-    label: string;
-}
+type Props = {
+    /** Row of KeyHint elements — the key vocabulary for the current screen. */
+    hints: React.ReactNode;
+    /** Live status slot, e.g. <StatusPip intent="ok">READY</StatusPip>. */
+    status?: React.ReactNode;
+    className?: string;
+};
 
-const SHORTCUTS: Shortcut[] = [
-    { key: "↑/↓ j/k", label: "navigate" },
-    { key: "gg/G", label: "top/bottom" },
-    { key: "Enter", label: "select" },
-    { key: "q", label: "quit" },
-];
-
-export function AppFooter() {
+/**
+ * App footer — every screen ends with its key vocabulary (composed from
+ * KeyHint) + a live status slot.
+ *
+ * Spec: docs/design-system/reference/components/containers/AppFooter.jsx
+ */
+export function AppFooter({ hints, status, className }: Props) {
     return (
-        <div data-component="app-footer" className={styles.root}>
-            {SHORTCUTS.map((s) => (
-                <span key={s.key} className={styles.shortcut}>
-                    <kbd className={styles.keys}>{s.key}</kbd>
-                    <span className={styles.label}>{s.label}</span>
-                </span>
-            ))}
+        <div
+            data-component="app-footer"
+            className={[styles.root, className].filter(Boolean).join(" ")}
+        >
+            <div className={styles.hints}>{hints}</div>
+            {status ? <div className={styles.status}>{status}</div> : null}
         </div>
     );
 }
