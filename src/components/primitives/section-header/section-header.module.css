@@ -1,40 +1,32 @@
 /* =============================================================
-   SectionHeader — Uppercase mono label with horizontal rule
-   DESIGN.md: "Section Headers" pattern.
+   SectionHeader — Uppercase mono label + hairline rule
+   Spec: docs/design-system/reference/components/display/SectionHeader.jsx
    ============================================================= */
 
 .root {
     display: flex;
-    flex-direction: column;
-    gap: var(--ba-size-1);
-    margin-bottom: var(--ba-size-4);
-}
-
-.row {
-    display: flex;
-    justify-content: space-between;
     align-items: baseline;
+    gap: var(--ba-size-2);
+    font-family: var(--ba-font-mono);
 }
 
 .label {
-    font-family: var(--ba-font-mono);
-    font-variation-settings: "MONO" 1;
     font-size: var(--ba-font-size-0);
-    font-weight: var(--ba-font-weight-medium);
-    text-transform: uppercase;
     letter-spacing: var(--ba-font-letterspacing-label);
-    color: var(--ba-color-fg-subtle);
-}
-
-.meta {
-    font-family: var(--ba-font-mono);
-    font-variation-settings: "MONO" 1;
-    font-size: 10px;
     color: var(--ba-color-fg-hint);
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .rule {
+    flex: 1;
     border: none;
-    border-top: var(--ba-border-subtle);
+    border-bottom: var(--ba-border-subtle);
     margin: 0;
+}
+
+.meta {
+    font-size: var(--ba-font-size-0);
+    color: var(--ba-color-fg-disabled);
+    white-space: nowrap;
 }

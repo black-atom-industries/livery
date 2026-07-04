@@ -1,27 +1,30 @@
+import { cva, type VariantProps } from "cva";
 import styles from "./section-header.module.css";
 
-interface SectionHeaderProps {
-    /** Uppercase mono label text. */
-    label: string;
-    /** Optional right-aligned metadata (e.g. count). */
-    meta?: string;
-}
+export const sectionHeaderVariants = cva({
+    base: styles.root,
+});
+
+type Props = VariantProps<typeof sectionHeaderVariants> & {
+    /** Label, e.g. "PRIMARIES · 12", "JPN — JAPAN (4)". */
+    children: React.ReactNode;
+    /** Right-aligned meta, e.g. "REV 03". */
+    meta?: React.ReactNode;
+    className?: string;
+};
 
 /**
- * SectionHeader — Uppercase monospace label with horizontal rule underneath.
+ * Uppercase mono label + hairline rule. The primary structural pattern —
+ * heads every datasheet section and list group.
  *
- * Matches the DESIGN.md "Section Headers" pattern: mono font, uppercase,
- * wide letter-spacing, optional right-aligned metadata, and a 1px rule
- * in --ba-color-border-subtle.
+ * Spec: docs/design-system/reference/components/display/SectionHeader.jsx
  */
-export function SectionHeader({ label, meta }: SectionHeaderProps) {
+export function SectionHeader({ children, meta, className }: Props) {
     return (
-        <div data-component="section-header" className={styles.root}>
-            <div className={styles.row}>
-                <span className={styles.label}>{label}</span>
-                {meta && <span className={styles.meta}>{meta}</span>}
-            </div>
+        <div data-component="section-header" className={sectionHeaderVariants({ className })}>
+            <span className={styles.label}>{children}</span>
             <hr className={styles.rule} />
+            {meta && <span className={styles.meta}>{meta}</span>}
         </div>
     );
 }

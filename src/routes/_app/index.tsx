@@ -78,7 +78,7 @@ function Component() {
         <App.SplitPanel
             left={
                 <>
-                    <SectionHeader label="THEMES" />
+                    <SectionHeader>THEMES</SectionHeader>
                     <ThemeList
                         groups={groups}
                         selectedIndex={pickedIndex}
@@ -88,7 +88,7 @@ function Component() {
             }
             right={
                 <>
-                    <SectionHeader label="DETAIL" />
+                    <SectionHeader>DETAIL</SectionHeader>
                     <ThemeDetail theme={pickedEntry} />
                     {currentTheme && (
                         <div style={{ marginTop: "var(--ba-size-6)" }}>
