@@ -6,6 +6,9 @@ interface SplitPanelProps {
     left: ReactNode;
     /** Content for the right panel. */
     right: ReactNode;
+    /** Remove the right panel's padding — for content that paints its own
+        surface to the pane edges (e.g. the theme preview). */
+    rightFlush?: boolean;
 }
 
 /**
@@ -15,11 +18,13 @@ interface SplitPanelProps {
  * 1px right border. Both panels scroll independently. Carries zero opinions
  * about what goes inside — routes compose their page content into the slots.
  */
-export function SplitPanel({ left, right }: SplitPanelProps) {
+export function SplitPanel({ left, right, rightFlush }: SplitPanelProps) {
     return (
         <div data-layout="split-panel" className={styles.root}>
             <div className={styles.left}>{left}</div>
-            <div className={styles.right}>{right}</div>
+            <div className={rightFlush ? `${styles.right} ${styles.rightFlush}` : styles.right}>
+                {right}
+            </div>
         </div>
     );
 }

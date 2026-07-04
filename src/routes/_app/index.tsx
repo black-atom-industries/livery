@@ -142,6 +142,7 @@ function Component() {
 
     return (
         <App.SplitPanel
+            rightFlush
             left={
                 <>
                     <div

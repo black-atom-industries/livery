@@ -26,3 +26,7 @@
     overflow-y: auto;
     padding: var(--ba-size-6) var(--ba-size-7);
 }
+
+.rightFlush {
+    padding: 0;
+}

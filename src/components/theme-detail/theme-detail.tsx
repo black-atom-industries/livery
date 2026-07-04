@@ -1,4 +1,5 @@
 import type { ThemeDefinition } from "@black-atom/core";
+import { themeToCustomProperties } from "../../lib/tokens.ts";
 import { Badge } from "../primitives/badge/badge.tsx";
 import { CodePreview } from "../primitives/code-preview/code-preview.tsx";
 import { CodeToken } from "../primitives/code-preview/code-token.tsx";
@@ -72,7 +73,15 @@ export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
     const feedback = getFeedbackBands(theme);
 
     return (
-        <div data-component="theme-detail" className={styles.root}>
+        <div
+            data-component="theme-detail"
+            className={styles.root}
+            /* Scope-override the chrome tokens with the previewed theme's ui
+               palette — the pane renders IN the cursored theme (bg.default
+               page, bg.panel panels, derived borders) while the app chrome
+               keeps the applied theme. Theme values are content here. */
+            style={themeToCustomProperties(theme) as React.CSSProperties}
+        >
             <div className={styles.headerRow}>
                 <div className={styles.titleColumn}>
                     <div className={styles.titleGroup}>
