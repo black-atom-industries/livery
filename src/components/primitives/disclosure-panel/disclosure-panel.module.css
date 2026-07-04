@@ -17,11 +17,25 @@
     border: var(--ba-border-strong);
 }
 
+.headerRow {
+    display: flex;
+    align-items: center;
+    transition:
+        background var(--ba-duration-3) var(--ba-ease),
+        border-color var(--ba-duration-3) var(--ba-ease);
+}
+
+.headerRow > :first-child:not(.header) {
+    margin-left: var(--ba-size-4);
+}
+
 .header {
     display: flex;
     align-items: center;
     gap: var(--ba-size-3);
     width: 100%;
+    min-width: 0;
+    flex: 1;
     padding: var(--ba-size-3) var(--ba-size-4);
     background: transparent;
     border: none;
@@ -39,7 +53,7 @@
     outline-offset: var(--ba-focus-offset);
 }
 
-.expanded > .header {
+.expanded > .headerRow {
     border-bottom: var(--ba-border);
     background: var(--ba-color-bg-subtle);
 }

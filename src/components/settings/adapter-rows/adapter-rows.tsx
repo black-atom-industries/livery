@@ -116,9 +116,9 @@ function AdapterRow(
                 expanded={expanded}
                 onToggle={onToggleExpanded}
                 className={styles.panel}
+                leading={<Toggle on={enabled} onChange={onToggleEnabled} />}
                 header={
                     <div className={styles.header}>
-                        <Toggle on={enabled} onChange={onToggleEnabled} />
                         <span className={enabled ? styles.nameEnabled : styles.name}>
                             {appName}
                         </span>
