@@ -109,26 +109,46 @@ function Component() {
     const [filterCursor, setFilterCursor] = useState<number | null>(null);
     const inFilterMode = filterCursor !== null;
 
+    /** 2D chip navigation: h/l move within a row, j/k jump between the
+        collection row and the appearance row, keeping the column. */
+    const moveFilterCursor = (dir: "up" | "down" | "left" | "right") =>
+        setFilterCursor((c) => {
+            if (c === null) return c;
+            const rowSize = collectionChips.length;
+            const total = filterChips.length;
+            const row = c < rowSize ? 0 : 1;
+            const col = row === 0 ? c : c - rowSize;
+
+            switch (dir) {
+                case "left":
+                    return Math.max(row === 0 ? 0 : rowSize, c - 1);
+                case "right":
+                    return Math.min(row === 0 ? rowSize - 1 : total - 1, c + 1);
+                case "down":
+                    return row === 0 ? rowSize + Math.min(col, total - rowSize - 1) : c;
+                case "up":
+                    return row === 1 ? Math.min(col, rowSize - 1) : c;
+            }
+        });
+
     const moveUp = () =>
-        inFilterMode
-            ? setFilterCursor((c) => Math.max(0, (c ?? 0) - 1))
-            : setPickedIndex((i) => Math.max(0, i - 1));
+        inFilterMode ? moveFilterCursor("up") : setPickedIndex((i) => Math.max(0, i - 1));
     const moveDown = () =>
         inFilterMode
-            ? setFilterCursor((c) => Math.min(filterChips.length - 1, (c ?? 0) + 1))
+            ? moveFilterCursor("down")
             : setPickedIndex((i) => Math.min(themes.length - 1, i + 1));
 
     // Arrow keys
     useHotkey("ArrowUp", moveUp);
     useHotkey("ArrowDown", moveDown);
-    useHotkey("ArrowLeft", () => inFilterMode && moveUp());
-    useHotkey("ArrowRight", () => inFilterMode && moveDown());
+    useHotkey("ArrowLeft", () => inFilterMode && moveFilterCursor("left"));
+    useHotkey("ArrowRight", () => inFilterMode && moveFilterCursor("right"));
 
     // Vim navigation
     useHotkey("K", moveUp);
     useHotkey("J", moveDown);
-    useHotkey("H", () => inFilterMode && moveUp());
-    useHotkey("L", () => inFilterMode && moveDown());
+    useHotkey("H", () => inFilterMode && moveFilterCursor("left"));
+    useHotkey("L", () => inFilterMode && moveFilterCursor("right"));
     useHotkeySequence(["G", "G"], () => !inFilterMode && setPickedIndex(0));
     useHotkey("Shift+G", () => !inFilterMode && setPickedIndex(themes.length - 1));
 
