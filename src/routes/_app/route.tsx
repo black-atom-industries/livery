@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
+import { useMutationState } from "@tanstack/react-query";
 import { collectionOrder, themeMap } from "@black-atom/core";
 import denoConfig from "../../../deno.json" with { type: "json" };
 import { AppHeader } from "../../components/app-header/index.ts";
@@ -31,6 +32,17 @@ function AppLayout() {
     const isSettings = settingsMatch !== undefined;
     const settingsSection = (settingsMatch?.search as { section?: string } | undefined)?.section ??
         "adapters";
+
+    // Save mutation lives on the settings route's own useConfig() instance —
+    // useMutationState reads the shared MutationCache by key instead of
+    // threading mutation state up through props.
+    const saveMutationStatuses = useMutationState({
+        filters: { mutationKey: ["config", "save"] },
+        select: (mutation) => mutation.state.status,
+    });
+    const latestSaveStatus = saveMutationStatuses.at(-1);
+    const isSaving = latestSaveStatus === "pending";
+    const justSaved = latestSaveStatus === "success";
 
     const themeCount = useMemo(() => Object.keys(themeMap).length, []);
     const collectionCount = collectionOrder.length;
@@ -117,7 +129,11 @@ function AppLayout() {
                                     <KeyHint keys="q">QUIT</KeyHint>
                                 </>
                             )}
-                        status={<StatusPip intent="ok">READY</StatusPip>}
+                        status={isSettings && isSaving
+                            ? <StatusPip intent="running">SAVING…</StatusPip>
+                            : isSettings && justSaved
+                            ? <StatusPip intent="ok">SAVED</StatusPip>
+                            : <StatusPip intent="ok">READY</StatusPip>}
                     />
                 </footer>
             </div>

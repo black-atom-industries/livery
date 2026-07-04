@@ -5,9 +5,16 @@ import { DisclosurePanel } from "../../primitives/disclosure-panel/disclosure-pa
 import { Toggle } from "../../primitives/toggle/toggle.tsx";
 import { StatusPip } from "../../primitives/status-pip/status-pip.tsx";
 import { TextInput } from "../../primitives/text-input/text-input.tsx";
+import { Button } from "../../primitives/button/button.tsx";
 import styles from "./adapter-rows.module.css";
 
 export type AdapterField = "config_path" | "themes_path" | "match_pattern" | "replace_template";
+
+/** Session-local result of a "TEST APPLY" run — never persisted. */
+export type TestApplyResult =
+    | { status: "running" }
+    | { status: "ok"; durationMs: number | null }
+    | { status: "error"; message: string };
 
 type Props = {
     apps: [AppName, AppConfig][];
@@ -18,6 +25,10 @@ type Props = {
     onToggleEnabled: (appName: AppName) => void;
     onToggleExpanded: (appName: AppName) => void;
     onFieldCommit: (appName: AppName, field: AdapterField, value: string) => void;
+    /** Runs the real single-app update for the expanded adapter (TEST APPLY). */
+    onTestApply: (appName: AppName) => void;
+    /** Session-local last-applied result per app — starts empty, fills after a test apply. */
+    testApplyResults?: Partial<Record<AppName, TestApplyResult>>;
     /** Ref to the first input of the expanded row — the "e" hotkey focuses it. */
     firstFieldRef?: React.Ref<HTMLInputElement>;
     className?: string;
@@ -25,8 +36,8 @@ type Props = {
 
 /**
  * ADAPTERS panel — one DisclosurePanel row per adapter, expand for editable
- * paths. No per-tool layouts; VERIFY PATH / TEST APPLY / LAST APPLIED are
- * omitted (no backend support).
+ * paths. VERIFY PATH is omitted — no backend command exists yet (follow-up
+ * issue). TEST APPLY runs the real single-app updater.
  */
 export function AdapterRows(
     {
@@ -36,6 +47,8 @@ export function AdapterRows(
         onToggleEnabled,
         onToggleExpanded,
         onFieldCommit,
+        onTestApply,
+        testApplyResults,
         firstFieldRef,
         className,
     }: Props,
@@ -58,6 +71,8 @@ export function AdapterRows(
                         onToggleEnabled={() => onToggleEnabled(appName)}
                         onToggleExpanded={() => onToggleExpanded(appName)}
                         onFieldCommit={(field, value) => onFieldCommit(appName, field, value)}
+                        onTestApply={() => onTestApply(appName)}
+                        testApplyResult={testApplyResults?.[appName]}
                         firstFieldRef={expandedApp === appName ? firstFieldRef : undefined}
                     />
                 ))}
@@ -74,6 +89,8 @@ type RowProps = {
     onToggleEnabled: () => void;
     onToggleExpanded: () => void;
     onFieldCommit: (field: AdapterField, value: string) => void;
+    onTestApply: () => void;
+    testApplyResult?: TestApplyResult;
     firstFieldRef?: React.Ref<HTMLInputElement>;
 };
 
@@ -86,6 +103,8 @@ function AdapterRow(
         onToggleEnabled,
         onToggleExpanded,
         onFieldCommit,
+        onTestApply,
+        testApplyResult,
         firstFieldRef,
     }: RowProps,
 ) {
@@ -115,8 +134,53 @@ function AdapterRow(
                     onFieldCommit={onFieldCommit}
                     firstFieldRef={firstFieldRef}
                 />
+                <ActionRow
+                    running={testApplyResult?.status === "running"}
+                    onTestApply={onTestApply}
+                    testApplyResult={testApplyResult}
+                />
             </DisclosurePanel>
         </div>
+    );
+}
+
+type ActionRowProps = {
+    running: boolean;
+    onTestApply: () => void;
+    testApplyResult?: TestApplyResult;
+};
+
+/**
+ * VERIFY PATH is intentionally omitted here — there is no backend command
+ * for path verification yet (tracked as a follow-up issue).
+ */
+function ActionRow({ running, onTestApply, testApplyResult }: ActionRowProps) {
+    return (
+        <div className={styles.actionRow}>
+            <Button intent="secondary" onClick={onTestApply} disabled={running}>
+                {running ? "TESTING…" : "TEST APPLY"}
+            </Button>
+            <LastAppliedMeta result={testApplyResult} />
+        </div>
+    );
+}
+
+function LastAppliedMeta({ result }: { result?: TestApplyResult }) {
+    if (!result || result.status === "running") return null;
+
+    if (result.status === "error") {
+        return (
+            <span className={styles.lastAppliedError}>
+                FAILED — {result.message}
+            </span>
+        );
+    }
+
+    const duration = result.durationMs === null ? "—" : `${result.durationMs} MS`;
+    return (
+        <span className={styles.lastAppliedOk}>
+            APPLIED {duration} · OK
+        </span>
     );
 }
 
@@ -166,9 +230,16 @@ type DraftFieldProps = {
 /**
  * TextInput with per-field draft state — persists through the whole-Config
  * save mutation on Enter or blur, not on every keystroke.
+ *
+ * Escape hierarchy: while a field is focused/dirty, Escape reverts the
+ * draft to the last saved value and stops propagation — it does NOT
+ * collapse the row. A second Escape (field is clean, focus leaves the
+ * input) reaches the route's handler, which collapses the row; a third
+ * Escape navigates back. Revert-before-collapse-before-back.
  */
 function DraftField({ label, value, optional, onCommit, inputRef }: DraftFieldProps) {
     const [draft, setDraft] = useState(value);
+    const [focused, setFocused] = useState(false);
 
     // Config prop changed underneath us (e.g. save from another field
     // resolved, or the row was reopened) — resync the draft.
@@ -177,23 +248,38 @@ function DraftField({ label, value, optional, onCommit, inputRef }: DraftFieldPr
     }, [value]);
 
     function commit() {
-        if (draft !== value) onFieldCommit(draft);
+        setFocused(false);
+        if (draft !== value) onCommit(draft);
     }
 
-    function onFieldCommit(next: string) {
-        onCommit(next);
-    }
+    const editing = focused || draft !== value;
 
     return (
         <TextInput
             label={label}
             optional={optional}
             value={draft}
+            editing={editing}
+            hint={editing ? "⏎ SAVE · esc REVERT" : undefined}
             onChange={setDraft}
+            onFocus={() => setFocused(true)}
             onBlur={commit}
             onKeyDown={(event) => {
                 if (event.key === "Enter") {
                     event.currentTarget.blur();
+                } else if (event.key === "Escape") {
+                    if (draft !== value) {
+                        // Dirty: first Escape reverts and stays put —
+                        // swallow it before the route-level Escape
+                        // hotkey (collapse/back) can see it.
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setDraft(value);
+                    } else {
+                        // Clean: nothing left to revert, hand off to the
+                        // route hierarchy (collapse row, then back).
+                        event.currentTarget.blur();
+                    }
                 }
             }}
             inputRef={inputRef}

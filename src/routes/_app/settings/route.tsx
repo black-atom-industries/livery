@@ -1,14 +1,20 @@
 import { useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useHotkey } from "@tanstack/react-hotkeys";
+import { useStore } from "@tanstack/react-store";
 import { Typo } from "../../../components/typo/index.ts";
 import { useConfig } from "../../../queries/use-config.ts";
 import { App } from "../../../components/layouts/app.ts";
 import { ListRow } from "../../../components/primitives/list-row/list-row.tsx";
 import { AdapterRows } from "../../../components/settings/adapter-rows/index.ts";
 import { GeneralPanel } from "../../../components/settings/general-panel/index.ts";
-import type { AdapterField } from "../../../components/settings/adapter-rows/index.ts";
+import type {
+    AdapterField,
+    TestApplyResult,
+} from "../../../components/settings/adapter-rows/index.ts";
+import { commands } from "../../../bindings.ts";
 import type { AppConfig, AppName, Config } from "../../../bindings.ts";
+import { appStore } from "../../../store/app.ts";
 import denoConfig from "../../../../deno.json" with { type: "json" };
 import styles from "./route.module.css";
 
@@ -29,6 +35,11 @@ function SettingsRoute() {
     const [cursorIndex, setCursorIndex] = useState(0);
     const [expandedApp, setExpandedApp] = useState<AppName | null>(null);
     const firstFieldRef = useRef<HTMLInputElement>(null);
+    // Session-local TEST APPLY results — never persisted, starts empty.
+    const [testApplyResults, setTestApplyResults] = useState<
+        Partial<Record<AppName, TestApplyResult>>
+    >({});
+    const currentTheme = useStore(appStore, (s) => s.currentTheme);
 
     const data = config.query.data;
     const appEntries = (data ? Object.entries(data.apps) : []) as [AppName, AppConfig][];
@@ -71,6 +82,25 @@ function SettingsRoute() {
             },
         };
         config.save.mutate(next);
+    }
+
+    async function testApplyAdapter(appName: AppName) {
+        setTestApplyResults((prev) => ({ ...prev, [appName]: { status: "running" } }));
+        try {
+            const result = await commands.updateApp(appName, {
+                theme_key: currentTheme.meta.key,
+                appearance: currentTheme.meta.appearance,
+                collection_key: currentTheme.meta.collection.key,
+                theme_label: currentTheme.meta.label,
+            });
+            const next: TestApplyResult = result.status === "error"
+                ? { status: "error", message: result.message ?? "Unknown error" }
+                : { status: "ok", durationMs: result.duration_ms };
+            setTestApplyResults((prev) => ({ ...prev, [appName]: next }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            setTestApplyResults((prev) => ({ ...prev, [appName]: { status: "error", message } }));
+        }
     }
 
     function toggleSystemAppearance() {
@@ -165,6 +195,8 @@ function SettingsRoute() {
                         onToggleExpanded={(appName) =>
                             setExpandedApp((current) => (current === appName ? null : appName))}
                         onFieldCommit={commitAdapterField}
+                        onTestApply={testApplyAdapter}
+                        testApplyResults={testApplyResults}
                         firstFieldRef={firstFieldRef}
                     />
                 )

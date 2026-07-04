@@ -63,3 +63,24 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--ba-size-4);
 }
+
+.actionRow {
+    display: flex;
+    align-items: center;
+    gap: var(--ba-size-3);
+    margin-top: var(--ba-size-4);
+}
+
+.lastAppliedOk {
+    margin-left: auto;
+    font-size: var(--ba-font-size-0);
+    letter-spacing: var(--ba-font-letterspacing-label);
+    color: var(--ba-color-fg-positive);
+}
+
+.lastAppliedError {
+    margin-left: auto;
+    font-size: var(--ba-font-size-0);
+    letter-spacing: var(--ba-font-letterspacing-label);
+    color: var(--ba-color-fg-negative);
+}

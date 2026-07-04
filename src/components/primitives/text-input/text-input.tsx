@@ -25,6 +25,8 @@ type Props = VariantProps<typeof textInputVariants> & {
     hint?: string;
     disabled?: boolean;
     onChange?: (value: string) => void;
+    /** Fires on focus — pairs with `editing` for draft fields that show the hint while focused. */
+    onFocus?: () => void;
     /** Fires on blur — pair with onKeyDownCapture-driven Enter commits for draft-until-commit fields. */
     onBlur?: (value: string) => void;
     /** Native key handler — e.g. commit-on-Enter or blur-on-Escape for draft fields. */
@@ -52,6 +54,7 @@ export function TextInput(
         hint,
         disabled,
         onChange,
+        onFocus,
         onBlur,
         onKeyDown,
         inputRef,
@@ -77,6 +80,7 @@ export function TextInput(
                     placeholder={placeholder}
                     disabled={disabled}
                     onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+                    onFocus={onFocus}
                     onBlur={onBlur ? (e) => onBlur(e.target.value) : undefined}
                     onKeyDown={onKeyDown}
                     readOnly={!onChange}

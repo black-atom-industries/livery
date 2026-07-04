@@ -15,7 +15,10 @@ import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx
 import { ThemeList } from "../../components/theme-list/index.ts";
 import { ThemeDetail } from "../../components/theme-detail/index.ts";
 import { AdapterRows } from "../../components/settings/adapter-rows/index.ts";
-import type { AdapterField } from "../../components/settings/adapter-rows/index.ts";
+import type {
+    AdapterField,
+    TestApplyResult,
+} from "../../components/settings/adapter-rows/index.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";
 import type { UpdateResult } from "../../lib/updaters.ts";
 import type { AppConfig, AppName, Config } from "../../bindings.ts";
@@ -111,6 +114,9 @@ function Page() {
     const [settingsFixture, setSettingsFixture] = useState(SETTINGS_ADAPTERS_FIXTURE);
     const [settingsExpandedApp, setSettingsExpandedApp] = useState<AppName | null>("ghostty");
     const [settingsCursorIndex, setSettingsCursorIndex] = useState(1);
+    const [settingsTestApplyResults, setSettingsTestApplyResults] = useState<
+        Partial<Record<AppName, TestApplyResult>>
+    >({ ghostty: { status: "ok", durationMs: 412 } });
 
     return (
         <div>
@@ -274,6 +280,24 @@ function Page() {
                             },
                         }));
                     }}
+                    onTestApply={(appName) => {
+                        setSettingsTestApplyResults((prev) => ({
+                            ...prev,
+                            [appName]: { status: "running" },
+                        }));
+                        setTimeout(() => {
+                            setSettingsTestApplyResults((prev) => ({
+                                ...prev,
+                                [appName]: appName === "obsidian"
+                                    ? { status: "error", message: "config not found" }
+                                    : {
+                                        status: "ok",
+                                        durationMs: 380 + Math.round(Math.random() * 80),
+                                    },
+                            }));
+                        }, 600);
+                    }}
+                    testApplyResults={settingsTestApplyResults}
                 />
             </div>
 
