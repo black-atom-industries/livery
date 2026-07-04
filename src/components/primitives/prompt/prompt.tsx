@@ -1,0 +1,51 @@
+import { cva, type VariantProps } from "cva";
+import styles from "./prompt.module.css";
+
+export const promptVariants = cva({
+    base: styles.root,
+    variants: {
+        focused: {
+            true: styles.focused,
+            false: "",
+        },
+    },
+    defaultVariants: {
+        focused: false,
+    },
+});
+
+type Props = VariantProps<typeof promptVariants> & {
+    /** Current query. Empty string renders the placeholder. */
+    value?: string;
+    placeholder?: string;
+    /** Match counter, e.g. "2/24". */
+    count?: string;
+    onChange?: (value: string) => void;
+    className?: string;
+};
+
+/**
+ * Command-line search prompt — the `»` glyph, recessed surface, block caret
+ * (native caret hidden via `caret-color: transparent`), `n/m` counter at
+ * right. Search is name-only by convention; collection/appearance filtering
+ * belongs to Chips or the Dialog.
+ *
+ * Spec: docs/design-system/reference/components/forms/Prompt.jsx
+ */
+export function Prompt({ value, placeholder, count, focused, onChange, className }: Props) {
+    return (
+        <div data-component="prompt" className={promptVariants({ focused, className })}>
+            <span className={styles.glyph}>»</span>
+            <input
+                className={styles.input}
+                type="text"
+                value={value ?? ""}
+                placeholder={placeholder ?? "search theme names — /"}
+                onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+                readOnly={!onChange}
+            />
+            {value ? <span className={styles.caret} /> : null}
+            {count ? <span className={styles.count}>{count}</span> : null}
+        </div>
+    );
+}

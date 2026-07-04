@@ -1,15 +1,21 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Badge } from "../../components/primitives/badge/badge.tsx";
 import { Button } from "../../components/primitives/button/button.tsx";
+import { Chip } from "../../components/primitives/chip/chip.tsx";
 import { CodePreview } from "../../components/primitives/code-preview/code-preview.tsx";
 import { CodeToken } from "../../components/primitives/code-preview/code-token.tsx";
 import { KeyHint } from "../../components/primitives/key-hint/key-hint.tsx";
 import { KVRow } from "../../components/primitives/kv-row/kv-row.tsx";
 import { ListRow } from "../../components/primitives/list-row/list-row.tsx";
 import { ProgressBar } from "../../components/primitives/progress-bar/progress-bar.tsx";
+import { Prompt } from "../../components/primitives/prompt/prompt.tsx";
+import { RadioGroup } from "../../components/primitives/radio-group/radio-group.tsx";
 import { SectionHeader } from "../../components/primitives/section-header/section-header.tsx";
 import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx";
 import { Swatch } from "../../components/primitives/swatch/swatch.tsx";
+import { TextInput } from "../../components/primitives/text-input/text-input.tsx";
+import { Toggle } from "../../components/primitives/toggle/toggle.tsx";
 import type { UpdateResult } from "../../lib/updaters.ts";
 
 const KOYO_YORU_PALETTE = ["#C46A5A", "#D9A662", "#8FA36B", "#A97BA2"];
@@ -39,6 +45,12 @@ export const Route = createFileRoute("/dev/primitives")({
 });
 
 function Page() {
+    const [promptValue, setPromptValue] = useState("koyo");
+    const [textInputValue, setTextInputValue] = useState("^theme = .*$");
+    const [toggleOn, setToggleOn] = useState(true);
+    const [radioValue, setRadioValue] = useState("keep");
+    const [collectionValue, setCollectionValue] = useState("all");
+
     return (
         <div>
             <h1
@@ -306,6 +318,159 @@ function Page() {
                         <CodeToken color="#8FA36B">"~/.config"</CodeToken>
                         <CodeToken color="#D9CBAE">);</CodeToken>
                     </CodePreview>
+                </div>
+            </section>
+
+            <section style={{ marginBottom: 32 }}>
+                <h2
+                    style={{
+                        fontFamily: "var(--ba-font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--ba-color-fg-subtle)",
+                        marginBottom: 12,
+                    }}
+                >
+                    Prompt — block-cursor command/filter input
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 420 }}>
+                    <Prompt placeholder="search theme names — /" />
+                    <Prompt
+                        value={promptValue}
+                        onChange={setPromptValue}
+                        count="2/24"
+                        focused
+                    />
+                </div>
+            </section>
+
+            <section style={{ marginBottom: 32 }}>
+                <h2
+                    style={{
+                        fontFamily: "var(--ba-font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--ba-color-fg-subtle)",
+                        marginBottom: 12,
+                    }}
+                >
+                    TextInput — datasheet text field
+                </h2>
+                <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                        <TextInput
+                            label="CONFIG_PATH"
+                            value="~/.config/ghostty/config"
+                        />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                        <TextInput
+                            label="THEMES_PATH"
+                            optional
+                            placeholder="optional — leave empty to skip"
+                        />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                        <TextInput
+                            label="MATCH_PATTERN"
+                            value={textInputValue}
+                            onChange={setTextInputValue}
+                            editing
+                            hint="⏎ SAVE · esc REVERT"
+                        />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                        <TextInput
+                            label="LOCKED_PATH"
+                            value="/usr/local/etc/locked"
+                            disabled
+                        />
+                    </div>
+                </div>
+            </section>
+
+            <section style={{ marginBottom: 32 }}>
+                <h2
+                    style={{
+                        fontFamily: "var(--ba-font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--ba-color-fg-subtle)",
+                        marginBottom: 12,
+                    }}
+                >
+                    Toggle — square-knob switch
+                </h2>
+                <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+                    <Toggle on={toggleOn} onChange={() => setToggleOn((v) => !v)} />
+                    <Toggle on={false} />
+                    <Toggle on disabled />
+                </div>
+            </section>
+
+            <section style={{ marginBottom: 32 }}>
+                <h2
+                    style={{
+                        fontFamily: "var(--ba-font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--ba-color-fg-subtle)",
+                        marginBottom: 12,
+                    }}
+                >
+                    RadioGroup — segmented single-choice control
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    <RadioGroup
+                        name="apply-mode"
+                        options={[
+                            { value: "keep", label: "KEEP + REPORT" },
+                            { value: "rollback", label: "ROLL BACK" },
+                        ]}
+                        value={radioValue}
+                        onChange={setRadioValue}
+                    />
+                    <RadioGroup
+                        name="collection"
+                        options={[
+                            { value: "all", label: "ALL", hotkey: "1" },
+                            { value: "jpn", label: "JPN", hotkey: "2" },
+                            { value: "terra", label: "TERRA", hotkey: "3" },
+                            { value: "mono", label: "MONO", hotkey: "4", disabled: true },
+                        ]}
+                        value={collectionValue}
+                        onChange={setCollectionValue}
+                    />
+                </div>
+            </section>
+
+            <section style={{ marginBottom: 32 }}>
+                <h2
+                    style={{
+                        fontFamily: "var(--ba-font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--ba-color-fg-subtle)",
+                        marginBottom: 12,
+                    }}
+                >
+                    Chip — filter chip
+                </h2>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                    <Chip>JPN</Chip>
+                    <Chip active>ALL</Chip>
+                    <Chip hotkey="3">JPN</Chip>
+                    <Chip active focused hotkey="4">TERRA</Chip>
                 </div>
             </section>
         </div>
