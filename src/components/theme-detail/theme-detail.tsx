@@ -91,21 +91,6 @@ export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
             </div>
 
             <div className={styles.section}>
-                <SectionHeader>ACCENTS · {accents.length}</SectionHeader>
-                <div className={styles.bands}>
-                    {accents.map((accent) => (
-                        <Swatch
-                            key={accent.label}
-                            variant="band"
-                            color={accent.color}
-                            label={accent.label}
-                            tag={accent.tag}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            <div className={styles.section}>
                 <SectionHeader>PRIMARIES · {PRIMARY_KEYS.length}</SectionHeader>
                 <div className={styles.primariesGrid}>
                     {PRIMARY_KEYS.map((key) => (
@@ -119,6 +104,21 @@ export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
                 <div className={styles.paletteGrid}>
                     {PALETTE_KEYS.map((key) => (
                         <Swatch key={key} variant="cell" color={palette[key]} />
+                    ))}
+                </div>
+            </div>
+
+            <div className={styles.section}>
+                <SectionHeader>ACCENTS · {accents.length}</SectionHeader>
+                <div className={styles.bands}>
+                    {accents.map((accent) => (
+                        <Swatch
+                            key={accent.label}
+                            variant="band"
+                            color={accent.color}
+                            label={accent.label}
+                            tag={accent.tag}
+                        />
                     ))}
                 </div>
             </div>
