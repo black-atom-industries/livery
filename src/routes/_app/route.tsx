@@ -3,7 +3,7 @@ import { useStore } from "@tanstack/react-store";
 import denoConfig from "../../../deno.json" with { type: "json" };
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
-import { ProgressBar } from "../../components/progress-bar/index.ts";
+import { ProgressBar } from "../../components/primitives/progress-bar/progress-bar.tsx";
 import { themeToStyleSheet } from "../../lib/tokens.ts";
 import { appStore } from "../../store/app.ts";
 import styles from "./route.module.css";

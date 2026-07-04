@@ -1,7 +1,7 @@
 import { cva } from "cva";
 import { Progress } from "@base-ui/react/progress";
-import type { UpdateResult } from "../../lib/updaters.ts";
-import { getProgressState } from "../../lib/progress.ts";
+import type { UpdateResult } from "../../../lib/updaters.ts";
+import { getProgressState } from "../../../lib/progress.ts";
 import styles from "./progress-bar.module.css";
 
 const indicatorVariants = cva({
@@ -20,6 +20,13 @@ interface ProgressBarProps {
     results: UpdateResult[];
 }
 
+/**
+ * 3px determinate progress bar — width-only fill transition, intent colors
+ * via `--ba-color-fg-*`. No indeterminate spinners exist in this system.
+ * Driven by real updater state via `getProgressState`.
+ *
+ * Spec: docs/design-system/reference/components/display/ProgressBar.jsx
+ */
 export function ProgressBar({ results }: ProgressBarProps) {
     const { value, completedCount, total, currentLabel, status, totalDurationMs } =
         getProgressState(results);

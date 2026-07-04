@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { themeMap } from "@black-atom/core";
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
-import { ProgressBar } from "../../components/progress-bar/index.ts";
+import { ProgressBar } from "../../components/primitives/progress-bar/progress-bar.tsx";
 import { ThemeList } from "../../components/theme-list/index.ts";
 import { ThemeDetail } from "../../components/theme-detail/index.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";

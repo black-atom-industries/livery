@@ -1,13 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Badge } from "../../components/primitives/badge/badge.tsx";
 import { Button } from "../../components/primitives/button/button.tsx";
+import { CodePreview } from "../../components/primitives/code-preview/code-preview.tsx";
+import { CodeToken } from "../../components/primitives/code-preview/code-token.tsx";
 import { KeyHint } from "../../components/primitives/key-hint/key-hint.tsx";
 import { KVRow } from "../../components/primitives/kv-row/kv-row.tsx";
+import { ListRow } from "../../components/primitives/list-row/list-row.tsx";
+import { ProgressBar } from "../../components/primitives/progress-bar/progress-bar.tsx";
 import { SectionHeader } from "../../components/primitives/section-header/section-header.tsx";
 import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx";
 import { Swatch } from "../../components/primitives/swatch/swatch.tsx";
+import type { UpdateResult } from "../../lib/updaters.ts";
 
 const KOYO_YORU_PALETTE = ["#C46A5A", "#D9A662", "#8FA36B", "#A97BA2"];
+const KOYO_HIRU_PALETTE = ["#B0543F", "#7A8B4C", "#B08D3E", "#5F7A94"];
+
+const PROGRESS_FIXTURES: Record<string, UpdateResult[]> = {
+    idle: [],
+    running: [
+        { app: "neovim", status: "running", message: null, duration_ms: null },
+        { app: "alacritty", status: "pending", message: null, duration_ms: null },
+        { app: "tmux", status: "pending", message: null, duration_ms: null },
+    ],
+    done: [
+        { app: "neovim", status: "done", message: null, duration_ms: 42 },
+        { app: "alacritty", status: "done", message: null, duration_ms: 18 },
+        { app: "tmux", status: "done", message: null, duration_ms: 9 },
+    ],
+    error: [
+        { app: "neovim", status: "done", message: null, duration_ms: 42 },
+        { app: "alacritty", status: "error", message: "config file locked", duration_ms: 12 },
+        { app: "tmux", status: "done", message: null, duration_ms: 9 },
+    ],
+};
 
 export const Route = createFileRoute("/dev/primitives")({
     component: Page,
@@ -204,6 +229,83 @@ function Page() {
                     <SectionHeader>PRIMARIES · 12</SectionHeader>
                     <SectionHeader meta="REV 03">SPEC</SectionHeader>
                     <SectionHeader>JPN — JAPAN (4)</SectionHeader>
+                </div>
+            </section>
+
+            <section style={{ marginBottom: 32 }}>
+                <h2
+                    style={{
+                        fontFamily: "var(--ba-font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--ba-color-fg-subtle)",
+                        marginBottom: 12,
+                    }}
+                >
+                    ListRow — keyboard-list row with palette pips
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", maxWidth: 420 }}>
+                    <ListRow name="Koyo Hiru" pips={KOYO_HIRU_PALETTE} appearance="L" />
+                    <ListRow selected name="Koyo Yoru" pips={KOYO_YORU_PALETTE} appearance="D" />
+                    <ListRow name="Warm Precision" pips={KOYO_YORU_PALETTE} appearance="D" />
+                    <ListRow dimmed name="Dark Dimmed" appearance="D" />
+                </div>
+            </section>
+
+            <section style={{ marginBottom: 32 }}>
+                <h2
+                    style={{
+                        fontFamily: "var(--ba-font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--ba-color-fg-subtle)",
+                        marginBottom: 12,
+                    }}
+                >
+                    ProgressBar — 3px determinate bar
+                </h2>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 16,
+                        maxWidth: 420,
+                    }}
+                >
+                    {(Object.keys(PROGRESS_FIXTURES) as (keyof typeof PROGRESS_FIXTURES)[]).map((
+                        key,
+                    ) => <ProgressBar key={key} results={PROGRESS_FIXTURES[key]} />)}
+                </div>
+            </section>
+
+            <section style={{ marginBottom: 32 }}>
+                <h2
+                    style={{
+                        fontFamily: "var(--ba-font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--ba-color-fg-subtle)",
+                        marginBottom: 12,
+                    }}
+                >
+                    CodePreview — recessed code sample
+                </h2>
+                <div style={{ maxWidth: 420 }}>
+                    <CodePreview>
+                        <CodeToken color="#6B5D4C">{`// adapters/ghostty.ts`}</CodeToken> <br />
+                        <CodeToken color="#C46A5A">const</CodeToken> path{" "}
+                        <CodeToken color="#D9CBAE">=</CodeToken>{" "}
+                        <CodeToken color="#7E93B0">expand</CodeToken>
+                        <CodeToken color="#D9CBAE">(</CodeToken>
+                        <CodeToken color="#8FA36B">"~/.config"</CodeToken>
+                        <CodeToken color="#D9CBAE">);</CodeToken>
+                    </CodePreview>
                 </div>
             </section>
         </div>
