@@ -21,6 +21,8 @@ type Props = VariantProps<typeof promptVariants> & {
     /** Match counter, e.g. "2/24". */
     count?: string;
     onChange?: (value: string) => void;
+    /** Ref to the underlying input — e.g. to focus it from a `/` hotkey. */
+    inputRef?: React.Ref<HTMLInputElement>;
     className?: string;
 };
 
@@ -32,11 +34,14 @@ type Props = VariantProps<typeof promptVariants> & {
  *
  * Spec: docs/design-system/reference/components/forms/Prompt.jsx
  */
-export function Prompt({ value, placeholder, count, focused, onChange, className }: Props) {
+export function Prompt(
+    { value, placeholder, count, focused, onChange, inputRef, className }: Props,
+) {
     return (
         <div data-component="prompt" className={promptVariants({ focused, className })}>
             <span className={styles.glyph}>»</span>
             <input
+                ref={inputRef}
                 className={styles.input}
                 type="text"
                 value={value ?? ""}

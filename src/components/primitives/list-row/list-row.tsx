@@ -28,6 +28,8 @@ type Props = VariantProps<typeof listRowVariants> & {
     /** Appearance letter: "D" | "L". */
     appearance?: string;
     onClick?: () => void;
+    /** Root element ref — e.g. to scroll the selected row into view. */
+    rootRef?: React.Ref<HTMLDivElement>;
     className?: string;
 };
 
@@ -40,7 +42,9 @@ type Props = VariantProps<typeof listRowVariants> & {
  *
  * Spec: docs/design-system/reference/components/display/ListRow.jsx
  */
-export function ListRow({ selected, dimmed, name, pips, appearance, onClick, className }: Props) {
+export function ListRow(
+    { selected, dimmed, name, pips, appearance, onClick, rootRef, className }: Props,
+) {
     return (
         <div
             data-component="list-row"
@@ -48,6 +52,7 @@ export function ListRow({ selected, dimmed, name, pips, appearance, onClick, cla
             aria-selected={selected}
             tabIndex={0}
             onClick={onClick}
+            ref={rootRef}
             className={listRowVariants({ selected, dimmed, className })}
         >
             <span className={styles.cursor}>{selected ? "›" : ""}</span>

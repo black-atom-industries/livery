@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useHotkey } from "@tanstack/react-hotkeys";
 import { Typo } from "../../../components/typo/index.ts";
 import { useConfig } from "../../../queries/use-config.ts";
 import { SectionHeader } from "../../../components/primitives/section-header/section-header.tsx";
@@ -17,7 +18,11 @@ export const Route = createFileRoute("/_app/settings")({
 
 function SettingsRoute() {
     const config = useConfig();
+    const navigate = useNavigate();
     const [expandedApp, setExpandedApp] = useState<AppName | null>(null);
+
+    useHotkey("Escape", () => navigate({ to: "/" }));
+    useHotkey("S", () => navigate({ to: "/" }));
 
     if (config.query.isPending) {
         return (

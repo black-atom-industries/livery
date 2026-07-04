@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useHotkey, useHotkeySequence } from "@tanstack/react-hotkeys";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useStore } from "@tanstack/react-store";
 import { collectionOrder, type ThemeCollectionKey, themeMap } from "@black-atom/core";
 import { appStore } from "../../store/app.ts";
@@ -75,6 +76,24 @@ function Component() {
     useHotkeySequence(["G", "G"], () => setPickedIndex(0));
     useHotkey("Shift+G", () => setPickedIndex(themes.length - 1));
 
+    // Search, filters, settings, quit — the footer's advertised vocabulary
+    const promptInputRef = useRef<HTMLInputElement>(null);
+    const chipsRef = useRef<HTMLDivElement>(null);
+
+    useHotkey("/", (event) => {
+        event.preventDefault();
+        promptInputRef.current?.focus();
+    });
+    useHotkey("F", () => {
+        chipsRef.current?.querySelector("button")?.focus();
+    });
+    useHotkey("S", () => navigate({ to: "/settings" }));
+    useHotkey("Q", () => {
+        // Only meaningful inside the Tauri shell; a plain browser has no window handle.
+        getCurrentWindow().close().catch(() => {});
+    });
+    useHotkey("Escape", () => setQuery(""));
+
     const handleApplyTheme = async () => {
         if (phase === "applying") return;
         if (!config.query.data) return;
@@ -125,9 +144,20 @@ function Component() {
         <App.SplitPanel
             left={
                 <>
-                    <div className={styles.prompt}>
+                    <div
+                        className={styles.prompt}
+                        onKeyDown={(event) => {
+                            // Input filtering keeps global hotkeys out of the
+                            // input — Escape inside it is handled here.
+                            if (event.key === "Escape") {
+                                setQuery("");
+                                promptInputRef.current?.blur();
+                            }
+                        }}
+                    >
                         <Prompt
                             value={query}
+                            inputRef={promptInputRef}
                             onChange={(value) => {
                                 setQuery(value);
                                 setPickedIndex(0);
@@ -135,7 +165,7 @@ function Component() {
                             count={`${themes.length}/${allThemes.length}`}
                         />
                     </div>
-                    <div className={styles.chips}>
+                    <div className={styles.chips} ref={chipsRef}>
                         <div className={styles.chipGroup}>
                             <Chip
                                 active={collectionFilter === "all"}
@@ -175,11 +205,13 @@ function Component() {
                             </Chip>
                         </div>
                     </div>
-                    <ThemeList
-                        groups={groups}
-                        selectedIndex={clampedIndex}
-                        onSelect={setPickedIndex}
-                    />
+                    <div className={styles.list}>
+                        <ThemeList
+                            groups={groups}
+                            selectedIndex={clampedIndex}
+                            onSelect={setPickedIndex}
+                        />
+                    </div>
                 </>
             }
             right={

@@ -21,3 +21,9 @@
     height: 16px;
     background: var(--ba-color-border-default);
 }
+
+.list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}

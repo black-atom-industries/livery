@@ -18,14 +18,19 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
                 const rows = group.themes.map((theme) => {
                     const index = flatIndex++;
 
+                    const isSelected = index === selectedIndex;
+
                     return (
                         <ListRow
                             key={theme.meta.key}
-                            selected={index === selectedIndex}
+                            selected={isSelected}
                             name={theme.meta.name}
                             pips={paletteAccentPips(theme.palette)}
                             appearance={theme.meta.appearance === "dark" ? "D" : "L"}
                             onClick={() => onSelect(index)}
+                            rootRef={isSelected
+                                ? (el) => el?.scrollIntoView({ block: "nearest" })
+                                : undefined}
                         />
                     );
                 });

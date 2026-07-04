@@ -11,7 +11,10 @@
 }
 
 .left {
-    overflow-y: auto;
+    /* The rail itself never scrolls — a child (the theme list) owns its
+       own scroll region so prompt/filter chips stay pinned above it. */
+    overflow: hidden;
+    min-height: 0;
     border-right: var(--ba-border);
     padding: var(--ba-size-4) 0;
     display: flex;
