@@ -21,8 +21,6 @@ export const Route = createFileRoute("/_app/")({
     component: Component,
 });
 
-type AppearanceFilter = "all" | "dark" | "light";
-
 function Component() {
     const config = useConfig();
     const navigate = useNavigate();
@@ -34,23 +32,35 @@ function Component() {
     const phase = useStore(appStore, (s) => s.phase);
 
     const [query, setQuery] = useState("");
-    const [collectionFilter, setCollectionFilter] = useState<ThemeCollectionKey | "all">("all");
-    const [appearanceFilter, setAppearanceFilter] = useState<AppearanceFilter>("all");
+    // Filter sets — empty set = no filter (ALL).
+    const [collectionFilter, setCollectionFilter] = useState<ReadonlySet<ThemeCollectionKey>>(
+        new Set(),
+    );
+    const [appearanceFilter, setAppearanceFilter] = useState<ReadonlySet<"dark" | "light">>(
+        new Set(),
+    );
+
+    function toggleInSet<T>(set: ReadonlySet<T>, value: T): Set<T> {
+        const next = new Set(set);
+        if (next.has(value)) next.delete(value);
+        else next.add(value);
+        return next;
+    }
 
     const groups = useMemo(() => {
         const normalizedQuery = query.trim().toLowerCase();
 
         return allGroups
             .filter((group) =>
-                collectionFilter === "all" || group.collectionKey === collectionFilter
+                collectionFilter.size === 0 || collectionFilter.has(group.collectionKey)
             )
             .map((group) => ({
                 ...group,
                 themes: group.themes.filter((theme) => {
                     const matchesQuery = normalizedQuery === "" ||
                         theme.meta.name.toLowerCase().includes(normalizedQuery);
-                    const matchesAppearance = appearanceFilter === "all" ||
-                        theme.meta.appearance === appearanceFilter;
+                    const matchesAppearance = appearanceFilter.size === 0 ||
+                        appearanceFilter.has(theme.meta.appearance);
                     return matchesQuery && matchesAppearance;
                 }),
             }))
@@ -69,28 +79,28 @@ function Component() {
     const filterChips = useMemo(() => [
         {
             label: "ALL",
-            isActive: collectionFilter === "all",
-            toggle: () => setCollectionFilter("all"),
+            isActive: collectionFilter.size === 0,
+            toggle: () => setCollectionFilter(new Set()),
         },
         ...collectionOrder.map((key) => ({
             label: key.toUpperCase(),
-            isActive: collectionFilter === key,
-            toggle: () => setCollectionFilter(key),
+            isActive: collectionFilter.has(key),
+            toggle: () => setCollectionFilter((set) => toggleInSet(set, key)),
         })),
         {
             label: "\u25d0 ALL",
-            isActive: appearanceFilter === "all",
-            toggle: () => setAppearanceFilter("all"),
+            isActive: appearanceFilter.size === 0,
+            toggle: () => setAppearanceFilter(new Set()),
         },
         {
             label: "\u25cf DARK",
-            isActive: appearanceFilter === "dark",
-            toggle: () => setAppearanceFilter("dark"),
+            isActive: appearanceFilter.has("dark"),
+            toggle: () => setAppearanceFilter((set) => toggleInSet(set, "dark")),
         },
         {
             label: "\u25cb LIGHT",
-            isActive: appearanceFilter === "light",
-            toggle: () => setAppearanceFilter("light"),
+            isActive: appearanceFilter.has("light"),
+            toggle: () => setAppearanceFilter((set) => toggleInSet(set, "light")),
         },
     ], [collectionFilter, appearanceFilter]);
     const collectionChips = filterChips.slice(0, collectionOrder.length + 1);
@@ -175,7 +185,10 @@ function Component() {
 
     useHotkey("Enter", () => {
         if (filterCursor !== null) {
-            filterChips[filterCursor]?.toggle();
+            // Like the search bar: Enter hands key control back to the
+            // list, cursor on the first match. Space toggles chips.
+            setFilterCursor(null);
+            setPickedIndex(0);
             return;
         }
         handleApplyTheme();
