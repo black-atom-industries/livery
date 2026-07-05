@@ -27,14 +27,71 @@ pub fn update(
         return UpdateResult::error(app_str, e);
     }
 
-    if let Err(msg) = reload(ctx.theme_key, max_sockets) {
-        log::warn!("{msg}");
-        return UpdateResult::skipped(
-            app_str,
-            format!("Config patched; live reload failed: {msg}"),
-        );
+    match reload(ctx.theme_key, max_sockets) {
+        Err(msg) => {
+            log::warn!("{msg}");
+            UpdateResult::skipped(
+                app_str,
+                format!("Config patched; live reload failed: {msg}"),
+            )
+        }
+        Ok(summary) if !summary.failures.is_empty() => {
+            let msg = reload_failure_message(&summary);
+            log::warn!("{msg}");
+            UpdateResult::skipped(app_str, format!("Config patched; {msg}"))
+        }
+        Ok(_) => UpdateResult::done(app_str),
     }
-    UpdateResult::done(app_str)
+}
+
+/// Per-socket reload outcome. `stale` sockets (dead leftovers, connection
+/// refused) stay quiet; `failures` are live instances that answered but
+/// could not apply the colorscheme — those must surface as degraded.
+struct ReloadSummary {
+    sent: u32,
+    stale: u32,
+    /// (socket file name, first stderr line) per live-but-failed send.
+    failures: Vec<(String, String)>,
+}
+
+enum SendOutcome {
+    Sent,
+    Stale,
+    Failed(String),
+}
+
+/// Classify one `nvim --server … --remote-expr` result. E247 means the
+/// socket is a dead leftover (quiet); any other non-zero exit is a live
+/// instance that refused the colorscheme — report it, never swallow it.
+fn classify_send(output: &std::process::Output) -> SendOutcome {
+    if output.status.success() {
+        return SendOutcome::Sent;
+    }
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    if stderr.contains("E247") || stderr.contains("Failed to connect") {
+        return SendOutcome::Stale;
+    }
+    let reason = stderr
+        .lines()
+        .find(|line| !line.trim().is_empty())
+        .unwrap_or("unknown error")
+        .trim()
+        .to_string();
+    SendOutcome::Failed(reason)
+}
+
+/// One-line degraded message: counts + the first per-socket reason.
+fn reload_failure_message(summary: &ReloadSummary) -> String {
+    let live = summary.sent + summary.failures.len() as u32;
+    let (socket, reason) = &summary.failures[0];
+    let more = match summary.failures.len() {
+        0 | 1 => String::new(),
+        n => format!(" (+{} more)", n - 1),
+    };
+    format!(
+        "reload failed on {}/{live} live nvim instances — {socket}: {reason}{more}",
+        summary.failures.len(),
+    )
 }
 
 /// Validate that a theme key only contains safe characters (alphanumeric, hyphens, underscores).
@@ -105,11 +162,13 @@ fn find_nvim_sockets(tmpdir: &Path) -> Vec<PathBuf> {
     sockets
 }
 
-/// Reload all running Neovim instances by sending :colorscheme via server sockets.
-/// Non-zero exit from nvim --server is fine — means that socket is stale.
-/// Returns Err with a message if reload could not be attempted (e.g., invalid theme key).
-/// No sockets found is not an error — nvim will pick up the theme on next open.
-fn reload(theme_key: &str, max_sockets: Option<usize>) -> Result<(), String> {
+/// Reload all running Neovim instances via `--remote-expr execute("colorscheme …")`.
+/// remote-expr (unlike remote-send) never types into an insert-mode buffer,
+/// leaves the user's mode untouched, and reports whether the colorscheme
+/// actually applied — E185 from a live instance comes back as a failure.
+/// Returns Err only when reload could not be attempted (invalid theme key).
+/// No sockets found is not an error — nvim picks the theme up on next launch.
+fn reload(theme_key: &str, max_sockets: Option<usize>) -> Result<ReloadSummary, String> {
     if !is_valid_theme_key(theme_key) {
         return Err(format!("Invalid theme key for nvim reload: {theme_key}"));
     }
@@ -122,42 +181,43 @@ fn reload(theme_key: &str, max_sockets: Option<usize>) -> Result<(), String> {
 
     if sockets.is_empty() {
         log::info!("No nvim sockets found — will apply on next launch");
-        return Ok(());
+        return Ok(ReloadSummary {
+            sent: 0,
+            stale: 0,
+            failures: Vec::new(),
+        });
     }
 
-    let cmd = format!(":colorscheme {}<CR>", theme_key);
+    // theme_key is validated above — safe inside the quoted expr.
+    let expr = format!(r#"execute("colorscheme {theme_key}")"#);
     let total = sockets.len();
 
     // Send to all sockets in parallel — each is an independent subprocess
-    let counts: Vec<_> = std::thread::scope(|s| {
+    let outcomes: Vec<(String, SendOutcome)> = std::thread::scope(|s| {
         let handles: Vec<_> = sockets
             .iter()
             .map(|socket_path| {
-                let cmd = &cmd;
+                let expr = &expr;
                 s.spawn(move || {
+                    let socket_name = socket_path
+                        .file_name()
+                        .map(|n| n.to_string_lossy().to_string())
+                        .unwrap_or_else(|| socket_path.display().to_string());
+
                     let result = std::process::Command::new("nvim")
                         .args([
                             "--server",
                             &socket_path.to_string_lossy(),
-                            "--remote-send",
-                            cmd,
+                            "--remote-expr",
+                            expr,
                         ])
                         .output();
 
-                    match result {
-                        Ok(output) if !output.status.success() => {
-                            log::debug!("Stale nvim socket: {}", socket_path.display());
-                            (0u32, 1u32, 0u32) // (sent, stale, failed)
-                        }
-                        Err(e) => {
-                            log::warn!("Failed to send to nvim socket: {e}");
-                            (0, 0, 1)
-                        }
-                        _ => {
-                            log::debug!("Sent colorscheme to {}", socket_path.display());
-                            (1, 0, 0)
-                        }
-                    }
+                    let outcome = match result {
+                        Ok(output) => classify_send(&output),
+                        Err(e) => SendOutcome::Failed(format!("could not spawn nvim: {e}")),
+                    };
+                    (socket_name, outcome)
                 })
             })
             .collect();
@@ -165,30 +225,29 @@ fn reload(theme_key: &str, max_sockets: Option<usize>) -> Result<(), String> {
         handles.into_iter().map(|h| h.join().unwrap()).collect()
     });
 
-    let (sent, stale, failed) = counts
-        .iter()
-        .fold((0u32, 0u32, 0u32), |(s, st, f), &(ds, dst, df)| {
-            (s + ds, st + dst, f + df)
-        });
+    let mut summary = ReloadSummary {
+        sent: 0,
+        stale: 0,
+        failures: Vec::new(),
+    };
+    for (socket_name, outcome) in outcomes {
+        match outcome {
+            SendOutcome::Sent => summary.sent += 1,
+            SendOutcome::Stale => summary.stale += 1,
+            SendOutcome::Failed(reason) => summary.failures.push((socket_name, reason)),
+        }
+    }
 
     log::info!(
-        "Sent colorscheme {} to {}/{} nvim instances{}{}",
+        "Applied colorscheme {} on {}/{} nvim sockets ({} stale, {} failed)",
         theme_key,
-        sent,
+        summary.sent,
         total,
-        if stale > 0 {
-            format!(" ({stale} stale)")
-        } else {
-            String::new()
-        },
-        if failed > 0 {
-            format!(" ({failed} failed)")
-        } else {
-            String::new()
-        },
+        summary.stale,
+        summary.failures.len(),
     );
 
-    Ok(())
+    Ok(summary)
 }
 
 #[cfg(test)]
@@ -209,5 +268,65 @@ mod tests {
         assert!(!is_nvim_socket_name("nvim..0"));
         assert!(!is_nvim_socket_name(".12345.0"));
         assert!(!is_nvim_socket_name("nvim.12345.abc"));
+    }
+
+    fn fake_output(code: i32, stderr: &str) -> std::process::Output {
+        use std::os::unix::process::ExitStatusExt;
+        std::process::Output {
+            status: std::process::ExitStatus::from_raw(code << 8),
+            stdout: Vec::new(),
+            stderr: stderr.as_bytes().to_vec(),
+        }
+    }
+
+    #[test]
+    fn test_classify_send_success() {
+        assert!(matches!(
+            classify_send(&fake_output(0, "")),
+            SendOutcome::Sent
+        ));
+    }
+
+    #[test]
+    fn test_classify_send_dead_socket_is_stale() {
+        let stderr =
+            "E247: Failed to connect to '/tmp/nvim.sock': connection refused. Send expression failed.";
+        assert!(matches!(
+            classify_send(&fake_output(2, stderr)),
+            SendOutcome::Stale
+        ));
+    }
+
+    #[test]
+    fn test_classify_send_live_failure_carries_reason() {
+        let stderr =
+            "Lua: Vim(colorscheme):E185: Cannot find color scheme 'nope'\nstack traceback:";
+        match classify_send(&fake_output(2, stderr)) {
+            SendOutcome::Failed(reason) => {
+                assert!(reason.contains("E185"), "reason was: {reason}");
+                assert!(!reason.contains("traceback"));
+            }
+            _ => panic!("expected Failed"),
+        }
+    }
+
+    #[test]
+    fn test_reload_failure_message_counts_and_first_reason() {
+        let summary = ReloadSummary {
+            sent: 1,
+            stale: 2,
+            failures: vec![
+                (
+                    "nvim-edit.3715.0".to_string(),
+                    "E185: Cannot find color scheme".to_string(),
+                ),
+                ("nvim.99.0".to_string(), "whatever".to_string()),
+            ],
+        };
+        let msg = reload_failure_message(&summary);
+        assert_eq!(
+            msg,
+            "reload failed on 2/3 live nvim instances — nvim-edit.3715.0: E185: Cannot find color scheme (+1 more)"
+        );
     }
 }
