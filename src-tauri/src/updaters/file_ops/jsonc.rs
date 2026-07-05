@@ -36,7 +36,7 @@ pub fn patch_jsonc_file(path: String, key_path: &str, value: &str) -> Result<(),
     // Navigate key path (e.g., "theme" or "theme.dark")
     let parts: Vec<&str> = key_path.split('.').collect();
 
-    if parts.first().map_or(true, |p| p.is_empty()) {
+    if parts.first().is_none_or(|p| p.is_empty()) {
         return Err("Empty key path".to_string());
     }
 
