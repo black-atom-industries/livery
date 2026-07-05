@@ -131,7 +131,7 @@ export function ApplyRail({
                 rows never flash on mount or in settled/idle display. */
             }
             <div className={styles.rows} data-live={mode === "active"}>
-                {results.map((result) => (
+                {results.map((result, index) => (
                     <AdapterStatusRow
                         key={result.app}
                         name={result.app}
@@ -142,6 +142,7 @@ export function ApplyRail({
                         expanded={expandedApp === result.app}
                         onToggle={onToggleRow ? () => onToggleRow(result.app) : undefined}
                         onRetry={onRetryFailed}
+                        style={{ "--i": index } as React.CSSProperties}
                     />
                 ))}
             </div>

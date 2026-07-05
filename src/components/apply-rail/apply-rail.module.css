@@ -69,32 +69,33 @@
     background-color: var(--ba-color-bg-hint);
 }
 
-/* Instrument ballistics: the fill advances like a galvanometer needle —
-   one ~5% overshoot, quick settle, no oscillation. Spring-derived but
-   technical; deliberately NOT a bounce (design review 2026-07-05). */
+/* Conveyor — while the pass runs, the unfilled track carries marching
+   45° hatching (industrial stripe, left → right). Honest: it shows the
+   machine running, never slows the data down. */
+.root[data-kind="running"] .track {
+    background-image: repeating-linear-gradient(
+        -45deg,
+        color-mix(in srgb, var(--ba-color-fg-hint) 35%, transparent) 0 4px,
+        transparent 4px 8px
+    );
+    animation: conveyor 700ms var(--ba-ease-linear) infinite;
+}
+
+@keyframes conveyor {
+    to {
+        /* one stripe period (8px along the 45° axis ≈ 11.31px horizontal) */
+        background-position: 11.31px 0;
+    }
+}
+
 .fill {
     position: relative;
     height: 100%;
     background: var(--ba-color-fg-positive);
-    transition: width 480ms
-        linear(
-            0,
-            0.093 2.8%,
-            0.316 6.5%,
-            0.568 10.5%,
-            0.785 14.6%,
-            0.936 18.8%,
-            1.028 23.5%,
-            1.056 29%,
-            1.05 35.5%,
-            1.027 44%,
-            1.007 55%,
-            1 70%,
-            1
-        );
+    transition: width var(--ba-duration-3) var(--ba-ease);
 }
 
-/* Scanhead — a cream leading edge on the needle while the pass runs. */
+/* Scanhead — a cream leading edge on the fill while the pass runs. */
 .root[data-kind="running"] .fill::after {
     content: "";
     position: absolute;
@@ -109,15 +110,18 @@
     background: var(--ba-color-fg-warn);
 }
 
-/* Resolve tick — a row flashes one surface tier as its verdict lands.
-   Cascades with the reveal cadence; scoped to a live pass via data-live. */
-.rows[data-live="true"] [data-status="ok"],
-.rows[data-live="true"] [data-status="warn"],
-.rows[data-live="true"] [data-status="error"] {
-    animation: resolve-tick var(--ba-duration-2) var(--ba-ease);
+/* Verdict cascade — the moment the pass resolves, a one-shot confirm
+   flash sweeps the rows top → bottom (25ms/row). Pure celebration layered
+   over instantly-visible data; gated to a live pass via data-live so
+   nothing flashes on mount or in settled display. */
+.root[data-kind="clean"] .rows[data-live="true"] [data-component="adapter-status-row"],
+.root[data-kind="degraded"] .rows[data-live="true"] [data-component="adapter-status-row"],
+.root[data-kind="error"] .rows[data-live="true"] [data-component="adapter-status-row"] {
+    animation: confirm-tick var(--ba-duration-2) var(--ba-ease);
+    animation-delay: calc(var(--i, 0) * 25ms);
 }
 
-@keyframes resolve-tick {
+@keyframes confirm-tick {
     from {
         background-color: var(--ba-color-bg-hint);
     }
@@ -126,7 +130,8 @@
     }
 }
 
-/* The running row's pip hard-blinks — terminal cursor, not a spinner. */
+/* The running row's pip hard-blinks — terminal cursor, not a spinner.
+   Only perceivable on slower adapters; costs nothing on fast ones. */
 .rows[data-live="true"] [data-status="running"] [data-component="status-pip"] {
     animation: cursor-blink 860ms step-end infinite;
 }
@@ -147,9 +152,10 @@
         transition: none;
     }
 
-    .rows[data-live="true"] [data-status="ok"],
-    .rows[data-live="true"] [data-status="warn"],
-    .rows[data-live="true"] [data-status="error"],
+    .root[data-kind="running"] .track,
+    .root[data-kind="clean"] .rows[data-live="true"] [data-component="adapter-status-row"],
+    .root[data-kind="degraded"] .rows[data-live="true"] [data-component="adapter-status-row"],
+    .root[data-kind="error"] .rows[data-live="true"] [data-component="adapter-status-row"],
     .rows[data-live="true"] [data-status="running"] [data-component="status-pip"] {
         animation: none;
     }

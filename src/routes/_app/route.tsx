@@ -9,7 +9,6 @@ import type { AppName } from "../../bindings.ts";
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
 import { ApplyRail } from "../../components/apply-rail/index.ts";
-import { usePacedResults } from "../../components/apply-rail/use-paced-results.ts";
 import { KeyHint } from "../../components/primitives/key-hint/key-hint.tsx";
 import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx";
 import { themeToStyleSheet } from "../../lib/tokens.ts";
@@ -55,10 +54,7 @@ function AppLayout() {
     const collectionCount = collectionOrder.length;
     const env = currentTheme.meta.appearance.toUpperCase();
 
-    // Everything the rail (and the settle beat) sees is the PACED view —
-    // rows reveal on a fixed scan cadence; retry logic keeps the real data.
-    const displayResults = usePacedResults(updaterResults, phase);
-    const summary = summarizeApply(displayResults);
+    const summary = summarizeApply(updaterResults);
     const railKeysActive = phase !== "picking" && !isSettings;
 
     // The rail is permanently docked. Idle (nothing applied yet) previews
@@ -79,7 +75,7 @@ function AppLayout() {
                 : [],
         [config.query.data],
     );
-    const railResults = displayResults.length > 0 ? displayResults : idleRows;
+    const railResults = updaterResults.length > 0 ? updaterResults : idleRows;
 
     // Rail cursor + expansion. The cursor follows the running row, then the
     // first fault, until j/k takes over; a new apply pass resets both.
@@ -94,17 +90,17 @@ function AppLayout() {
         }
     }
 
-    const runningIndex = displayResults.findIndex((r) => r.status === "running");
-    const firstFaultIndex = displayResults.findIndex(
+    const runningIndex = updaterResults.findIndex((r) => r.status === "running");
+    const firstFaultIndex = updaterResults.findIndex(
         (r) => r.status === "error" || (r.status === "skipped" && r.message),
     );
     const cursorIndex = manualCursor ?? (runningIndex !== -1 ? runningIndex : firstFaultIndex);
-    const cursorResult = cursorIndex >= 0 ? displayResults[cursorIndex] : undefined;
+    const cursorResult = cursorIndex >= 0 ? updaterResults[cursorIndex] : undefined;
 
     const moveRailCursor = (delta: number) => {
-        if (displayResults.length === 0) return;
-        const from = cursorIndex >= 0 ? cursorIndex : delta > 0 ? -1 : displayResults.length;
-        setManualCursor(Math.max(0, Math.min(displayResults.length - 1, from + delta)));
+        if (updaterResults.length === 0) return;
+        const from = cursorIndex >= 0 ? cursorIndex : delta > 0 ? -1 : updaterResults.length;
+        setManualCursor(Math.max(0, Math.min(updaterResults.length - 1, from + delta)));
     };
 
     const toggleCursoredRow = (app?: AppName) => {

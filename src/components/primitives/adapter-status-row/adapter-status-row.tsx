@@ -52,6 +52,8 @@ type Props = {
     /** Re-run only this adapter — the [ r RETRY FAILED ] actuator. */
     onRetry?: () => void;
     className?: string;
+    /** Per-instance CSS vars (e.g. `--i` for the rail's verdict cascade). */
+    style?: React.CSSProperties;
 };
 
 /**
@@ -75,6 +77,7 @@ export function AdapterStatusRow({
     onToggle,
     onRetry,
     className,
+    style,
 }: Props) {
     const duration = status === "ok" && durationMs != null ? `${durationMs}ms` : "—";
 
@@ -84,6 +87,7 @@ export function AdapterStatusRow({
                 data-component="adapter-status-row"
                 data-status={status}
                 className={adapterStatusRowVariants({ status, cursored, className })}
+                style={style}
                 onClick={status === "error" ? onToggle : undefined}
             >
                 <div className={styles.line}>
