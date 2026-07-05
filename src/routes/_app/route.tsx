@@ -1,17 +1,19 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { useMutationState } from "@tanstack/react-query";
 import { collectionOrder, themeMap } from "@black-atom/core";
 import denoConfig from "../../../deno.json" with { type: "json" };
+import type { AppName } from "../../bindings.ts";
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
-import { ApplyStrip } from "../../components/apply-strip/index.ts";
+import { ApplyRail } from "../../components/apply-rail/index.ts";
+import { Button } from "../../components/primitives/button/button.tsx";
 import { KeyHint } from "../../components/primitives/key-hint/key-hint.tsx";
 import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx";
 import { themeToStyleSheet } from "../../lib/tokens.ts";
-import { getFailedUpdaters, mergeUpdateResults } from "../../lib/progress.ts";
+import { getFailedUpdaters, mergeUpdateResults, summarizeApply } from "../../lib/progress.ts";
 import { applyTheme, createUpdaters, getEnabledApps } from "../../lib/updaters.ts";
 import { useConfig } from "../../queries/use-config.ts";
 import { appStore } from "../../store/app.ts";
@@ -48,6 +50,53 @@ function AppLayout() {
     const collectionCount = collectionOrder.length;
     const env = currentTheme.meta.appearance.toUpperCase();
 
+    const summary = summarizeApply(updaterResults);
+    const railOpen = phase !== "picking" && updaterResults.length > 0;
+    const railKeysActive = railOpen && !isSettings;
+
+    // Rail cursor + expansion. The cursor follows the running row, then the
+    // first fault, until j/k takes over; a new apply pass resets both.
+    const [manualCursor, setManualCursor] = useState<number | null>(null);
+    const [expandedApp, setExpandedApp] = useState<AppName | null>(null);
+    const [prevPhase, setPrevPhase] = useState(phase);
+    if (phase !== prevPhase) {
+        setPrevPhase(phase);
+        if (phase === "applying") {
+            setManualCursor(null);
+            setExpandedApp(null);
+        }
+    }
+
+    const runningIndex = updaterResults.findIndex((r) => r.status === "running");
+    const firstFaultIndex = updaterResults.findIndex(
+        (r) => r.status === "error" || (r.status === "skipped" && r.message),
+    );
+    const cursorIndex = manualCursor ?? (runningIndex !== -1 ? runningIndex : firstFaultIndex);
+    const cursorResult = cursorIndex >= 0 ? updaterResults[cursorIndex] : undefined;
+
+    const moveRailCursor = (delta: number) => {
+        if (updaterResults.length === 0) return;
+        const from = cursorIndex >= 0 ? cursorIndex : delta > 0 ? -1 : updaterResults.length;
+        setManualCursor(Math.max(0, Math.min(updaterResults.length - 1, from + delta)));
+    };
+
+    const toggleCursoredRow = (app?: AppName) => {
+        const target = app ?? (cursorResult?.status === "error" ? cursorResult.app : undefined);
+        if (!target) return;
+        setExpandedApp((current) => (current === target ? null : target));
+    };
+
+    const dismissRail = () => appStore.setState((s) => ({ ...s, phase: "picking" }));
+    const reopenRail = () => appStore.setState((s) => ({ ...s, phase: "done" }));
+
+    // Clean success holds the ■ APPLIED beat, then dismisses itself —
+    // nothing to acknowledge. Faults never leave on a timer.
+    useEffect(() => {
+        if (phase !== "done" || summary.kind !== "clean") return;
+        const beat = setTimeout(dismissRail, 1200);
+        return () => clearTimeout(beat);
+    }, [phase, summary.kind]);
+
     const handleRetryFailed = async () => {
         if (!config.query.data) return;
 
@@ -80,8 +129,37 @@ function AppLayout() {
     };
 
     useHotkey("R", handleRetryFailed);
+    useHotkey("J", () => railKeysActive && moveRailCursor(1));
+    useHotkey("K", () => railKeysActive && moveRailCursor(-1));
+    useHotkey("Enter", () => railKeysActive && toggleCursoredRow());
+    useHotkey("Escape", () => railKeysActive && phase !== "applying" && dismissRail());
 
-    const showApplyStrip = phase !== "picking" && updaterResults.length > 0;
+    // After dismissal the last result lives on as a footer pip; a fault pip
+    // carries [ a REOPEN RAIL ].
+    const lastResultVisible = phase === "picking" && updaterResults.length > 0 && !isSettings;
+    const lastResultFaulted = summary.kind === "error" || summary.kind === "degraded";
+    useHotkey("A", () => lastResultVisible && lastResultFaulted && reopenRail());
+
+    const themeName = currentTheme.meta.name.toUpperCase();
+
+    const resultPip = summary.kind === "clean"
+        ? (
+            <StatusPip intent="ok">
+                APPLIED — {themeName} · {summary.okCount}/{summary.total}
+                {summary.totalDurationMs != null ? ` · ${summary.totalDurationMs}MS` : ""}
+            </StatusPip>
+        )
+        : (
+            <span className={styles.faultPip}>
+                <StatusPip intent={summary.errorCount > 0 ? "error" : "warn"}>
+                    {summary.total - summary.errorCount}/{summary.total} APPLIED ·{" "}
+                    {summary.errorCount > 0
+                        ? `${summary.errorCount} ERROR`
+                        : `${summary.degradedCount} DEGRADED`}
+                </StatusPip>
+                <Button hotkey="a" intent="ghost" onClick={reopenRail}>REOPEN RAIL</Button>
+            </span>
+        );
 
     return (
         <>
@@ -96,17 +174,22 @@ function AppLayout() {
                     />
                 </header>
                 <main className={styles.main}>
-                    <Outlet />
-                </main>
-                {showApplyStrip && (
-                    <div className={styles.progress}>
-                        <ApplyStrip
-                            themeName={currentTheme.meta.name.toUpperCase()}
-                            results={updaterResults}
-                            onRetryFailed={handleRetryFailed}
-                        />
+                    <div className={styles.content}>
+                        <Outlet />
                     </div>
-                )}
+                    <aside className={styles.rail} data-open={railOpen}>
+                        {updaterResults.length > 0 && (
+                            <ApplyRail
+                                themeName={themeName}
+                                results={updaterResults}
+                                cursorApp={cursorResult?.app ?? null}
+                                expandedApp={expandedApp}
+                                onToggleRow={toggleCursoredRow}
+                                onRetryFailed={handleRetryFailed}
+                            />
+                        )}
+                    </aside>
+                </main>
                 <footer className={styles.footer}>
                     <AppFooter
                         hints={isSettings
@@ -133,6 +216,8 @@ function AppLayout() {
                             ? <StatusPip intent="running">SAVING…</StatusPip>
                             : isSettings && justSaved
                             ? <StatusPip intent="ok">SAVED</StatusPip>
+                            : lastResultVisible
+                            ? resultPip
                             : <StatusPip intent="ok">READY</StatusPip>}
                     />
                 </footer>

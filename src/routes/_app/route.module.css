@@ -17,14 +17,35 @@
 }
 
 .main {
+    display: flex;
     flex: 1;
     min-height: 0;
 }
 
-.progress {
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Apply Rail slot — hard 1px left seam, compresses the content pane
+   while open. Dismissal is the spec'd 150ms ease-out width collapse
+   (intentional layout animation; the seam slides, content never squishes). */
+.rail {
     flex-shrink: 0;
-    padding: var(--ba-size-2) var(--ba-size-6);
-    border-top: var(--ba-border-subtle);
+    width: 0;
+    overflow: hidden;
+    transition: width var(--ba-duration-2) ease-out;
+}
+
+.rail[data-open="true"] {
+    width: 280px;
+    border-left: var(--ba-border-subtle);
+}
+
+.faultPip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ba-size-4);
 }
 
 .footer {

@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { themeMap } from "@black-atom/core";
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
-import { ApplyStrip } from "../../components/apply-strip/index.ts";
+import { ApplyRail } from "../../components/apply-rail/index.ts";
 import { EmptyState } from "../../components/empty-state/index.ts";
 import { Button } from "../../components/primitives/button/button.tsx";
 import { Chip } from "../../components/primitives/chip/chip.tsx";
@@ -44,7 +44,21 @@ const SETTINGS_ADAPTERS_FIXTURE: Config = {
     },
 };
 
-const APPLY_STRIP_FIXTURES: Record<string, UpdateResult[]> = {
+const APPLY_RAIL_FIXTURES: Record<string, UpdateResult[]> = {
+    degraded: [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "tmux", status: "done", duration_ms: 8 },
+        {
+            app: "ghostty",
+            status: "skipped",
+            message: "config patched · live reload failed — restart ghostty",
+            duration_ms: 15,
+        },
+        { app: "delta", status: "done", duration_ms: 60 },
+        { app: "lazygit", status: "done", duration_ms: 92 },
+        { app: "obsidian", status: "done", duration_ms: 110 },
+        { app: "helm", status: "done", duration_ms: 115 },
+    ],
     running: [
         { app: "nvim", status: "done", duration_ms: 12 },
         { app: "tmux", status: "done", duration_ms: 8 },
@@ -368,41 +382,37 @@ function Page() {
                 />
             </div>
 
-            <SectionLabel>ApplyStrip — running</SectionLabel>
-            <div
-                style={{
-                    border: "1px solid var(--ba-color-fg-hint)",
-                    marginBottom: 32,
-                    padding: "12px 20px",
-                }}
-            >
-                <ApplyStrip themeName="KOYO YORU" results={APPLY_STRIP_FIXTURES.running} />
-            </div>
-
-            <SectionLabel>ApplyStrip — success</SectionLabel>
-            <div
-                style={{
-                    border: "1px solid var(--ba-color-fg-hint)",
-                    marginBottom: 32,
-                    padding: "12px 20px",
-                }}
-            >
-                <ApplyStrip themeName="KOYO YORU" results={APPLY_STRIP_FIXTURES.success} />
-            </div>
-
-            <SectionLabel>ApplyStrip — partial failure + retry</SectionLabel>
-            <div
-                style={{
-                    border: "1px solid var(--ba-color-fg-hint)",
-                    marginBottom: 32,
-                    padding: "12px 20px",
-                }}
-            >
-                <ApplyStrip
-                    themeName="KOYO YORU"
-                    results={APPLY_STRIP_FIXTURES.partialFailure}
-                    onRetryFailed={() => {}}
-                />
+            <SectionLabel>
+                ApplyRail — board 3f states: running · success · partial failure · degraded
+            </SectionLabel>
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginBottom: 32 }}>
+                <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
+                    <ApplyRail
+                        themeName="KOYO YORU"
+                        results={APPLY_RAIL_FIXTURES.running}
+                        cursorApp="delta"
+                    />
+                </div>
+                <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
+                    <ApplyRail themeName="KOYO YORU" results={APPLY_RAIL_FIXTURES.success} />
+                </div>
+                <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
+                    <ApplyRail
+                        themeName="KOYO YORU"
+                        results={APPLY_RAIL_FIXTURES.partialFailure}
+                        cursorApp="obsidian"
+                        expandedApp="obsidian"
+                        onToggleRow={() => {}}
+                        onRetryFailed={() => {}}
+                    />
+                </div>
+                <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
+                    <ApplyRail
+                        themeName="KOYO YORU"
+                        results={APPLY_RAIL_FIXTURES.degraded}
+                        cursorApp="ghostty"
+                    />
+                </div>
             </div>
 
             <SectionLabel>EmptyState — first run, no adapters</SectionLabel>

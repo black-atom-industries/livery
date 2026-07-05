@@ -131,37 +131,47 @@ function Component() {
             }
         });
 
-    const moveUp = () =>
-        inFilterMode ? moveFilterCursor("up") : setPickedIndex((i) => Math.max(0, i - 1));
-    const moveDown = () =>
-        inFilterMode
-            ? moveFilterCursor("down")
-            : setPickedIndex((i) => Math.min(themes.length - 1, i + 1));
+    // While the Apply Rail is open (phase != picking) its vocabulary owns
+    // j/k, ⏎ and esc — the picking vocabulary goes inert until dismissal.
+    const railOpen = phase !== "picking";
+
+    const moveUp = () => {
+        if (railOpen) return;
+        if (inFilterMode) moveFilterCursor("up");
+        else setPickedIndex((i) => Math.max(0, i - 1));
+    };
+    const moveDown = () => {
+        if (railOpen) return;
+        if (inFilterMode) moveFilterCursor("down");
+        else setPickedIndex((i) => Math.min(themes.length - 1, i + 1));
+    };
 
     // Arrow keys
     useHotkey("ArrowUp", moveUp);
     useHotkey("ArrowDown", moveDown);
-    useHotkey("ArrowLeft", () => inFilterMode && moveFilterCursor("left"));
-    useHotkey("ArrowRight", () => inFilterMode && moveFilterCursor("right"));
+    useHotkey("ArrowLeft", () => !railOpen && inFilterMode && moveFilterCursor("left"));
+    useHotkey("ArrowRight", () => !railOpen && inFilterMode && moveFilterCursor("right"));
 
     // Vim navigation
     useHotkey("K", moveUp);
     useHotkey("J", moveDown);
-    useHotkey("H", () => inFilterMode && moveFilterCursor("left"));
-    useHotkey("L", () => inFilterMode && moveFilterCursor("right"));
-    useHotkeySequence(["G", "G"], () => !inFilterMode && setPickedIndex(0));
-    useHotkey("Shift+G", () => !inFilterMode && setPickedIndex(themes.length - 1));
+    useHotkey("H", () => !railOpen && inFilterMode && moveFilterCursor("left"));
+    useHotkey("L", () => !railOpen && inFilterMode && moveFilterCursor("right"));
+    useHotkeySequence(["G", "G"], () => !railOpen && !inFilterMode && setPickedIndex(0));
+    useHotkey("Shift+G", () => !railOpen && !inFilterMode && setPickedIndex(themes.length - 1));
 
     // Search, filters, settings, quit — the footer's advertised vocabulary
     const promptInputRef = useRef<HTMLInputElement>(null);
 
     useHotkey("/", (event) => {
+        if (railOpen) return;
         event.preventDefault();
         setFilterCursor(null);
         promptInputRef.current?.focus();
     });
-    useHotkey("F", () => setFilterCursor((c) => (c === null ? 0 : null)));
+    useHotkey("F", () => !railOpen && setFilterCursor((c) => (c === null ? 0 : null)));
     useHotkey("Space", () => {
+        if (railOpen) return;
         if (filterCursor !== null) filterChips[filterCursor]?.toggle();
     });
     useHotkey("S", () => navigate({ to: "/settings" }));
@@ -170,6 +180,7 @@ function Component() {
         getCurrentWindow().close().catch(() => {});
     });
     useHotkey("Escape", () => {
+        if (railOpen) return;
         if (filterCursor !== null) setFilterCursor(null);
         else setQuery("");
     });
@@ -204,6 +215,7 @@ function Component() {
     };
 
     useHotkey("Enter", () => {
+        if (railOpen) return;
         if (filterCursor !== null) {
             // Like the search bar: Enter hands key control back to the
             // list, cursor on the first match. Space toggles chips.
