@@ -82,6 +82,7 @@ export function AdapterStatusRow({
         <>
             <div
                 data-component="adapter-status-row"
+                data-status={status}
                 className={adapterStatusRowVariants({ status, cursored, className })}
                 onClick={status === "error" ? onToggle : undefined}
             >

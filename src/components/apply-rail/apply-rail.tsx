@@ -126,7 +126,11 @@ export function ApplyRail({
                     </div>
                 )}
             </div>
-            <div className={styles.rows}>
+            {
+                /* data-live scopes the resolve/blink animations to a running pass —
+                rows never flash on mount or in settled/idle display. */
+            }
+            <div className={styles.rows} data-live={mode === "active"}>
                 {results.map((result) => (
                     <AdapterStatusRow
                         key={result.app}

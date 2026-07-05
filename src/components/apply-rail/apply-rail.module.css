@@ -69,14 +69,90 @@
     background-color: var(--ba-color-bg-hint);
 }
 
+/* Instrument ballistics: the fill advances like a galvanometer needle —
+   one ~5% overshoot, quick settle, no oscillation. Spring-derived but
+   technical; deliberately NOT a bounce (design review 2026-07-05). */
 .fill {
+    position: relative;
     height: 100%;
     background: var(--ba-color-fg-positive);
-    transition: width var(--ba-duration-2) var(--ba-ease-linear);
+    transition: width 480ms
+        linear(
+            0,
+            0.093 2.8%,
+            0.316 6.5%,
+            0.568 10.5%,
+            0.785 14.6%,
+            0.936 18.8%,
+            1.028 23.5%,
+            1.056 29%,
+            1.05 35.5%,
+            1.027 44%,
+            1.007 55%,
+            1 70%,
+            1
+        );
+}
+
+/* Scanhead — a cream leading edge on the needle while the pass runs. */
+.root[data-kind="running"] .fill::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--ba-color-fg-default);
 }
 
 .root[data-kind="degraded"] .fill {
     background: var(--ba-color-fg-warn);
+}
+
+/* Resolve tick — a row flashes one surface tier as its verdict lands.
+   Cascades with the reveal cadence; scoped to a live pass via data-live. */
+.rows[data-live="true"] [data-status="ok"],
+.rows[data-live="true"] [data-status="warn"],
+.rows[data-live="true"] [data-status="error"] {
+    animation: resolve-tick var(--ba-duration-2) var(--ba-ease);
+}
+
+@keyframes resolve-tick {
+    from {
+        background-color: var(--ba-color-bg-hint);
+    }
+    to {
+        background-color: transparent;
+    }
+}
+
+/* The running row's pip hard-blinks — terminal cursor, not a spinner. */
+.rows[data-live="true"] [data-status="running"] [data-component="status-pip"] {
+    animation: cursor-blink 860ms step-end infinite;
+}
+
+@keyframes cursor-blink {
+    0%,
+    49% {
+        opacity: 1;
+    }
+    50%,
+    100% {
+        opacity: 0.3;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fill {
+        transition: none;
+    }
+
+    .rows[data-live="true"] [data-status="ok"],
+    .rows[data-live="true"] [data-status="warn"],
+    .rows[data-live="true"] [data-status="error"],
+    .rows[data-live="true"] [data-status="running"] [data-component="status-pip"] {
+        animation: none;
+    }
 }
 
 .rows {
