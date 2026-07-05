@@ -1,5 +1,10 @@
 import { assertEquals } from "@std/assert";
-import { getFailedUpdaters, getProgressState, mergeUpdateResults } from "./progress.ts";
+import {
+    getFailedUpdaters,
+    getProgressState,
+    mergeUpdateResults,
+    summarizeApply,
+} from "./progress.ts";
 import type { UpdateResult } from "./updaters.ts";
 
 Deno.test("getProgressState returns zero progress for empty results", () => {
@@ -102,6 +107,74 @@ Deno.test("mergeUpdateResults overlays updates onto matching app entries", () =>
         { app: "tmux", status: "done", duration_ms: 8 },
         { app: "ghostty", status: "done", duration_ms: 5 },
     ]);
+});
+
+Deno.test("summarizeApply reads empty results as running, never clean", () => {
+    const summary = summarizeApply([]);
+    assertEquals(summary.kind, "running");
+    assertEquals(summary.total, 0);
+});
+
+Deno.test("summarizeApply stays running while any row is pending or running", () => {
+    const results: UpdateResult[] = [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "tmux", status: "running", duration_ms: null },
+        { app: "ghostty", status: "pending", duration_ms: null },
+    ];
+    const summary = summarizeApply(results);
+    assertEquals(summary.kind, "running");
+    assertEquals(summary.completedCount, 1);
+    assertEquals(summary.totalDurationMs, 12);
+});
+
+Deno.test("summarizeApply reports clean when every row resolved without fault", () => {
+    const results: UpdateResult[] = [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "tmux", status: "done", duration_ms: 8 },
+    ];
+    const summary = summarizeApply(results);
+    assertEquals(summary, {
+        kind: "clean",
+        okCount: 2,
+        errorCount: 0,
+        degradedCount: 0,
+        completedCount: 2,
+        total: 2,
+        totalDurationMs: 20,
+    });
+});
+
+Deno.test("summarizeApply reports error over degraded when both are present", () => {
+    const results: UpdateResult[] = [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "ghostty", status: "skipped", message: "reload failed", duration_ms: 15 },
+        { app: "obsidian", status: "error", message: "ENOENT", duration_ms: 3 },
+    ];
+    const summary = summarizeApply(results);
+    assertEquals(summary.kind, "error");
+    assertEquals(summary.okCount, 1);
+    assertEquals(summary.errorCount, 1);
+    assertEquals(summary.degradedCount, 1);
+});
+
+Deno.test("summarizeApply reports degraded for message-carrying skips without errors", () => {
+    const results: UpdateResult[] = [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "ghostty", status: "skipped", message: "reload failed", duration_ms: 15 },
+    ];
+    const summary = summarizeApply(results);
+    assertEquals(summary.kind, "degraded");
+    assertEquals(summary.degradedCount, 1);
+});
+
+Deno.test("summarizeApply keeps a bare skip quiet (clean, counted ok)", () => {
+    const results: UpdateResult[] = [
+        { app: "nvim", status: "done", duration_ms: 12 },
+        { app: "tmux", status: "skipped", duration_ms: null },
+    ];
+    const summary = summarizeApply(results);
+    assertEquals(summary.kind, "clean");
+    assertEquals(summary.okCount, 2);
 });
 
 Deno.test("mergeUpdateResults preserves original order and leaves unmatched entries untouched", () => {

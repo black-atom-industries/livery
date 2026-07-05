@@ -35,6 +35,53 @@ export function mergeUpdateResults(
     return results.map((r) => updatesByApp.get(r.app) ?? r);
 }
 
+export type ApplySummaryKind = "running" | "clean" | "degraded" | "error";
+
+export interface ApplySummary {
+    /**
+     * Resolution class of the whole apply pass. "clean" auto-dismisses the
+     * rail; "degraded" and "error" persist — a fault needs a decision.
+     */
+    kind: ApplySummaryKind;
+    /** Rows that completed without fault (done, or a bare quiet skip). */
+    okCount: number;
+    errorCount: number;
+    /** Skips carrying a message — applied-but-attention results (e.g. reload failed). */
+    degradedCount: number;
+    completedCount: number;
+    total: number;
+    totalDurationMs: number | null;
+}
+
+/**
+ * Classify a full apply pass for the ApplyRail: still running, clean,
+ * degraded (skips with a message), or error. Empty results read as
+ * "running" so an apply that hasn't produced rows yet never auto-dismisses.
+ */
+export function summarizeApply(results: UpdateResult[]): ApplySummary {
+    const total = results.length;
+    const errorCount = results.filter((r) => r.status === "error").length;
+    const degradedCount = results.filter((r) => r.status === "skipped" && r.message).length;
+    const completedCount = results.filter((r) => COMPLETED_STATUSES.has(r.status)).length;
+    const okCount = completedCount - errorCount - degradedCount;
+    const inFlight = total === 0 || completedCount < total;
+
+    const kind: ApplySummaryKind = inFlight
+        ? "running"
+        : errorCount > 0
+        ? "error"
+        : degradedCount > 0
+        ? "degraded"
+        : "clean";
+
+    const totalDurationMs = results.reduce<number | null>((sum, r) => {
+        if (r.duration_ms != null) return (sum ?? 0) + r.duration_ms;
+        return sum;
+    }, null);
+
+    return { kind, okCount, errorCount, degradedCount, completedCount, total, totalDurationMs };
+}
+
 export function getProgressState(results: UpdateResult[]): ProgressState {
     if (results.length === 0) {
         return {
