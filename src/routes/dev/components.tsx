@@ -14,6 +14,7 @@ import { ProgressBar } from "../../components/primitives/progress-bar/progress-b
 import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx";
 import { ThemeList } from "../../components/theme-list/index.ts";
 import { ThemeDetail } from "../../components/theme-detail/index.ts";
+import { AdapterStatusRow } from "../../components/primitives/adapter-status-row/adapter-status-row.tsx";
 import { AdapterRows } from "../../components/settings/adapter-rows/index.ts";
 import type {
     AdapterField,
@@ -117,6 +118,7 @@ function Page() {
     const [settingsTestApplyResults, setSettingsTestApplyResults] = useState<
         Partial<Record<AppName, TestApplyResult>>
     >({ ghostty: { status: "ok", durationMs: 412 } });
+    const [errorRowExpanded, setErrorRowExpanded] = useState(true);
 
     return (
         <div>
@@ -331,6 +333,39 @@ function Page() {
             </div>
             <div style={{ marginBottom: 32 }}>
                 <ProgressBar results={PROGRESS_FIXTURES[progressState]} />
+            </div>
+
+            <SectionLabel>
+                AdapterStatusRow — five statuses · cursored · degraded · expanded error
+            </SectionLabel>
+            <div
+                style={{
+                    width: 280,
+                    border: "1px solid var(--ba-color-fg-hint)",
+                    marginBottom: 32,
+                    padding: "8px 0",
+                }}
+            >
+                <AdapterStatusRow name="system" status="ok" durationMs={8} />
+                <AdapterStatusRow name="nvim" status="ok" durationMs={92} />
+                <AdapterStatusRow name="delta" status="running" cursored />
+                <AdapterStatusRow name="lazygit" status="pending" />
+                <AdapterStatusRow
+                    name="ghostty"
+                    status="warn"
+                    message="config patched · live reload failed — restart ghostty"
+                />
+                <AdapterStatusRow
+                    name="obsidian"
+                    status="error"
+                    cursored
+                    expanded={errorRowExpanded}
+                    message="ENOENT: themes directory not found. Point THEMES_PATH at the vault or disable the adapter."
+                    path="~/.config/obsidian/themes/black-atom.css"
+                    code="LVR-102"
+                    onToggle={() => setErrorRowExpanded((e) => !e)}
+                    onRetry={() => {}}
+                />
             </div>
 
             <SectionLabel>ApplyStrip — running</SectionLabel>
