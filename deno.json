@@ -1,6 +1,9 @@
 {
     "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
     "version": "0.2.0",
+    "links": [
+        "../core"
+    ],
     "compilerOptions": {
         "jsx": "react-jsx",
         "jsxImportSource": "react",
@@ -16,20 +19,17 @@
     },
     "tasks": {
         "cache": "deno cache --reload src/",
-        "dev": "sh scripts/dev-local.sh _dev",
+        "dev": "deno run -A npm:@tauri-apps/cli dev",
         "build": "deno run -A npm:@tauri-apps/cli build",
         "vite:dev": "deno run -A npm:vite --port 1420",
         "vite:build": "deno run -A npm:vite build",
-        "check": "sh scripts/dev-local.sh _check",
-        "test": "sh scripts/dev-local.sh _test",
+        "check": "deno check src/",
+        "test": "deno test -P",
         "checks": "deno run -A .githooks/checks-frontend.ts && deno run -A .githooks/checks-backend.ts",
         "install-hooks": "git config core.hooksPath .githooks && echo 'Hooks installed.'",
         "test:perf-benchmark": "cd src-tauri && cargo run --bin perf-benchmark --release",
         "install:macos": "deno run -A npm:@tauri-apps/cli build && rm -rf /Applications/livery.app && cp -R src-tauri/target/release/bundle/macos/livery.app /Applications/livery.app",
-        "dev:ui": "deno run -A npm:vite --port 1430 --open '/dev'",
-        "_dev": "deno run -A npm:@tauri-apps/cli dev",
-        "_check": "deno check src/**/*.ts src/**/*.tsx",
-        "_test": "deno test -P"
+        "dev:ui": "deno run -A npm:vite --port 1430 --open '/dev'"
     },
     "nodeModulesDir": "auto",
     "lint": {
@@ -38,6 +38,7 @@
             "src/bindings.ts",
             ".agents/",
             ".claude/",
+            ".impeccable/",
             "docs/design-system/reference/"
         ]
     },
@@ -54,6 +55,7 @@
             "src/bindings.ts",
             ".agents/",
             ".claude/",
+            ".impeccable/",
             "docs/design-system/reference/"
         ]
     },
