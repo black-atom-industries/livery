@@ -41,16 +41,87 @@ pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> Upd
         }
     };
 
-    match file_ops::jsonc::patch_jsonc_file(app_config.config_path.clone(), key_path, theme_label) {
-        Ok(()) => {
-            log::info!(
-                "Updated zed settings: {} (key: {})",
-                app_config.config_path,
-                key_path
-            );
-            UpdateResult::done(app_str)
+    if let Err(e) =
+        file_ops::jsonc::patch_jsonc_file(app_config.config_path.clone(), key_path, theme_label)
+    {
+        return UpdateResult::error(app_str, e);
+    }
+    log::info!(
+        "Updated zed settings: {} (key: {})",
+        app_config.config_path,
+        key_path
+    );
+
+    // Zed silently keeps the previous theme when the display name matches no
+    // installed theme (broken adapter symlink, missing extension) — surface
+    // that as degraded instead of success.
+    if theme_installed(theme_label) == Some(false) {
+        let msg = format!(
+            "Config patched; theme \"{theme_label}\" is not installed in Zed — it will keep the previous theme"
+        );
+        log::warn!("{msg}");
+        return UpdateResult::skipped(app_str, msg);
+    }
+
+    UpdateResult::done(app_str)
+}
+
+/// Directories Zed loads themes from: user themes + installed extensions.
+fn zed_theme_dirs() -> Vec<std::path::PathBuf> {
+    let Some(home) = dirs::home_dir() else {
+        return Vec::new();
+    };
+    let mut dirs = vec![home.join(".config/zed/themes")];
+    for ext_root in [
+        home.join("Library/Application Support/Zed/extensions/installed"),
+        home.join(".local/share/zed/extensions/installed"),
+    ] {
+        let Ok(entries) = std::fs::read_dir(ext_root) else {
+            continue;
+        };
+        dirs.extend(entries.flatten().map(|e| e.path().join("themes")));
+    }
+    dirs
+}
+
+/// Whether any installed Zed theme file carries `theme_label` as a name.
+/// `None` = unverifiable (no theme dirs at all) — stay quiet rather than
+/// degrade every apply on an unusual setup.
+///
+/// Matches by verbatim substring: display names ("Black Atom — JPN ∷ …")
+/// appear literally in the theme JSON, and a broken symlink fails
+/// read_to_string — exactly the case that must be caught.
+fn theme_installed(theme_label: &str) -> Option<bool> {
+    theme_installed_in(&zed_theme_dirs(), theme_label)
+}
+
+fn theme_installed_in(dirs: &[std::path::PathBuf], theme_label: &str) -> Option<bool> {
+    let needle = format!("\"{theme_label}\"");
+    let mut scanned_any_dir = false;
+
+    for dir in dirs {
+        let Ok(entries) = std::fs::read_dir(dir) else {
+            continue;
+        };
+        scanned_any_dir = true;
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().is_none_or(|ext| ext != "json") {
+                continue;
+            }
+            let Ok(content) = std::fs::read_to_string(&path) else {
+                continue; // broken symlink or unreadable — cannot provide the theme
+            };
+            if content.contains(&needle) {
+                return Some(true);
+            }
         }
-        Err(e) => UpdateResult::error(app_str, e),
+    }
+
+    if scanned_any_dir {
+        Some(false)
+    } else {
+        None
     }
 }
 
@@ -84,5 +155,64 @@ fn detect_theme_format(content: &str) -> ThemeFormat {
         Some(val) if val.as_object().is_some() => ThemeFormat::Object,
         Some(_) => ThemeFormat::FlatString,
         None => ThemeFormat::NotFound,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    fn fixture_path(name: &str) -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("fixtures")
+            .join(name)
+    }
+
+    /// Build a fake Zed themes dir in a temp dir: one real theme family
+    /// fixture, one dangling symlink (the case found in the wild), one
+    /// non-json file.
+    fn fake_themes_dir() -> tempfile::TempDir {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::copy(
+            fixture_path("jsonc/zed-theme-family.json"),
+            dir.path().join("black-atom-jpn-tsuki-yoru.json"),
+        )
+        .unwrap();
+        std::os::unix::fs::symlink(
+            dir.path().join("does-not-exist.json"),
+            dir.path().join("black-atom-north-night.json"),
+        )
+        .unwrap();
+        std::fs::write(dir.path().join("README.md"), "not a theme").unwrap();
+        dir
+    }
+
+    #[test]
+    fn test_theme_installed_finds_name_in_theme_file() {
+        let dir = fake_themes_dir();
+        let dirs = vec![dir.path().to_path_buf()];
+        assert_eq!(
+            theme_installed_in(&dirs, "Black Atom — JPN ∷ Tsuki Yoru"),
+            Some(true)
+        );
+    }
+
+    #[test]
+    fn test_theme_installed_reports_missing_theme() {
+        let dir = fake_themes_dir();
+        let dirs = vec![dir.path().to_path_buf()];
+        // The NORTH theme file is a dangling symlink — it must NOT count.
+        assert_eq!(
+            theme_installed_in(&dirs, "Black Atom — NORTH ∷ Night"),
+            Some(false)
+        );
+    }
+
+    #[test]
+    fn test_theme_installed_unverifiable_without_dirs() {
+        let dirs = vec![PathBuf::from("/definitely/not/a/dir")];
+        assert_eq!(theme_installed_in(&dirs, "Anything"), None);
     }
 }
