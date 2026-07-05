@@ -1,7 +1,16 @@
 import { assertEquals, assertGreater } from "@std/assert";
 import { themeMap } from "@black-atom/core";
 import { collectionOrder } from "@black-atom/core";
-import { getGroupedThemes } from "./themes.ts";
+import { formatCollectionTitle, getGroupedThemes } from "./themes.ts";
+
+Deno.test("formatCollectionTitle collapses a label that merely echoes the key", () => {
+    assertEquals(formatCollectionTitle("jpn", "JPN"), "JPN");
+    assertEquals(formatCollectionTitle("default", "Default"), "DEFAULT");
+});
+
+Deno.test("formatCollectionTitle keeps the em-dash form for distinct labels", () => {
+    assertEquals(formatCollectionTitle("jpn", "Japan"), "JPN — JAPAN");
+});
 
 Deno.test("getGroupedThemes returns groups in collectionOrder", () => {
     const groups = getGroupedThemes(themeMap);

@@ -1,4 +1,4 @@
-import type { ThemeGroup } from "../../lib/themes.ts";
+import { formatCollectionTitle, type ThemeGroup } from "../../lib/themes.ts";
 import { ListRow } from "../primitives/list-row/list-row.tsx";
 import { SectionHeader } from "../primitives/section-header/section-header.tsx";
 import styles from "./theme-list.module.css";
@@ -35,8 +35,9 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
                     );
                 });
 
-                const label =
-                    `${group.collectionKey.toUpperCase()} — ${group.label.toUpperCase()} (${group.themes.length})`;
+                const label = `${
+                    formatCollectionTitle(group.collectionKey, group.label)
+                } (${group.themes.length})`;
 
                 return (
                     <div key={group.collectionKey} className={styles.group}>

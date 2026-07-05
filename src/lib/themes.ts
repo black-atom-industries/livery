@@ -11,6 +11,17 @@ export interface ThemeGroup {
     themes: ThemeDefinition[];
 }
 
+/**
+ * "JPN — JAPAN" when core ships a distinct display label; plain "JPN" while
+ * the label merely echoes the key (which it currently does for every
+ * collection — the em-dash form activates itself once core grows real names).
+ */
+export function formatCollectionTitle(key: string, label: string): string {
+    const keyUpper = key.toUpperCase();
+    const labelUpper = label.toUpperCase();
+    return keyUpper === labelUpper ? keyUpper : `${keyUpper} — ${labelUpper}`;
+}
+
 /** Group themes by collection in display order. Sorts themes within each group by name. */
 export function getGroupedThemes(themeMap: ThemeKeyDefinitionMap): ThemeGroup[] {
     const themes = Object.values(themeMap).filter((d): d is ThemeDefinition => d !== null);

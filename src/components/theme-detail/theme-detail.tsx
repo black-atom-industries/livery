@@ -1,4 +1,5 @@
 import type { ThemeDefinition } from "@black-atom/core";
+import { formatCollectionTitle } from "../../lib/themes.ts";
 import { themeToCustomProperties } from "../../lib/tokens.ts";
 import { Badge } from "../primitives/badge/badge.tsx";
 import { CodePreview } from "../primitives/code-preview/code-preview.tsx";
@@ -89,8 +90,7 @@ export function ThemeDetail({ theme, isActive }: ThemeDetailProps) {
                         <Badge>{appearanceLabel}</Badge>
                     </div>
                     <div className={styles.collectionLine}>
-                        {meta.collection.key.toUpperCase()} — {meta.collection.label.toUpperCase()}
-                        {" "}
+                        {formatCollectionTitle(meta.collection.key, meta.collection.label)}{" "}
                         COLLECTION · KEY {meta.key}
                     </div>
                 </div>
