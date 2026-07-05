@@ -19,6 +19,7 @@ import { AdapterRows } from "../../components/settings/adapter-rows/index.ts";
 import type {
     AdapterField,
     TestApplyResult,
+    VerifyPathResult,
 } from "../../components/settings/adapter-rows/index.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";
 import type { UpdateResult } from "../../lib/updaters.ts";
@@ -132,6 +133,9 @@ function Page() {
     const [settingsTestApplyResults, setSettingsTestApplyResults] = useState<
         Partial<Record<AppName, TestApplyResult>>
     >({ ghostty: { status: "ok", durationMs: 412 } });
+    const [settingsVerifyPathResults, setSettingsVerifyPathResults] = useState<
+        Partial<Record<AppName, VerifyPathResult>>
+    >({ obsidian: { status: "verified", exists: false, patternMatches: null } });
     const [errorRowExpanded, setErrorRowExpanded] = useState(true);
 
     return (
@@ -314,6 +318,25 @@ function Page() {
                         }, 600);
                     }}
                     testApplyResults={settingsTestApplyResults}
+                    onVerifyPath={(appName) => {
+                        setSettingsVerifyPathResults((prev) => ({
+                            ...prev,
+                            [appName]: { status: "running" },
+                        }));
+                        setTimeout(() => {
+                            setSettingsVerifyPathResults((prev) => ({
+                                ...prev,
+                                [appName]: appName === "obsidian"
+                                    ? { status: "verified", exists: false, patternMatches: null }
+                                    : {
+                                        status: "verified",
+                                        exists: true,
+                                        patternMatches: appName === "ghostty" ? true : null,
+                                    },
+                            }));
+                        }, 400);
+                    }}
+                    verifyPathResults={settingsVerifyPathResults}
                 />
             </div>
 

@@ -16,6 +16,22 @@ export type TestApplyResult =
     | { status: "ok"; durationMs: number | null }
     | { status: "error"; message: string };
 
+/** Session-local result of a "VERIFY PATH" run — never persisted. */
+export type VerifyPathResult =
+    | { status: "running" }
+    | { status: "verified"; exists: boolean; patternMatches: boolean | null }
+    | { status: "unverifiable"; message: string };
+
+/** The qualifier a verify fault puts on the row, or null when all clear. */
+function verifyFaultLabel(result?: VerifyPathResult): string | null {
+    if (!result) return null;
+    if (result.status === "unverifiable") return "UNVERIFIABLE";
+    if (result.status !== "verified") return null;
+    if (!result.exists) return "PATH NOT FOUND";
+    if (result.patternMatches === false) return "NO PATTERN MATCH";
+    return null;
+}
+
 type Props = {
     apps: [AppName, AppConfig][];
     /** Currently cursored row (j/k navigation), independent of expansion. */
@@ -29,6 +45,10 @@ type Props = {
     onTestApply: (appName: AppName) => void;
     /** Session-local last-applied result per app — starts empty, fills after a test apply. */
     testApplyResults?: Partial<Record<AppName, TestApplyResult>>;
+    /** Checks config_path existence + match_pattern hit (VERIFY PATH). */
+    onVerifyPath: (appName: AppName) => void;
+    /** Session-local verification result per app — a fault puts a CHECK qualifier on the row. */
+    verifyPathResults?: Partial<Record<AppName, VerifyPathResult>>;
     /** Ref to the first input of the expanded row — the "e" hotkey focuses it. */
     firstFieldRef?: React.Ref<HTMLInputElement>;
     className?: string;
@@ -36,8 +56,8 @@ type Props = {
 
 /**
  * ADAPTERS panel — one DisclosurePanel row per adapter, expand for editable
- * paths. VERIFY PATH is omitted — no backend command exists yet (follow-up
- * issue). TEST APPLY runs the real single-app updater.
+ * paths. VERIFY PATH checks the config_path read-only; TEST APPLY runs the
+ * real single-app updater.
  */
 export function AdapterRows(
     {
@@ -49,6 +69,8 @@ export function AdapterRows(
         onFieldCommit,
         onTestApply,
         testApplyResults,
+        onVerifyPath,
+        verifyPathResults,
         firstFieldRef,
         className,
     }: Props,
@@ -73,6 +95,8 @@ export function AdapterRows(
                         onFieldCommit={(field, value) => onFieldCommit(appName, field, value)}
                         onTestApply={() => onTestApply(appName)}
                         testApplyResult={testApplyResults?.[appName]}
+                        onVerifyPath={() => onVerifyPath(appName)}
+                        verifyPathResult={verifyPathResults?.[appName]}
                         firstFieldRef={expandedApp === appName ? firstFieldRef : undefined}
                     />
                 ))}
@@ -91,6 +115,8 @@ type RowProps = {
     onFieldCommit: (field: AdapterField, value: string) => void;
     onTestApply: () => void;
     testApplyResult?: TestApplyResult;
+    onVerifyPath: () => void;
+    verifyPathResult?: VerifyPathResult;
     firstFieldRef?: React.Ref<HTMLInputElement>;
 };
 
@@ -105,10 +131,13 @@ function AdapterRow(
         onFieldCommit,
         onTestApply,
         testApplyResult,
+        onVerifyPath,
+        verifyPathResult,
         firstFieldRef,
     }: RowProps,
 ) {
     const enabled = appConfig.enabled !== false;
+    const fault = verifyFaultLabel(verifyPathResult);
 
     return (
         <div className={cursored ? `${styles.rowSlot} ${styles.rowSlotCursored}` : styles.rowSlot}>
@@ -122,10 +151,17 @@ function AdapterRow(
                         <span className={enabled ? styles.nameEnabled : styles.name}>
                             {appName}
                         </span>
-                        <span className={styles.path}>{appConfig.config_path}</span>
-                        <StatusPip intent={enabled ? "ok" : "off"}>
-                            {enabled ? "OK" : "DISABLED"}
-                        </StatusPip>
+                        <span className={styles.pathGroup}>
+                            <span className={styles.path}>{appConfig.config_path}</span>
+                            {fault && <span className={styles.pathFault}>— {fault}</span>}
+                        </span>
+                        {enabled && fault
+                            ? <StatusPip intent="warn">CHECK</StatusPip>
+                            : (
+                                <StatusPip intent={enabled ? "ok" : "off"}>
+                                    {enabled ? "OK" : "DISABLED"}
+                                </StatusPip>
+                            )}
                     </div>
                 }
             >
@@ -135,9 +171,12 @@ function AdapterRow(
                     firstFieldRef={firstFieldRef}
                 />
                 <ActionRow
-                    running={testApplyResult?.status === "running"}
+                    testRunning={testApplyResult?.status === "running"}
+                    verifyRunning={verifyPathResult?.status === "running"}
                     onTestApply={onTestApply}
+                    onVerifyPath={onVerifyPath}
                     testApplyResult={testApplyResult}
+                    verifyPathResult={verifyPathResult}
                 />
             </DisclosurePanel>
         </div>
@@ -145,23 +184,53 @@ function AdapterRow(
 }
 
 type ActionRowProps = {
-    running: boolean;
+    testRunning: boolean;
+    verifyRunning: boolean;
     onTestApply: () => void;
+    onVerifyPath: () => void;
     testApplyResult?: TestApplyResult;
+    verifyPathResult?: VerifyPathResult;
 };
 
-/**
- * VERIFY PATH is intentionally omitted here — there is no backend command
- * for path verification yet (tracked as a follow-up issue).
- */
-function ActionRow({ running, onTestApply, testApplyResult }: ActionRowProps) {
+function ActionRow(
+    { testRunning, verifyRunning, onTestApply, onVerifyPath, testApplyResult, verifyPathResult }:
+        ActionRowProps,
+) {
     return (
         <div className={styles.actionRow}>
-            <Button intent="secondary" onClick={onTestApply} disabled={running}>
-                {running ? "TESTING…" : "TEST APPLY"}
+            <Button intent="primary" onClick={onVerifyPath} disabled={verifyRunning}>
+                {verifyRunning ? "VERIFYING…" : "VERIFY PATH"}
             </Button>
-            <LastAppliedMeta result={testApplyResult} />
+            <Button intent="secondary" onClick={onTestApply} disabled={testRunning}>
+                {testRunning ? "TESTING…" : "TEST APPLY"}
+            </Button>
+            <span className={styles.metas}>
+                <VerifyPathMeta result={verifyPathResult} />
+                <LastAppliedMeta result={testApplyResult} />
+            </span>
         </div>
+    );
+}
+
+/**
+ * Verification verdict for the meta line. A fault repeats the header
+ * qualifier; "unverifiable" carries the reason so the button is never
+ * a dead control.
+ */
+function VerifyPathMeta({ result }: { result?: VerifyPathResult }) {
+    if (!result || result.status === "running") return null;
+
+    if (result.status === "unverifiable") {
+        return <span className={styles.verifyFault}>UNVERIFIABLE — {result.message}</span>;
+    }
+
+    const fault = verifyFaultLabel(result);
+    if (fault) return <span className={styles.verifyFault}>{fault}</span>;
+
+    return (
+        <span className={styles.verifyOk}>
+            PATH OK{result.patternMatches === true ? " · PATTERN OK" : ""}
+        </span>
     );
 }
 

@@ -49,13 +49,28 @@
     color: var(--ba-color-fg-default);
 }
 
+.pathGroup {
+    display: flex;
+    align-items: center;
+    gap: var(--ba-size-2);
+    flex: 1;
+    min-width: 0;
+}
+
 .path {
     color: var(--ba-color-fg-hint);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
+}
+
+/* Verify fault qualifier — stays visible when the path truncates. */
+.pathFault {
+    flex-shrink: 0;
+    color: var(--ba-color-fg-warn);
+    white-space: nowrap;
 }
 
 .fieldGrid {
@@ -71,16 +86,33 @@
     margin-top: var(--ba-size-4);
 }
 
-.lastAppliedOk {
+.metas {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--ba-size-4);
+}
+
+.lastAppliedOk {
     font-size: var(--ba-font-size-0);
     letter-spacing: var(--ba-font-letterspacing-label);
     color: var(--ba-color-fg-positive);
 }
 
 .lastAppliedError {
-    margin-left: auto;
     font-size: var(--ba-font-size-0);
     letter-spacing: var(--ba-font-letterspacing-label);
     color: var(--ba-color-fg-negative);
+}
+
+.verifyOk {
+    font-size: var(--ba-font-size-0);
+    letter-spacing: var(--ba-font-letterspacing-label);
+    color: var(--ba-color-fg-positive);
+}
+
+.verifyFault {
+    font-size: var(--ba-font-size-0);
+    letter-spacing: var(--ba-font-letterspacing-label);
+    color: var(--ba-color-fg-warn);
 }

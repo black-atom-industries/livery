@@ -11,6 +11,7 @@ import { GeneralPanel } from "../../../components/settings/general-panel/index.t
 import type {
     AdapterField,
     TestApplyResult,
+    VerifyPathResult,
 } from "../../../components/settings/adapter-rows/index.ts";
 import { commands } from "../../../bindings.ts";
 import type { AppConfig, AppName, Config } from "../../../bindings.ts";
@@ -38,6 +39,10 @@ function SettingsRoute() {
     // Session-local TEST APPLY results — never persisted, starts empty.
     const [testApplyResults, setTestApplyResults] = useState<
         Partial<Record<AppName, TestApplyResult>>
+    >({});
+    // Session-local VERIFY PATH results — same lifetime as test applies.
+    const [verifyPathResults, setVerifyPathResults] = useState<
+        Partial<Record<AppName, VerifyPathResult>>
     >({});
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
 
@@ -100,6 +105,27 @@ function SettingsRoute() {
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             setTestApplyResults((prev) => ({ ...prev, [appName]: { status: "error", message } }));
+        }
+    }
+
+    async function verifyAdapterPath(appName: AppName) {
+        setVerifyPathResults((prev) => ({ ...prev, [appName]: { status: "running" } }));
+        try {
+            const result = await commands.verifyAppPath(appName);
+            const next: VerifyPathResult = result.message != null
+                ? { status: "unverifiable", message: result.message }
+                : {
+                    status: "verified",
+                    exists: result.exists,
+                    patternMatches: result.pattern_matches,
+                };
+            setVerifyPathResults((prev) => ({ ...prev, [appName]: next }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            setVerifyPathResults((prev) => ({
+                ...prev,
+                [appName]: { status: "unverifiable", message },
+            }));
         }
     }
 
@@ -202,6 +228,8 @@ function SettingsRoute() {
                         onFieldCommit={commitAdapterField}
                         onTestApply={testApplyAdapter}
                         testApplyResults={testApplyResults}
+                        onVerifyPath={verifyAdapterPath}
+                        verifyPathResults={verifyPathResults}
                         firstFieldRef={firstFieldRef}
                     />
                 )
