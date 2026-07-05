@@ -14,12 +14,17 @@ type Props = {
  * App header bar — wordmark (brand dot standing in for the O, the system's
  * sole border-radius exception) + version left, uppercase env context right.
  *
+ * With window decorations off, the header doubles as the window's drag
+ * handle (data-tauri-drag-region only fires on this element itself — the
+ * wordmark/context children stay clickable text, the space between drags).
+ *
  * Spec: docs/design-system/reference/components/containers/AppHeader.jsx
  */
 export function AppHeader({ product = "LIVERY", version, context, className }: Props) {
     return (
         <div
             data-component="app-header"
+            data-tauri-drag-region
             className={[styles.root, className].filter(Boolean).join(" ")}
         >
             <div className={styles.wordmarkRow}>
