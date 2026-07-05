@@ -1,35 +1,59 @@
 /* =============================================================
    AppHeader — Application title bar
-   DESIGN.md: Display font for title, mono for version/subtitle.
-   Bottom border handled by App.Shell.
+   Spec: docs/design-system/reference/components/containers/AppHeader.jsx
+   Wordmark uses the display font; the brand dot is the system's sole
+   border-radius exception (--ba-radius-dot).
    ============================================================= */
 
 .root {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--ba-font-mono);
 }
 
-.title {
-    font-family: var(--lvr-font-family-heading);
-    font-size: var(--lvr-font-size-3);
-    font-weight: var(--lvr-font-weight-7);
-    margin: 0;
+/* The undecorated window drags by its header. data-tauri-drag-region only
+   fires when the mousedown target IS the .root element, so the children
+   (static chrome text, nothing interactive) must let events pass through. */
+.root > * {
+    pointer-events: none;
+}
+
+.wordmarkRow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--ba-size-3);
+}
+
+.wordmark {
+    font-family: var(--ba-font-display);
+    font-weight: var(--ba-font-weight-bold);
+    font-size: var(--ba-font-size-3);
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: baseline;
+}
+
+.dot {
+    display: inline-block;
+    width: 0.62em;
+    height: 0.62em;
+    border-radius: var(--ba-radius-dot);
+    background: var(--ba-color-fg-default);
+    margin: 0 0.03em;
 }
 
 .version {
-    font-family: var(--lvr-font-family-mono);
+    font-family: var(--ba-font-mono);
     font-variation-settings: "MONO" 1;
-    font-size: var(--lvr-font-size-0);
-    font-weight: var(--lvr-font-weight-4);
-    color: var(--lvr-color-fg-subtle);
+    font-size: var(--ba-font-size-1);
+    font-weight: var(--ba-font-weight-regular);
+    color: var(--ba-color-fg-hint);
 }
 
-.subtitle {
-    font-family: var(--lvr-font-family-mono);
-    font-variation-settings: "MONO" 1;
-    font-size: var(--lvr-font-size-0);
-    color: var(--lvr-color-fg-hint);
-    text-transform: uppercase;
-    letter-spacing: var(--lvr-font-letterspacing-wide);
-    margin: 0;
+.context {
+    font-size: var(--ba-font-size-1);
+    color: var(--ba-color-fg-hint);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
 }

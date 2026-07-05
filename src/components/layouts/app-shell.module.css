@@ -1,23 +1,23 @@
 /* =============================================================
    App.Shell — Outer application chrome
    Full-height flex column. Header, main content, progress bar,
-   and footer slots separated by 1px borders in --lvr-color-bg-hint.
-   All colors via --lvr-* tokens — no hardcoded values.
+   and footer slots separated by 1px borders in --ba-color-border-subtle.
+   All colors via --ba-* tokens — no hardcoded values.
    ============================================================= */
 
 .root {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: var(--lvr-color-bg-default);
-    color: var(--lvr-color-fg-default);
-    font-family: var(--lvr-font-family-body);
+    background-color: var(--ba-color-bg-default);
+    color: var(--ba-color-fg-default);
+    font-family: var(--ba-font-mono);
 }
 
 .header {
     flex-shrink: 0;
-    padding: var(--lvr-size-4) var(--lvr-size-6);
-    border-bottom: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--ba-size-4) var(--ba-size-6);
+    border-bottom: var(--ba-border-subtle);
 }
 
 .main {
@@ -27,12 +27,12 @@
 
 .progress {
     flex-shrink: 0;
-    padding: var(--lvr-size-2) var(--lvr-size-6);
-    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--ba-size-2) var(--ba-size-6);
+    border-top: var(--ba-border-subtle);
 }
 
 .footer {
     flex-shrink: 0;
-    padding: var(--lvr-size-2) var(--lvr-size-6);
-    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--ba-size-2) var(--ba-size-6);
+    border-top: var(--ba-border-subtle);
 }

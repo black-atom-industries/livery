@@ -104,17 +104,105 @@ function Component() {
             </section>
 
             <section>
-                <SectionLabel>Font variants</SectionLabel>
+                <SectionLabel>Font families (3 voices)</SectionLabel>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <Typo.P style={{ margin: 0, fontFamily: "var(--lvr-font-family-heading)" }}>
-                        <Typo.Small>[heading]</Typo.Small>{" "}
+                    <Typo.P style={{ margin: 0, fontFamily: "var(--ba-font-display)" }}>
+                        <Typo.Small>[display]</Typo.Small>{" "}
                         The quick brown fox jumps over the lazy dog
                     </Typo.P>
-                    <Typo.P style={{ margin: 0, fontFamily: "var(--lvr-font-family-body)" }}>
+                    <Typo.P style={{ margin: 0, fontFamily: "var(--ba-font-body)" }}>
                         <Typo.Small>[body]</Typo.Small> The quick brown fox jumps over the lazy dog
                     </Typo.P>
-                    <Typo.P style={{ margin: 0, fontFamily: "var(--lvr-font-family-code)" }}>
+                    <Typo.P style={{ margin: 0, fontFamily: "var(--ba-font-mono)" }}>
                         <Typo.Small>[mono]</Typo.Small> The quick brown fox jumps over the lazy dog
+                    </Typo.P>
+                </div>
+            </section>
+
+            <section>
+                <SectionLabel>Font weights (3 voices)</SectionLabel>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <Typo.P style={{ margin: 0, fontWeight: "var(--ba-font-weight-regular)" }}>
+                        <Typo.Small>[regular · 400]</Typo.Small>{" "}
+                        The quick brown fox jumps over the lazy dog
+                    </Typo.P>
+                    <Typo.P style={{ margin: 0, fontWeight: "var(--ba-font-weight-medium)" }}>
+                        <Typo.Small>[medium · 500]</Typo.Small>{" "}
+                        The quick brown fox jumps over the lazy dog
+                    </Typo.P>
+                    <Typo.P style={{ margin: 0, fontWeight: "var(--ba-font-weight-bold)" }}>
+                        <Typo.Small>[bold · 700]</Typo.Small>{" "}
+                        The quick brown fox jumps over the lazy dog
+                    </Typo.P>
+                </div>
+            </section>
+
+            <section>
+                <SectionLabel>Font sizes (00 – 8)</SectionLabel>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {(["00", "0", "1", "2", "3", "4", "5", "6", "7", "8"] as const).map((step) => (
+                        <div
+                            key={step}
+                            style={{
+                                margin: 0,
+                                fontSize: `var(--ba-font-size-${step})`,
+                                fontFamily: "var(--ba-font-mono)",
+                            }}
+                        >
+                            [{step}] The quick brown fox
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <section>
+                <SectionLabel>Line heights</SectionLabel>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    <Typo.P style={{ margin: 0, lineHeight: "var(--ba-font-lineheight-tight)" }}>
+                        <Typo.Small>[tight · display]</Typo.Small>{" "}
+                        Livery applies your chosen theme across all configured developer tools
+                        simultaneously.
+                    </Typo.P>
+                    <Typo.P style={{ margin: 0, lineHeight: "var(--ba-font-lineheight-ui)" }}>
+                        <Typo.Small>[ui · mono UI]</Typo.Small>{" "}
+                        Livery applies your chosen theme across all configured developer tools
+                        simultaneously.
+                    </Typo.P>
+                    <Typo.P style={{ margin: 0, lineHeight: "var(--ba-font-lineheight-body)" }}>
+                        <Typo.Small>[body · prose]</Typo.Small>{" "}
+                        Livery applies your chosen theme across all configured developer tools
+                        simultaneously.
+                    </Typo.P>
+                    <Typo.P style={{ margin: 0, lineHeight: "var(--ba-font-lineheight-code)" }}>
+                        <Typo.Small>[code · previews]</Typo.Small>{" "}
+                        Livery applies your chosen theme across all configured developer tools
+                        simultaneously.
+                    </Typo.P>
+                </div>
+            </section>
+
+            <section>
+                <SectionLabel>Letter spacing</SectionLabel>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <Typo.P
+                        style={{ margin: 0, letterSpacing: "var(--ba-font-letterspacing-display)" }}
+                    >
+                        <Typo.Small>[display]</Typo.Small> THE QUICK BROWN FOX
+                    </Typo.P>
+                    <Typo.P
+                        style={{ margin: 0, letterSpacing: "var(--ba-font-letterspacing-label)" }}
+                    >
+                        <Typo.Small>[label]</Typo.Small> THE QUICK BROWN FOX
+                    </Typo.P>
+                    <Typo.P
+                        style={{ margin: 0, letterSpacing: "var(--ba-font-letterspacing-wide)" }}
+                    >
+                        <Typo.Small>[wide]</Typo.Small> THE QUICK BROWN FOX
+                    </Typo.P>
+                    <Typo.P
+                        style={{ margin: 0, letterSpacing: "var(--ba-font-letterspacing-chip)" }}
+                    >
+                        <Typo.Small>[chip]</Typo.Small> THE QUICK BROWN FOX
                     </Typo.P>
                 </div>
             </section>
@@ -350,14 +438,14 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
         <div
             style={{
-                fontFamily: "var(--lvr-font-family-ui)",
+                fontFamily: "var(--ba-font-mono)",
                 fontSize: 11,
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
-                color: "var(--lvr-color-fg-subtle)",
+                color: "var(--ba-color-fg-subtle)",
                 marginBottom: 24,
-                borderBottom: "3px solid var(--lvr-color-fg-subtle)",
+                borderBottom: "3px solid var(--ba-color-fg-subtle)",
             }}
         >
             {children}

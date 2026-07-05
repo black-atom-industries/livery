@@ -171,7 +171,7 @@ fn main() {
     }
 
     // Sort by avg time descending (slowest first)
-    lines.sort_by(|a, b| b.1.cmp(&a.1));
+    lines.sort_by_key(|line| std::cmp::Reverse(line.1));
 
     let (total_avg, total_min, total_max) = stats(&total_times);
 

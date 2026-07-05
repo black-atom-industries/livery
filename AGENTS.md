@@ -10,6 +10,9 @@ _how_ to do it — all OS operations.
 
 No direct file system access from TypeScript. No shell commands from TypeScript.
 
+Livery develops against the **sibling `../core` checkout** via the `links` field in `deno.json` —
+clone [black-atom-industries/core](https://github.com/black-atom-industries/core) alongside livery.
+
 See [DESIGN.md](DESIGN.md) for config decisions, updater flow, and data architecture.
 
 ## Shared Language

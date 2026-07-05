@@ -12,23 +12,30 @@
 
 .header {
     flex-shrink: 0;
-    padding: var(--lvr-size-4) var(--lvr-size-6);
-    border-bottom: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--ba-size-4) var(--ba-size-6);
+    border-bottom: var(--ba-border-subtle);
 }
 
 .main {
+    display: flex;
     flex: 1;
     min-height: 0;
 }
 
-.progress {
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Apply Rail slot — permanently docked, hard 1px left seam. */
+.rail {
     flex-shrink: 0;
-    padding: var(--lvr-size-2) var(--lvr-size-6);
-    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    width: 280px;
+    border-left: var(--ba-border-subtle);
 }
 
 .footer {
     flex-shrink: 0;
-    padding: var(--lvr-size-2) var(--lvr-size-6);
-    border-top: var(--lvr-border-size-1) solid var(--lvr-color-bg-hint);
+    padding: var(--ba-size-2) var(--ba-size-6);
+    border-top: var(--ba-border-subtle);
 }

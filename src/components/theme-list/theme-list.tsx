@@ -1,16 +1,7 @@
-import { ChevronRight, Moon, Sun } from "lucide-react";
-import { cva } from "cva";
-import type { ThemeGroup } from "../../lib/themes.ts";
+import { formatCollectionTitle, type ThemeGroup } from "../../lib/themes.ts";
+import { ListRow } from "../primitives/list-row/list-row.tsx";
+import { SectionHeader } from "../primitives/section-header/section-header.tsx";
 import styles from "./theme-list.module.css";
-
-const itemVariants = cva({
-    base: styles.item,
-    variants: {
-        selected: {
-            true: styles.selected,
-        },
-    },
-});
 
 interface ThemeListProps {
     groups: ThemeGroup[];
@@ -22,44 +13,47 @@ export function ThemeList({ groups, selectedIndex, onSelect }: ThemeListProps) {
     let flatIndex = 0;
 
     return (
-        <div data-component="theme-list">
+        <div data-component="theme-list" className={styles.root}>
             {groups.map((group) => {
-                const items = group.themes.map((entry) => {
+                const rows = group.themes.map((theme) => {
                     const index = flatIndex++;
+
                     const isSelected = index === selectedIndex;
-                    const name = entry.meta.name;
-                    const AppearanceIcon = entry.meta.appearance === "dark" ? Moon : Sun;
 
                     return (
-                        <button
-                            key={entry.meta.key}
-                            ref={isSelected
+                        <ListRow
+                            key={theme.meta.key}
+                            selected={isSelected}
+                            name={theme.meta.name}
+                            pips={paletteAccentPips(theme.palette)}
+                            appearance={theme.meta.appearance === "dark" ? "D" : "L"}
+                            onClick={() => onSelect(index)}
+                            rootRef={isSelected
                                 ? (el) => el?.scrollIntoView({ block: "nearest" })
                                 : undefined}
-                            type="button"
-                            onClick={() => onSelect(index)}
-                            className={itemVariants({ selected: isSelected })}
-                        >
-                            <span className={styles.cursor}>
-                                {isSelected && <ChevronRight size={14} />}
-                            </span>
-                            {name}
-                            <span className={styles.icon}>
-                                <AppearanceIcon size={12} />
-                            </span>
-                        </button>
+                        />
                     );
                 });
 
+                const label = `${
+                    formatCollectionTitle(group.collectionKey, group.label)
+                } (${group.themes.length})`;
+
                 return (
                     <div key={group.collectionKey} className={styles.group}>
-                        <div className={styles.groupLabel}>
-                            {group.label} ({group.themes.length})
+                        <div className={styles.sectionHeader}>
+                            <SectionHeader>{label}</SectionHeader>
                         </div>
-                        {items}
+                        {rows}
                     </div>
                 );
             })}
         </div>
     );
+}
+
+function paletteAccentPips(
+    palette: { red: string; yellow: string; green: string; magenta: string },
+) {
+    return [palette.red, palette.yellow, palette.green, palette.magenta];
 }

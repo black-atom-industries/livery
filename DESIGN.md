@@ -1,152 +1,160 @@
-# Livery UI Design Language
+# Livery UI Design Language — "Warm Precision"
 
 ## Summary
 
-Design language and screen specifications for Black Atom Livery — a theme management desktop app
-(Tauri v2). The visual identity draws from technical documentation, industrial datasheets, and
-vintage space-program aesthetics. The app serves as a "vault terminal" for browsing and deploying
-color themes across developer tools.
+Design language for Black Atom Livery — a theme management desktop app (Tauri v2). 1970s NASA /
+DHARMA / technical-datasheet visual language: bordered boxes, monospace labels, vintage authority.
+Warmth comes from color temperature and copy, never from soft shapes.
+
+**Canonical spec:** [`docs/design-system/`](docs/design-system/README.md) — a vendored, renderable
+snapshot of the Black Atom Design project (tokens, 17 component specs, guideline specimens, the
+exploration board). This document records the adopted decisions and the rules of the language; where
+detail matters (exact tokens, component anatomy), the reference wins.
+
+Adopted via epic [#49](https://github.com/black-atom-industries/livery/issues/49).
 
 ## Design DNA
 
 ### Aesthetic References
 
 - DHARMA Initiative (Lost) — mysterious corporate identity, vintage badges
-- NASA 1970s identity — Futura mixed with technical type, worm/meatball duality
-- Berkeley Mono specimen — box-drawing diagrams, hatched shadows, RFC-style schematics
-- The existing black-atom.industries website — bordered sections, monospace, datasheet layout
+- NASA 1970s identity — technical type, worm/meatball duality
+- Technical datasheets / RFC-style schematics — the existing black-atom.industries website shares
+  this language (bordered sections, monospace, datasheet layout)
+- Reference images: `docs/design-system/reference/refs/`
 
 ### Typography — Three Voices
 
-- **Display (Space Grotesk Bold):** Headlines, theme names, step numbers, page titles. Tight
-  tracking, uppercase or title case. Provides institutional authority and visual weight. Used
-  sparingly — the exception, not the default.
-- **Body (TBD — IBM Plex Sans or Geist):** Descriptions, documentation, multi-sentence content.
-  Relaxed leading, max 65ch width. Neutral and readable for sustained reading.
-- **Mono (JetBrains Mono — interim):** ALL labels, navigation, status text, section headers, form
-  fields, metadata, keyboard shortcuts. Uppercase with letterspacing for section headers. This is
-  the default voice of the interface — anything that is part of the chrome uses monospace. Berkeley
-  Mono (TX-02) was the original visual target, but its license prohibits app bundling and
-  redistribution (EULA §1.14, §9) — licensing inquiry (black-atom-industries/ui#5) did not resolve,
-  so JetBrains Mono ships as the interim mono voice. Full type-stack refinement (mono + body) is
-  deferred to the upcoming Claude Design pass.
+Vendored via Fontsource (static weights 400/500/700, family names match the tokens):
 
-**Hierarchy through contrast:** Pair massive display headlines with tiny monospace metadata labels
-to create the "technical datasheet" effect.
+- **Display (Space Grotesk 700):** Headlines, theme names, page titles. Tight tracking (−0.01em),
+  uppercase or Title Case. Used sparingly — the exception, not the default.
+- **Mono (Iosevka) — the DEFAULT interface voice:** ALL labels, navigation, status text, section
+  headers, form values, metadata, keyboard hints. Uppercase section labels carry 0.14em
+  letterspacing. Anything that is chrome is mono.
+- **Body (IBM Plex Sans):** Prose only — descriptions, help text. 1.7 leading, ≤65ch measure,
+  sentence case.
+
+**Hierarchy through contrast:** massive display next to tiny mono metadata — the datasheet effect.
+
+History: Berkeley Mono (TX-02) was the original mono target; its license prohibits app bundling
+(EULA §1.14, §9; black-atom-industries/ui#5 unresolved). JetBrains Mono served as interim until the
+design pass settled on Iosevka.
 
 ### Color System
 
-- **Chrome is monochrome.** Dark warm grays on dark mode, warm off-whites on light mode.
-- **Accent colors:** Muted green for synced/active indicators. Optionally muted purple for
-  selection/focus states.
-- **Themes are the color.** Palette swatches and previews bring color. Chrome never competes.
-- **Light mode:** Paper-like warmth to backgrounds (not pure white, not olive/yellow). Warm cream
-  inspired by aged cotton paper. The `terra-fall` theme family in `@black-atom/core` (hue ~50) is
-  the closest tonal reference. The `default` family (hue 240) is too cool.
-- **Dark mode:** Deep teal-tinted charcoal (not pure black). The `default-dark` tokens (hue 195)
-  work well here.
-- **All colors import from `@black-atom/core` via JSR** at implementation time — no hardcoded hex
-  values in components.
+- **Chrome is warm monochrome.** Warm charcoal in dark (`oklch ~0.18, hue 30`), warm cream in light
+  (`~0.95, hue 30`). No pure black or white.
+- **One accent.** Muted green (`--ba-color-fg-positive`) for positive/synced/focus/selection.
+  Intents: muted amber (warn), rust (negative), slate blue (info). Intents are foreground-only —
+  pips, labels, outlines; there are no intent background tokens.
+- **Themes are the color.** Saturated color appears exclusively as theme content — swatches, bands,
+  palette pips, code previews. Chrome never competes.
+- **Chrome re-tints at runtime.** The ThemeProvider overrides the `--ba-*` bg/fg tokens with the
+  selected theme's `ui` palette (`src/lib/tokens.ts` documents the role mapping). Borders and focus
+  derive from foreground via `color-mix`, so they follow automatically. Components consume tokens,
+  never hex.
+
+### Tokens
+
+Single brand-wide namespace: `--ba-*`, defined in `src/styles/tokens/` — the five category files
+(colors, typography, spacing, borders, motion) mirror `docs/design-system/reference/tokens/` 1:1 and
+change only via design re-import. `layers.css` (z-index) is app-local. There are deliberately NO
+shadow or radius scales — banned properties have no tokens.
 
 ### Surfaces & Borders
 
-- Bordered panels with visible 1px solid edges — the datasheet box aesthetic.
-- No rounded corners (or minimal, 2px max). Squared-off is more technical.
-- Subtle hatched/dotted patterns as decorative texture on non-interactive surfaces.
-- Box-drawing-inspired dividers and separators where appropriate.
+- Depth via tonal layering only: recessed (inputs/code) < default (page) < subtle (panels/bars) <
+  hint (selection). No shadows, no gradients, no blur.
+- 1px solid borders everywhere — the datasheet box aesthetic. Borders derive from foreground (18% /
+  10% / 45% mixes), so they re-tint with the theme.
+- **0px border-radius.** Sole exception: the brand dot (`--ba-radius-dot`).
 
-### Recurring Motifs
+### States
 
-- **The dot/circle:** Logo mark (a literal black dot = black atom), wordmark "o" replacement, bullet
-  indicators.
-- **Uppercase mono labels** with horizontal rules underneath (website section header pattern).
-- **Bordered boxes** as the primary container pattern.
+- Hover = one surface tier lighter (80ms ease-out)
+- Keyboard focus = 1px positive outline at 2px offset (`--ba-focus-outline`/`--ba-focus-offset`)
+- Selection = hint surface + 2px positive left edge (`--ba-selection-edge`), or full contrast
+  inversion
+- Editing = positive border + block caret
 
-### Design Register Split
+### Motion
 
-- **Setup Wizard & Settings:** Fully technical/datasheet. Pure utility.
-- **Main View:** Hybrid — technical chrome on the side panels, more atmospheric and spacious in the
-  center specimen area where themes are displayed.
+Austere. ≤150ms ease-out for state changes; panel expand/collapse caps at 240ms. Progress bars are
+3px and animate width only. No bounces, no entrance animations, no fades over 200ms.
+
+### Iconography
+
+**There are no decorative icons.** Unicode glyphs as functional symbols: `›` (selection cursor), `»`
+(prompt), `■` (status), `↑ ↓ ⏎` (keys), `◐ ● ○` (appearance), `·` (separator). Square pips (plain
+divs) for status; bordered letter tags (`D`/`L`) for appearance. No icon font, no SVG icon set, no
+emoji. If a glyph can't say it, a mono label does.
+
+### Signature Motifs
+
+- Bracket actuators: `[ LABEL ]` — the visual signature for interactive elements
+- Square status pips (8px) + mono label; mini palette pips (4×7px) on list rows
+- Block cursor `»` prompts
+- `n/m` counters (`SYNCED 8/8`, `2/24`)
+- Uppercase mono section labels with a hairline rule to the right
+- Document/revision codes (`DOC LVR-JPN-KY-D · REV 03`)
+
+## Copy Register
+
+Technical documentation voice. Terse, factual, confident — instrument-panel captions, not marketing.
+
+- **Casing:** chrome text is UPPERCASE mono with letterspacing (`SEMANTIC · FEEDBACK`,
+  `APPLYING KOYO YORU`). Body prose is sentence case. Theme names are Title Case.
+- **Separators:** middle dot `·` joins facts; em-dash `—` introduces qualifiers
+  (`■ APPLIED — KOYO YORU`). Counts as `n/m`.
+- **Voice:** imperative and impersonal. "Select any theme with j/k and press ⏎." Never "we", rarely
+  "you". No exclamation marks.
+- **Keyboard-first:** every action names its key (`[ r RETRY FAILED ]`, `esc DISMISS`). The footer
+  always shows the key vocabulary.
+- Personality in small doses: taglines (`PAINT YOUR COCKPIT`), document codes.
 
 ## Component Patterns
 
-Reusable patterns extracted from screen designs. These map to the component architecture: Dumb
-Components own styling, Containers/Routes own data, Partials compose without styling, Layouts handle
-structural arrangement.
-
-### Buttons — "Actuator" Style
-
-```
-[ PRIMARY_ACTION ]     — Filled contrast background, inverse text, mono uppercase
-[ SECONDARY_ACTION ]   — 1px border, transparent fill, mono uppercase
-[ DISABLED ]           — Muted fill, reduced opacity text
-```
-
-Bracket notation `[ LABEL ]` is the visual signature for interactive elements. No rounded corners.
-No glows. No gradients.
-
-### Status Indicators
-
-Square pip (not circle) + monospace label. Three states:
-
-- Green pip + "SYNCED" / "VALID" / "ACTIVE"
-- Purple pip + "SELECTED" / "FOCUSED" (if a second accent is added)
-- Gray pip + "INACTIVE" / "DISABLED"
-
-### Section Headers
-
-Uppercase monospace label with horizontal rule underneath. Optional metadata right-aligned on the
-same line. This is the primary structural pattern — borrowed from the website.
-
-### Data Panels / Cards
-
-1px border, squared corners. Uppercase mono header with rule. Key-value content pairs in monospace
-(label left, value right). Optional metadata footer (document ID, revision, classification).
-
-### Input Fields
-
-Flat surface background (one tier darker than page). 1px border. Label above in mono label style.
-All user input renders in monospace. Placeholder text in disabled color.
-
-### Metadata Rows
-
-Uppercase label above value in datasheet pattern: `APPEARANCE | COLLECTION | VERSION`. Used in theme
-specimen and settings views.
+The 17 primitives are specified in `docs/design-system/reference/components/` (actions, forms,
+display, containers) — each with `.jsx` spec, prop types, and prompt notes. They map to the
+component architecture: dumb components own styling, routes own data and orchestration, layouts
+handle structure.
 
 ## Anti-Patterns (Banned)
 
-- No rounded corners (0px border-radius is the rule — squared-off is more technical)
-- No soft drop shadows (depth through tonal layering only)
-- No gradients on surfaces
-- No saturated or neon accent colors in chrome
+- No border-radius (0px is the rule; sole exception: the brand dot)
+- No shadows of any kind (depth through tonal layering only)
+- No gradients, no blur/transparency effects
+- No saturated or neon color in chrome — only theme content brings color
 - No pure black (`#000000`) or pure white (`#FFFFFF`)
 - No emoji in the interface
-- No decorative icons — prefer text labels or geometric glyphs
-- No "vibrant" colors in chrome — only theme content brings color
-- No centered hero layouts (prefer asymmetric, left-aligned)
-- No generic AI copywriting ("Elevate", "Seamless", "Next-Gen")
-- No filler UI text ("Scroll to explore", bouncing chevrons)
+- No icons — unicode glyphs + mono labels only
+- No centered hero layouts (asymmetric, left-aligned; split panels with hard 1px seams)
+- No hardcoded hex in components — chrome consumes `--ba-*` tokens
+- No generic AI copywriting ("Elevate", "Seamless", "Next-Gen"), no filler UI text
+- No bounces, entrance animations, or slow fades
 
 ## Screens
 
-### Main View — Theme Browser
+Canonical compositions live on the exploration board
+(`docs/design-system/reference/Livery Explorations.dc.html`) — index: 2a main view (dark + light),
+2b filter popup, 3a adapter settings, 3b general settings, 3c apply progress, 3d empty & error, 3e
+component inventory, 4a color model / token map. The static UI-kit recreation of the main view is
+`docs/design-system/reference/ui_kits/livery/index.html`.
 
-Split-panel layout. Left: search/filter bar + theme list grouped by collection. Right: selected
-theme preview with color swatches, metadata, and description. Bottom status bar with keyboard
-shortcuts and sync state. See `design/drafts/` for visual references.
-
-### Setup Wizard / Settings
-
-TBD — to be designed in a future iteration.
+- **Main View:** split panel — grouped theme list (collection headers, palette pips, `n/m` counts) |
+  theme datasheet (display-voice name, swatch bands/grids, KV rows, code preview, doc-code footer).
+  Keyboard hints in the footer.
+- **Settings:** disclosure panels of forms primitives, same datasheet language.
+- **Apply progress / empty / error:** per-updater status pips, `n/m` counters, named recovery keys.
 
 ## Logo Direction
 
-No official logo yet. A black dot (filled circle). Literal representation of "black atom." Already
-embedded in the wordmark as the "o" in "atom." Works at every scale: favicon, app icon, watermark,
-badge.
+No official logo yet. The wordmark sets `BLACK AT●M` in Space Grotesk 700 with a 0.62em filled
+circle standing in for the O — the literal "black atom", and the only circle in the system. Do not
+draw any other mark.
 
-## Light / Dark Mode
+## Light / Dark Appearance
 
-Both are first-class. The design must work equally well in both appearances — the chrome adapts, the
-structure stays identical. This is especially important for a theme app that literally serves both
-appearances.
+Both first-class. Appearance switching affects chrome tokens only (`[data-ba-color-scheme]` +
+`light-dark()`); theme palettes remain content. The structure never changes between appearances.

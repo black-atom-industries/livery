@@ -32,6 +32,13 @@ async updateApp(app: AppName, theme: ThemeContext) : Promise<UpdateResult> {
  */
 async updateSystemAppearance(appearance: string) : Promise<UpdateResult> {
     return await TAURI_INVOKE("update_system_appearance", { appearance });
+},
+/**
+ * Check one adapter's config_path: does it exist, and does its
+ * match_pattern hit? Read-only — never writes.
+ */
+async verifyAppPath(app: AppName) : Promise<AppPathVerification> {
+    return await TAURI_INVOKE("verify_app_path", { app });
 }
 }
 
@@ -50,6 +57,19 @@ export type AppConfig = { enabled?: boolean; config_path: string; themes_path?: 
  * Supported app names. TypeScript bindings are auto-generated via tauri-specta.
  */
 export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta" | "lazygit" | "obsidian" | "helm"
+/**
+ * Result of `verify_app_path` — backs the settings screen's [ VERIFY PATH ].
+ */
+export type AppPathVerification = { app: string; exists: boolean; 
+/**
+ * `Some(hit)` when the adapter has a match_pattern to check; `None` for
+ * structural patchers (YAML/JSONC merge) where existence is the whole check.
+ */
+pattern_matches: boolean | null; 
+/**
+ * Why verification itself could not run (bad regex, unreadable file).
+ */
+message?: string | null }
 export type Config = { system_appearance: boolean; keymappings?: Keymappings; apps: { [key in AppName]: AppConfig } }
 export type Keymappings = { toggle_window: string }
 /**

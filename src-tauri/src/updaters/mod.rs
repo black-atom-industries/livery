@@ -174,6 +174,57 @@ pub fn dispatch_update(
     }
 }
 
+/// Result of `verify_app_path` — backs the settings screen's [ VERIFY PATH ].
+#[derive(Debug, Serialize, Type)]
+pub struct AppPathVerification {
+    pub app: String,
+    pub exists: bool,
+    /// `Some(hit)` when the adapter has a match_pattern to check; `None` for
+    /// structural patchers (YAML/JSONC merge) where existence is the whole check.
+    pub pattern_matches: Option<bool>,
+    /// Why verification itself could not run (bad regex, unreadable file).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+/// Check one adapter's config_path: does it exist, and does its
+/// match_pattern hit? Read-only — never writes.
+#[tauri::command]
+#[specta::specta]
+pub async fn verify_app_path(app: AppName) -> AppPathVerification {
+    let app_str = app.as_str();
+
+    let mut config = config_io::read_config_from_disk();
+    config_io::expand_app_paths(&mut config);
+
+    let Some(app_config) = config.apps.get(&app) else {
+        return AppPathVerification {
+            app: app_str.to_string(),
+            exists: false,
+            pattern_matches: None,
+            message: Some("App not found in config".to_string()),
+        };
+    };
+
+    match file_ops::verify::verify_path(
+        &app_config.config_path,
+        app_config.match_pattern.as_deref(),
+    ) {
+        Ok(v) => AppPathVerification {
+            app: app_str.to_string(),
+            exists: v.exists,
+            pattern_matches: v.pattern_matches,
+            message: None,
+        },
+        Err(e) => AppPathVerification {
+            app: app_str.to_string(),
+            exists: false,
+            pattern_matches: None,
+            message: Some(e),
+        },
+    }
+}
+
 /// Toggle system-wide dark/light mode. Separate from update_app because system
 /// appearance is not an app with AppConfig — it's a standalone boolean toggle.
 #[tauri::command]

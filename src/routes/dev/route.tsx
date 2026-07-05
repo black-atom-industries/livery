@@ -34,7 +34,7 @@ function Component() {
                         <div
                             style={{
                                 padding: "16px 12px 12px",
-                                fontFamily: "var(--lvr-font-family-ui)",
+                                fontFamily: "var(--ba-font-mono)",
                                 fontSize: 10,
                                 fontWeight: 600,
                                 textTransform: "uppercase",
@@ -54,10 +54,10 @@ function Component() {
                                         fontSize: 12,
                                         textDecoration: "none",
                                         color: currentPath === s.to
-                                            ? "var(--lvr-color-fg-accent)"
-                                            : "var(--lvr-color-fg-subtle)",
+                                            ? "var(--ba-color-fg-positive)"
+                                            : "var(--ba-color-fg-subtle)",
                                         backgroundColor: currentPath === s.to
-                                            ? "var(--lvr-color-bg-accent)"
+                                            ? "var(--ba-color-bg-hint)"
                                             : "transparent",
                                     }}
                                 >
@@ -72,13 +72,13 @@ function Component() {
                         <div
                             style={{
                                 padding: "16px 12px 12px",
-                                fontFamily: "var(--lvr-font-family-ui)",
+                                fontFamily: "var(--ba-font-mono)",
                                 fontSize: 10,
                                 fontWeight: 600,
                                 textTransform: "uppercase",
                                 letterSpacing: "0.1em",
-                                color: "var(--lvr-color-fg-subtle)",
-                                borderBottom: "1px solid var(--border-default, var(--primary-d20))",
+                                color: "var(--ba-color-fg-subtle)",
+                                borderBottom: "var(--ba-border)",
                             }}
                         >
                             Theme
@@ -100,10 +100,10 @@ function Component() {
                                         cursor: "pointer",
                                         border: "none",
                                         color: t.meta.key === theme.meta.key
-                                            ? "var(--lvr-color-fg-accent)"
-                                            : "var(--lvr-color-fg-subtle)",
+                                            ? "var(--ba-color-fg-positive)"
+                                            : "var(--ba-color-fg-subtle)",
                                         backgroundColor: t.meta.key === theme.meta.key
-                                            ? "var(--lvr-color-bg-accent)"
+                                            ? "var(--ba-color-bg-hint)"
                                             : "transparent",
                                     }}
                                 >

@@ -5,30 +5,30 @@
     display: grid;
     grid-template-columns: var(--nav-width) 1fr var(--aside-width);
     min-height: 100%;
-    font-family: var(--lvr-font-family-ui);
-    background-color: var(--lvr-color-bg-default);
-    color: var(--lvr-color-fg-default);
+    font-family: var(--ba-font-mono);
+    background-color: var(--ba-color-bg-default);
+    color: var(--ba-color-fg-default);
 }
 
 .nav,
 .aside {
-    background-color: var(--lvr-color-bg-subtle);
-    color: var(--lvr-color-fg-default);
+    background-color: var(--ba-color-bg-subtle);
+    color: var(--ba-color-fg-default);
 
     display: flex;
     flex-direction: column;
-    padding: var(--lvr-size-2);
+    padding: var(--ba-size-2);
     overflow: auto;
 }
 
 .nav {
-    border-right: var(--lvr-size-1) solid var(--lvr-color-fg-subtle);
+    border-right: var(--ba-border);
 }
 
 .main {
-    padding: var(--lvr-size-4);
+    padding: var(--ba-size-4);
 }
 
 .aside {
-    border-left: var(--lvr-size-1) solid var(--lvr-color-fg-subtle);
+    border-left: var(--ba-border);
 }
