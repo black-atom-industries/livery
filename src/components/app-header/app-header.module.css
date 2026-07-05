@@ -12,6 +12,13 @@
     font-family: var(--ba-font-mono);
 }
 
+/* The undecorated window drags by its header. data-tauri-drag-region only
+   fires when the mousedown target IS the .root element, so the children
+   (static chrome text, nothing interactive) must let events pass through. */
+.root > * {
+    pointer-events: none;
+}
+
 .wordmarkRow {
     display: flex;
     align-items: baseline;
