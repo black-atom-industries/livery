@@ -46,6 +46,15 @@ const SETTINGS_ADAPTERS_FIXTURE: Config = {
 };
 
 const APPLY_RAIL_FIXTURES: Record<string, UpdateResult[]> = {
+    idle: [
+        { app: "nvim", status: "pending", duration_ms: null },
+        { app: "tmux", status: "pending", duration_ms: null },
+        { app: "ghostty", status: "pending", duration_ms: null },
+        { app: "delta", status: "pending", duration_ms: null },
+        { app: "lazygit", status: "pending", duration_ms: null },
+        { app: "obsidian", status: "pending", duration_ms: null },
+        { app: "helm", status: "pending", duration_ms: null },
+    ],
     degraded: [
         { app: "nvim", status: "done", duration_ms: 12 },
         { app: "tmux", status: "done", duration_ms: 8 },
@@ -406,21 +415,34 @@ function Page() {
             </div>
 
             <SectionLabel>
-                ApplyRail — board 3f states: running · success · partial failure · degraded
+                ApplyRail — idle · running · success · partial failure · degraded
             </SectionLabel>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginBottom: 32 }}>
                 <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
                     <ApplyRail
+                        mode="idle"
+                        themeName="KOYO YORU"
+                        results={APPLY_RAIL_FIXTURES.idle}
+                    />
+                </div>
+                <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
+                    <ApplyRail
+                        mode="active"
                         themeName="KOYO YORU"
                         results={APPLY_RAIL_FIXTURES.running}
                         cursorApp="delta"
                     />
                 </div>
                 <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
-                    <ApplyRail themeName="KOYO YORU" results={APPLY_RAIL_FIXTURES.success} />
+                    <ApplyRail
+                        mode="active"
+                        themeName="KOYO YORU"
+                        results={APPLY_RAIL_FIXTURES.success}
+                    />
                 </div>
                 <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
                     <ApplyRail
+                        mode="active"
                         themeName="KOYO YORU"
                         results={APPLY_RAIL_FIXTURES.partialFailure}
                         cursorApp="obsidian"
@@ -431,6 +453,7 @@ function Page() {
                 </div>
                 <div style={{ height: 400, border: "1px solid var(--ba-color-fg-hint)" }}>
                     <ApplyRail
+                        mode="active"
                         themeName="KOYO YORU"
                         results={APPLY_RAIL_FIXTURES.degraded}
                         cursorApp="ghostty"

@@ -9,12 +9,16 @@ import type { AppName } from "../../bindings.ts";
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
 import { ApplyRail } from "../../components/apply-rail/index.ts";
-import { Button } from "../../components/primitives/button/button.tsx";
 import { KeyHint } from "../../components/primitives/key-hint/key-hint.tsx";
 import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx";
 import { themeToStyleSheet } from "../../lib/tokens.ts";
 import { getFailedUpdaters, mergeUpdateResults, summarizeApply } from "../../lib/progress.ts";
-import { applyTheme, createUpdaters, getEnabledApps } from "../../lib/updaters.ts";
+import {
+    applyTheme,
+    createUpdaters,
+    getEnabledApps,
+    type UpdateResult,
+} from "../../lib/updaters.ts";
 import { useConfig } from "../../queries/use-config.ts";
 import { appStore } from "../../store/app.ts";
 import styles from "./route.module.css";
@@ -51,8 +55,27 @@ function AppLayout() {
     const env = currentTheme.meta.appearance.toUpperCase();
 
     const summary = summarizeApply(updaterResults);
-    const railOpen = phase !== "picking" && updaterResults.length > 0;
-    const railKeysActive = railOpen && !isSettings;
+    const railKeysActive = phase !== "picking" && !isSettings;
+
+    // The rail is permanently docked. Idle (nothing applied yet) previews
+    // the enabled adapters as pending rows — what an apply will touch.
+    const railMode = phase !== "picking"
+        ? "active" as const
+        : updaterResults.length > 0
+        ? "settled" as const
+        : "idle" as const;
+    const idleRows = useMemo<UpdateResult[]>(
+        () =>
+            config.query.data
+                ? getEnabledApps(config.query.data.apps).map(([app]) => ({
+                    app,
+                    status: "pending",
+                    duration_ms: null,
+                }))
+                : [],
+        [config.query.data],
+    );
+    const railResults = updaterResults.length > 0 ? updaterResults : idleRows;
 
     // Rail cursor + expansion. The cursor follows the running row, then the
     // first fault, until j/k takes over; a new apply pass resets both.
@@ -86,14 +109,15 @@ function AppLayout() {
         setExpandedApp((current) => (current === target ? null : target));
     };
 
-    const dismissRail = () => appStore.setState((s) => ({ ...s, phase: "picking" }));
-    const reopenRail = () => appStore.setState((s) => ({ ...s, phase: "done" }));
+    // The rail never hides — settling only hands the keyboard back to the
+    // picking list; the last results stay on display.
+    const settleRail = () => appStore.setState((s) => ({ ...s, phase: "picking" }));
 
-    // Clean success holds the ■ APPLIED beat, then dismisses itself —
-    // nothing to acknowledge. Faults never leave on a timer.
+    // Clean success holds the ■ APPLIED beat, then settles itself —
+    // nothing to acknowledge. Faults never settle on a timer.
     useEffect(() => {
         if (phase !== "done" || summary.kind !== "clean") return;
-        const beat = setTimeout(dismissRail, 1200);
+        const beat = setTimeout(settleRail, 1200);
         return () => clearTimeout(beat);
     }, [phase, summary.kind]);
 
@@ -132,34 +156,9 @@ function AppLayout() {
     useHotkey("J", () => railKeysActive && moveRailCursor(1));
     useHotkey("K", () => railKeysActive && moveRailCursor(-1));
     useHotkey("Enter", () => railKeysActive && toggleCursoredRow());
-    useHotkey("Escape", () => railKeysActive && phase !== "applying" && dismissRail());
-
-    // After dismissal the last result lives on as a footer pip; a fault pip
-    // carries [ a REOPEN RAIL ].
-    const lastResultVisible = phase === "picking" && updaterResults.length > 0 && !isSettings;
-    const lastResultFaulted = summary.kind === "error" || summary.kind === "degraded";
-    useHotkey("A", () => lastResultVisible && lastResultFaulted && reopenRail());
+    useHotkey("Escape", () => railKeysActive && phase !== "applying" && settleRail());
 
     const themeName = currentTheme.meta.name.toUpperCase();
-
-    const resultPip = summary.kind === "clean"
-        ? (
-            <StatusPip intent="ok">
-                APPLIED — {themeName} · {summary.okCount}/{summary.total}
-                {summary.totalDurationMs != null ? ` · ${summary.totalDurationMs}MS` : ""}
-            </StatusPip>
-        )
-        : (
-            <span className={styles.faultPip}>
-                <StatusPip intent={summary.errorCount > 0 ? "error" : "warn"}>
-                    {summary.total - summary.errorCount}/{summary.total} APPLIED ·{" "}
-                    {summary.errorCount > 0
-                        ? `${summary.errorCount} ERROR`
-                        : `${summary.degradedCount} DEGRADED`}
-                </StatusPip>
-                <Button hotkey="a" intent="ghost" onClick={reopenRail}>REOPEN RAIL</Button>
-            </span>
-        );
 
     return (
         <>
@@ -177,17 +176,16 @@ function AppLayout() {
                     <div className={styles.content}>
                         <Outlet />
                     </div>
-                    <aside className={styles.rail} data-open={railOpen}>
-                        {updaterResults.length > 0 && (
-                            <ApplyRail
-                                themeName={themeName}
-                                results={updaterResults}
-                                cursorApp={cursorResult?.app ?? null}
-                                expandedApp={expandedApp}
-                                onToggleRow={toggleCursoredRow}
-                                onRetryFailed={handleRetryFailed}
-                            />
-                        )}
+                    <aside className={styles.rail}>
+                        <ApplyRail
+                            mode={railMode}
+                            themeName={themeName}
+                            results={railResults}
+                            cursorApp={railMode === "active" ? cursorResult?.app ?? null : null}
+                            expandedApp={expandedApp}
+                            onToggleRow={toggleCursoredRow}
+                            onRetryFailed={handleRetryFailed}
+                        />
                     </aside>
                 </main>
                 <footer className={styles.footer}>
@@ -216,8 +214,6 @@ function AppLayout() {
                             ? <StatusPip intent="running">SAVING…</StatusPip>
                             : isSettings && justSaved
                             ? <StatusPip intent="ok">SAVED</StatusPip>
-                            : lastResultVisible
-                            ? resultPip
                             : <StatusPip intent="ok">READY</StatusPip>}
                     />
                 </footer>

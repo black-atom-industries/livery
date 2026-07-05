@@ -27,25 +27,11 @@
     min-width: 0;
 }
 
-/* Apply Rail slot — hard 1px left seam, compresses the content pane
-   while open. Dismissal is the spec'd 150ms ease-out width collapse
-   (intentional layout animation; the seam slides, content never squishes). */
+/* Apply Rail slot — permanently docked, hard 1px left seam. */
 .rail {
     flex-shrink: 0;
-    width: 0;
-    overflow: hidden;
-    transition: width var(--ba-duration-2) ease-out;
-}
-
-.rail[data-open="true"] {
     width: 280px;
     border-left: var(--ba-border-subtle);
-}
-
-.faultPip {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ba-size-4);
 }
 
 .footer {

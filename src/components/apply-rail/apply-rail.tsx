@@ -26,10 +26,20 @@ export function toAdapterRowStatus(result: UpdateResult): AdapterRowStatus {
     }
 }
 
+/**
+ * The rail is permanently docked; `mode` says who owns the keyboard:
+ * - "idle": nothing applied yet — enabled adapters preview as pending rows
+ * - "active": an apply ran, the rail owns j/k/⏎/esc
+ * - "settled": esc (or the clean beat) handed the keys back to the list;
+ *   the last results stay on display
+ */
+export type ApplyRailMode = "idle" | "active" | "settled";
+
 interface ApplyRailProps {
+    mode: ApplyRailMode;
     /** Theme name shown in the register line, e.g. "KOYO YORU". */
     themeName: string;
-    /** Live updater results, in run order — one AdapterStatusRow each. */
+    /** Updater results in run order — one AdapterStatusRow each. */
     results: UpdateResult[];
     /** App under the j/k cursor, or null for no cursor. */
     cursorApp?: UpdateResult["app"] | null;
@@ -42,18 +52,20 @@ interface ApplyRailProps {
 }
 
 /**
- * Apply Rail — right-docked vertical apply status, the ApplyStrip's
- * successor. Register header (status line + n/m + total ms + 3px track),
- * one AdapterStatusRow per updater in run order, and the rail's key
- * vocabulary as its footer. Clean success auto-dismisses after a ~1.2s
- * beat; error/degraded persists until esc — a fault needs a decision.
+ * Apply Rail — permanently docked right aside (280px, hard 1px seam), the
+ * ApplyStrip's successor. Register header (status line + n/m + total ms +
+ * 3px track), one AdapterStatusRow per updater in run order, and the rail's
+ * key vocabulary as its footer. Idle previews the enabled adapters; after
+ * an apply the results stay on display, only keyboard ownership moves.
  *
- * Purely presentational: cursor, expansion, hotkeys and dismissal live
+ * Purely presentational: cursor, expansion, hotkeys and phase handoff live
  * in the app-layout container.
  *
  * Spec: docs/design-system/reference/Livery Explorations.dc.html#3f
+ * (deviation per design review 2026-07-05: never hidden, no auto-collapse)
  */
 export function ApplyRail({
+    mode,
     themeName,
     results,
     cursorApp,
@@ -65,7 +77,9 @@ export function ApplyRail({
     const { kind, okCount, errorCount, degradedCount, completedCount, total, totalDurationMs } =
         summary;
 
-    const statusLine = kind === "running"
+    const statusLine = mode === "idle"
+        ? "READY"
+        : kind === "running"
         ? `APPLYING ${themeName}`
         : kind === "clean"
         ? `■ APPLIED — ${themeName}`
@@ -73,7 +87,7 @@ export function ApplyRail({
         ? `■ APPLIED · ${degradedCount} DEGRADED`
         : "■ APPLIED WITH ERRORS";
 
-    const counterLeft = kind === "running"
+    const counterLeft = mode === "idle" || kind === "running"
         ? `${completedCount}/${total}`
         : `${okCount + degradedCount}/${total} OK`;
 
@@ -83,14 +97,22 @@ export function ApplyRail({
         ? `${totalDurationMs} MS`
         : "";
 
-    const progressValue = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+    const progressValue = mode !== "idle" && total > 0
+        ? Math.round((completedCount / total) * 100)
+        : 0;
 
-    const vocabulary = kind === "clean"
-        ? "esc DISMISS · auto in 1.2s"
-        : `j/k ROWS · ⏎ ${expandedApp ? "COLLAPSE" : "DETAILS"} · r RETRY · esc DISMISS`;
+    const vocabulary = mode !== "active"
+        ? "⏎ APPLY"
+        : kind === "clean"
+        ? "esc BACK · auto in 1.2s"
+        : `j/k ROWS · ⏎ ${expandedApp ? "COLLAPSE" : "DETAILS"} · r RETRY · esc BACK`;
 
     return (
-        <div data-component="apply-rail" data-kind={kind} className={styles.root}>
+        <div
+            data-component="apply-rail"
+            data-kind={mode === "idle" ? "idle" : kind}
+            className={styles.root}
+        >
             <div className={styles.header}>
                 <span className={styles.statusLine}>{statusLine}</span>
                 <div className={styles.counters}>
