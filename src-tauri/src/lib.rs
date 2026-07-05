@@ -10,6 +10,7 @@ pub fn start_app() {
         config::commands::save_config,
         updaters::update_app,
         updaters::update_system_appearance,
+        updaters::verify_app_path,
     ]);
 
     #[cfg(debug_assertions)]
