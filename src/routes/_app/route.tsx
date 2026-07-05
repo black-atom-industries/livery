@@ -5,7 +5,6 @@ import { useStore } from "@tanstack/react-store";
 import { useMutationState } from "@tanstack/react-query";
 import { collectionOrder, themeMap } from "@black-atom/core";
 import denoConfig from "../../../deno.json" with { type: "json" };
-import type { AppName } from "../../bindings.ts";
 import { AppHeader } from "../../components/app-header/index.ts";
 import { AppFooter } from "../../components/app-footer/index.ts";
 import { ApplyRail } from "../../components/apply-rail/index.ts";
@@ -80,7 +79,7 @@ function AppLayout() {
     // Rail cursor + expansion. The cursor follows the running row, then the
     // first fault, until j/k takes over; a new apply pass resets both.
     const [manualCursor, setManualCursor] = useState<number | null>(null);
-    const [expandedApp, setExpandedApp] = useState<AppName | null>(null);
+    const [expandedApp, setExpandedApp] = useState<UpdateResult["app"] | null>(null);
     const [prevPhase, setPrevPhase] = useState(phase);
     if (phase !== prevPhase) {
         setPrevPhase(phase);
@@ -103,7 +102,7 @@ function AppLayout() {
         setManualCursor(Math.max(0, Math.min(updaterResults.length - 1, from + delta)));
     };
 
-    const toggleCursoredRow = (app?: AppName) => {
+    const toggleCursoredRow = (app?: UpdateResult["app"]) => {
         const target = app ?? (cursorResult?.status === "error" ? cursorResult.app : undefined);
         if (!target) return;
         setExpandedApp((current) => (current === target ? null : target));
