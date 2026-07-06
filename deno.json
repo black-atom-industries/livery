@@ -72,6 +72,7 @@
         "@black-atom/core": "jsr:@black-atom/core@^0.4.0",
         "cva": "npm:cva@^1.0.0-beta.4",
         "clsx": "npm:clsx@^2.1.1",
+        "culori": "npm:culori@4",
         "@deno/vite-plugin": "npm:@deno/vite-plugin@^1",
         "@fontsource/ibm-plex-sans": "npm:@fontsource/ibm-plex-sans@^5",
         "@fontsource/iosevka": "npm:@fontsource/iosevka@^5",
