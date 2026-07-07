@@ -1,4 +1,5 @@
 pub mod config;
+pub mod themes;
 pub mod updaters;
 
 use tauri_specta::{collect_commands, Builder};
