@@ -17,6 +17,33 @@ async saveConfig(config: Config) : Promise<Result<null, string>> {
 }
 },
 /**
+ * Download one adapter's theme files into the managed themes directory.
+ * Placement wiring that belongs to the adapter (e.g. zed symlinks) is part
+ * of this call, not a separate step.
+ */
+async downloadTheme(app: AppName) : Promise<DownloadResult> {
+    return await TAURI_INVOKE("download_theme", { app });
+},
+/**
+ * Read the managed themes manifest for the frontend's greeting gate and
+ * the settings SYNC display.
+ */
+async getThemesStatus() : Promise<ThemesStatus> {
+    return await TAURI_INVOKE("get_themes_status");
+},
+/**
+ * Persist the greeting's "continue without" choice so hand-managed setups
+ * aren't greeted on every launch.
+ */
+async dismissThemesGreeting() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("dismiss_themes_greeting") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
  * Single entry point for all app updates. The frontend calls this once per app.
  * 
  * Each invocation reads config from disk independently — this is inherent to the
@@ -52,6 +79,11 @@ async verifyAppPath(app: AppName) : Promise<AppPathVerification> {
 
 /** user-defined types **/
 
+export type AdapterThemesStatus = { downloaded: boolean; etag?: string | null; 
+/**
+ * Unix epoch seconds (u32 carries us to 2106; tauri-specta has no u64).
+ */
+fetched_at_epoch: number | null; file_count: number | null }
 export type AppConfig = { enabled?: boolean; config_path: string; themes_path?: string | null; match_pattern?: string | null; replace_template?: string | null }
 /**
  * Supported app names. TypeScript bindings are auto-generated via tauri-specta.
@@ -71,11 +103,25 @@ pattern_matches: boolean | null;
  */
 message?: string | null }
 export type Config = { system_appearance: boolean; keymappings?: Keymappings; apps: { [key in AppName]: AppConfig } }
+/**
+ * Outcome of one adapter's theme download. Shares `UpdateStatus` with the
+ * apply flow so the frontend reuses the same row-status mapping.
+ */
+export type DownloadResult = { app: string; status: UpdateStatus; message?: string | null; file_count: number | null; duration_ms: number | null }
 export type Keymappings = { toggle_window: string }
 /**
  * Theme metadata passed from the frontend.
  */
 export type ThemeContext = { theme_key: string; appearance: string; collection_key: string; theme_label: string | null }
+export type ThemesStatus = { 
+/**
+ * One entry per downloadable adapter (helm/delta have none).
+ */
+adapters: { [key in AppName]: AdapterThemesStatus }; any_downloaded: boolean; 
+/**
+ * The first-run greeting's "continue without" flag.
+ */
+dismissed: boolean }
 export type UpdateResult = { app: string; status: UpdateStatus; message?: string | null; 
 /**
  * Time taken by the updater in milliseconds.
