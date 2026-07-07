@@ -215,6 +215,8 @@ function Component() {
         if (filterCursor !== null) filterChips[filterCursor]?.toggle();
     });
     useHotkey("S", () => navigate({ to: "/settings", search: { section: "adapters" } }));
+    // Muscle-memory alias: ⌘,/Ctrl+, — the OS-native settings chord.
+    useHotkey("Mod+,", () => navigate({ to: "/settings", search: { section: "adapters" } }));
     useHotkey("Q", () => {
         // Only meaningful inside the Tauri shell; a plain browser has no window handle.
         getCurrentWindow().close().catch(() => {});
