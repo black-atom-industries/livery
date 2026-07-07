@@ -22,7 +22,9 @@
     font-size: var(--ba-font-size-6);
     font-weight: var(--ba-font-weight-bold);
     line-height: var(--ba-font-lineheight-tight);
-    color: var(--ba-color-fg-contrast);
+    /* fg-default, NOT fg-contrast — contrast is the inverted-surface fg
+       (near-black in dark mode) and renders invisible on the base surface. */
+    color: var(--ba-color-fg-default);
 }
 
 .body {

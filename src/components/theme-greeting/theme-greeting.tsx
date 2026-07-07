@@ -33,9 +33,9 @@ export function ThemeGreeting(
             <div className={styles.headline}>STOCK THE HANGAR</div>
             <p className={styles.body}>
                 Livery repaints your tools by pointing them at Black Atom theme files on disk. None
-                are present yet — download every collection for all {adapterCount}{" "}
-                supported adapters into ~/.config/black-atom/themes. Safe to re-run anytime from
-                settings.
+                are present yet — download every collection for{" "}
+                {adapterCount > 0 ? `all ${adapterCount} supported adapters` : "every adapter"}{" "}
+                into ~/.config/black-atom/themes. Safe to re-run anytime from settings.
             </p>
             {results && (
                 <div className={styles.rows}>
