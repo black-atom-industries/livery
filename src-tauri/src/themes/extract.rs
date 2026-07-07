@@ -113,6 +113,16 @@ fn theme_relative_path(entry_path: &Path, layout: ExtractLayout) -> Option<PathB
             }
             _ => None,
         },
+        ExtractLayout::NvimColors => match repo_relative.as_slice() {
+            ["colors", file] if file.starts_with("black-atom-") => Some(PathBuf::from(file)),
+            _ => None,
+        },
+        ExtractLayout::ObsidianMerged => match repo_relative.as_slice() {
+            ["themes", file] if file.starts_with("black-atom-") => Some(PathBuf::from(file)),
+            // The vault-installable pair at the repo root.
+            ["theme.css"] | ["manifest.json"] => Some(PathBuf::from(repo_relative[0])),
+            _ => None,
+        },
     }
 }
 
@@ -163,7 +173,7 @@ fn sweep_stale_staging(managed_root: &Path) {
 
 /// Same discipline as `file_ops` writers: never touch anything outside the
 /// user's home directory.
-fn ensure_under_home(path: &Path) -> Result<(), String> {
+pub(super) fn ensure_under_home(path: &Path) -> Result<(), String> {
     let home = dirs::home_dir()
         .ok_or("Cannot determine home directory")?
         .canonicalize()
@@ -299,6 +309,39 @@ mod tests {
         assert!(result.unwrap_err().contains("no theme files"));
         // Previous download stays intact.
         assert_eq!(managed_dir_listing(&root.path().join("tmux")).len(), 3);
+    }
+
+    #[test]
+    fn test_nvim_colors_layout_maps_flat() {
+        let take = |p: &str| theme_relative_path(Path::new(p), ExtractLayout::NvimColors);
+        assert_eq!(
+            take("nvim-main/colors/black-atom-default-dark.lua"),
+            Some(PathBuf::from("black-atom-default-dark.lua"))
+        );
+        assert_eq!(take("nvim-main/colors/README.md"), None);
+        assert_eq!(
+            take("nvim-main/lua/black-atom/themes/default/collection.template.lua"),
+            None
+        );
+    }
+
+    #[test]
+    fn test_obsidian_layout_takes_flat_themes_and_vault_pair() {
+        let take = |p: &str| theme_relative_path(Path::new(p), ExtractLayout::ObsidianMerged);
+        assert_eq!(
+            take("obsidian-main/themes/black-atom-jpn-koyo-hiru.css"),
+            Some(PathBuf::from("black-atom-jpn-koyo-hiru.css"))
+        );
+        assert_eq!(
+            take("obsidian-main/theme.css"),
+            Some(PathBuf::from("theme.css"))
+        );
+        assert_eq!(
+            take("obsidian-main/manifest.json"),
+            Some(PathBuf::from("manifest.json"))
+        );
+        assert_eq!(take("obsidian-main/styles/source.css"), None);
+        assert_eq!(take("obsidian-main/README.md"), None);
     }
 
     #[test]

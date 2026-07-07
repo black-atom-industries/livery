@@ -5,3 +5,4 @@ pub mod commands;
 pub mod extract;
 pub mod manifest;
 pub mod registry;
+pub mod zed_symlinks;

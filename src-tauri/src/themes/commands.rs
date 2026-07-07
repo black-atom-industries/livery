@@ -8,6 +8,8 @@ use crate::config::types::AppName;
 use crate::updaters::UpdateStatus;
 
 use super::manifest::ManifestEntry;
+#[cfg(unix)]
+use super::zed_symlinks;
 use super::{extract, manifest, registry};
 
 /// Outcome of one adapter's theme download. Shares `UpdateStatus` with the
@@ -192,6 +194,25 @@ async fn download_theme_inner(app: AppName) -> Result<u32, DownloadError> {
 
     let file_count = extract::extract_tarball(&bytes, dist.layout, &root, app.as_str())
         .map_err(DownloadError::Failed)?;
+
+    // Placement tail — part of the sync, never a separate step.
+    #[cfg(unix)]
+    if app == AppName::Zed {
+        let home = dirs::home_dir()
+            .ok_or_else(|| DownloadError::Failed("Cannot determine home directory".to_string()))?;
+        let stats = zed_symlinks::sync_zed_symlinks(
+            &root.join(app.as_str()),
+            &home.join(".config/zed/themes"),
+        )
+        .map_err(DownloadError::Failed)?;
+        if !stats.skipped.is_empty() {
+            log::warn!(
+                "zed symlink sync skipped {} real file(s): {}",
+                stats.skipped.len(),
+                stats.skipped.join(", ")
+            );
+        }
+    }
 
     let fetched_at_epoch = SystemTime::now()
         .duration_since(UNIX_EPOCH)
