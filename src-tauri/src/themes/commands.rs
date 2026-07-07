@@ -163,8 +163,10 @@ async fn download_theme_inner(app: AppName) -> Result<u32, DownloadError> {
     };
     let root = extract::managed_themes_root().map_err(DownloadError::Failed)?;
 
+    // HEAD resolves each repo's default branch (obsidian uses master, the
+    // rest main) — no per-adapter branch knowledge needed.
     let url = format!(
-        "https://codeload.github.com/black-atom-industries/{}/tar.gz/refs/heads/main",
+        "https://codeload.github.com/black-atom-industries/{}/tar.gz/HEAD",
         dist.repo
     );
     let client = reqwest::Client::builder()
