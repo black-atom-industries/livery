@@ -10,9 +10,13 @@ impl Default for Config {
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/ghostty/config".to_string(),
-                themes_path: None,
+                // Ghostty loads absolute theme paths; {themesPath} expands at
+                // apply time, so the stored config stays tilde-portable.
+                themes_path: Some("~/.config/black-atom/themes/ghostty".to_string()),
                 match_pattern: Some(r"^theme\s*=\s*.+$".to_string()),
-                replace_template: Some("theme = {themeKey}.conf".to_string()),
+                replace_template: Some(
+                    "theme = {themesPath}/{collectionKey}/{themeKey}.conf".to_string(),
+                ),
             },
         );
         apps.insert(
@@ -30,7 +34,7 @@ impl Default for Config {
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/tmux/tmux.conf".to_string(),
-                themes_path: None, // user must set this to their tmux themes directory
+                themes_path: Some("~/.config/black-atom/themes/tmux".to_string()),
                 match_pattern: Some(r"^source-file\s+.+/themes/.+\.conf$".to_string()),
                 replace_template: Some(
                     "source-file {themesPath}/{collectionKey}/{themeKey}.conf".to_string(),
@@ -62,7 +66,7 @@ impl Default for Config {
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/lazygit/config.yml".to_string(),
-                themes_path: None,
+                themes_path: Some("~/.config/black-atom/themes/lazygit".to_string()),
                 match_pattern: None,
                 replace_template: None,
             },
