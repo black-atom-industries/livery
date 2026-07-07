@@ -4,6 +4,12 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { Typo } from "../../../components/typo/index.ts";
 import { useConfig } from "../../../queries/use-config.ts";
+import { useThemesStatus } from "../../../queries/use-themes-status.ts";
+import {
+    type DownloadRowResult,
+    downloadThemes,
+    latestFetchedAtEpoch,
+} from "../../../lib/theme-downloads.ts";
 import { App } from "../../../components/layouts/app.ts";
 import { ListRow } from "../../../components/primitives/list-row/list-row.tsx";
 import { AdapterRows } from "../../../components/settings/adapter-rows/index.ts";
@@ -44,7 +50,28 @@ function SettingsRoute() {
     const [verifyPathResults, setVerifyPathResults] = useState<
         Partial<Record<AppName, VerifyPathResult>>
     >({});
+    // Session-local SYNC THEMES results — same runner as the first-run greeting.
+    const themesStatus = useThemesStatus();
+    const [syncResults, setSyncResults] = useState<DownloadRowResult[] | null>(null);
+    const [syncing, setSyncing] = useState(false);
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
+
+    async function syncThemes() {
+        if (syncing) return;
+        setSyncing(true);
+        try {
+            let adapters = themesStatus.query.data?.adapters;
+            if (!adapters) adapters = (await themesStatus.query.refetch()).data?.adapters;
+            if (!adapters) return;
+            await downloadThemes(
+                Object.keys(adapters) as (keyof typeof adapters)[],
+                setSyncResults,
+            );
+        } finally {
+            setSyncing(false);
+            themesStatus.query.refetch();
+        }
+    }
 
     const data = config.query.data;
     const appEntries = (data ? Object.entries(data.apps) : []) as [AppName, AppConfig][];
@@ -238,6 +265,12 @@ function SettingsRoute() {
                         followOsAppearance={data.system_appearance}
                         onToggleFollowOsAppearance={toggleSystemAppearance}
                         liveryVersion={denoConfig.version}
+                        themesLastSyncedEpoch={latestFetchedAtEpoch(
+                            themesStatus.query.data?.adapters ?? {},
+                        )}
+                        syncResults={syncResults}
+                        syncing={syncing}
+                        onSyncThemes={syncThemes}
                         cursored={clampedCursor === 0}
                     />
                 )}
