@@ -9,6 +9,9 @@ pub fn start_app() {
     let builder = Builder::<tauri::Wry>::new().commands(collect_commands![
         config::commands::get_config,
         config::commands::save_config,
+        themes::commands::download_theme,
+        themes::commands::get_themes_status,
+        themes::commands::dismiss_themes_greeting,
         updaters::update_app,
         updaters::update_system_appearance,
         updaters::verify_app_path,
