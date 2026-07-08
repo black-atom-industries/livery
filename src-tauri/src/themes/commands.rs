@@ -8,9 +8,7 @@ use crate::config::types::AppName;
 use crate::updaters::UpdateStatus;
 
 use super::manifest::ManifestEntry;
-#[cfg(unix)]
-use super::symlinks;
-use super::{extract, manifest, registry};
+use super::{extract, manifest, registry, symlinks};
 
 /// Outcome of one adapter's theme download. Shares `UpdateStatus` with the
 /// apply flow so the frontend reuses the same row-status mapping.
@@ -59,6 +57,9 @@ impl DownloadResult {
 #[derive(Debug, Serialize, Type)]
 pub struct AdapterThemesStatus {
     pub downloaded: bool,
+    /// True for adapters wired via LINK THEMES (zed, ghostty) — drives the
+    /// action's visibility in the settings adapter row.
+    pub linked_placement: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub etag: Option<String>,
     /// Unix epoch seconds (u32 carries us to 2106; tauri-specta has no u64).
@@ -76,8 +77,8 @@ pub struct ThemesStatus {
 }
 
 /// Download one adapter's theme files into the managed themes directory.
-/// Placement wiring that belongs to the adapter (e.g. zed symlinks) is part
-/// of this call, not a separate step.
+/// Pure fetch — wiring apps to the files is adapter setup (link_app_themes
+/// for zed/ghostty, config-pointed themes_path for tmux/lazygit).
 #[tauri::command]
 #[specta::specta]
 pub async fn download_theme(app: AppName) -> DownloadResult {
@@ -123,6 +124,7 @@ pub async fn get_themes_status() -> ThemesStatus {
             *app,
             AdapterThemesStatus {
                 downloaded: entry.is_some(),
+                linked_placement: registry::linked_placement_extension(*app).is_some(),
                 etag: entry.and_then(|e| e.etag.clone()),
                 fetched_at_epoch: entry.map(|e| e.fetched_at_epoch as u32),
                 file_count: entry.map(|e| e.file_count),
@@ -135,6 +137,107 @@ pub async fn get_themes_status() -> ThemesStatus {
         dismissed: stored.greeting_dismissed,
         adapters,
     }
+}
+
+/// Outcome of wiring one adapter's themes dir via managed symlinks.
+#[derive(Debug, Serialize, Type)]
+pub struct LinkThemesResult {
+    pub app: String,
+    pub status: UpdateStatus,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    pub linked: Option<u32>,
+    pub pruned: Option<u32>,
+}
+
+/// Wire an adapter's own themes dir to the managed downloads via flat
+/// symlinks (create, heal, prune). Explicit adapter-setup action — never
+/// runs implicitly on download. The target dir is derived from the
+/// adapter's CONFIGURED config_path (its sibling `themes/`), so custom
+/// setups link into the right place.
+#[tauri::command]
+#[specta::specta]
+pub async fn link_app_themes(app: AppName) -> LinkThemesResult {
+    let app_str = app.as_str();
+
+    let Some(extension) = registry::linked_placement_extension(app) else {
+        return LinkThemesResult {
+            app: app_str.to_string(),
+            status: UpdateStatus::Skipped,
+            message: Some(format!("{app_str} is not wired via linked themes")),
+            linked: None,
+            pruned: None,
+        };
+    };
+
+    match link_app_themes_inner(app, extension) {
+        Ok(stats) => LinkThemesResult {
+            app: app_str.to_string(),
+            status: UpdateStatus::Done,
+            message: (!stats.skipped.is_empty()).then(|| {
+                format!(
+                    "left {} real file(s) untouched: {}",
+                    stats.skipped.len(),
+                    stats.skipped.join(", ")
+                )
+            }),
+            linked: Some(stats.linked),
+            pruned: Some(stats.pruned),
+        },
+        Err(msg) => LinkThemesResult {
+            app: app_str.to_string(),
+            status: UpdateStatus::Error,
+            message: Some(msg),
+            linked: None,
+            pruned: None,
+        },
+    }
+}
+
+#[cfg(unix)]
+fn link_app_themes_inner(
+    app: AppName,
+    extension: &str,
+) -> Result<symlinks::SymlinkSyncStats, String> {
+    let root = extract::managed_themes_root()?;
+    let managed_dir = root.join(app.as_str());
+    if !managed_dir.is_dir() {
+        return Err(format!(
+            "No downloaded themes for {} — run SYNC THEMES first",
+            app.as_str()
+        ));
+    }
+
+    let mut config = crate::config::io::read_config_from_disk();
+    crate::config::io::expand_app_paths(&mut config);
+    let app_config = config
+        .apps
+        .get(&app)
+        .ok_or_else(|| format!("{} not found in config", app.as_str()))?;
+    let themes_dir = app_themes_dir(&app_config.config_path).ok_or_else(|| {
+        format!(
+            "Cannot derive a themes directory from config_path '{}'",
+            app_config.config_path
+        )
+    })?;
+
+    symlinks::sync_flat_symlinks(&managed_dir, &themes_dir, extension)
+}
+
+#[cfg(not(unix))]
+fn link_app_themes_inner(
+    _app: AppName,
+    _extension: &str,
+) -> Result<symlinks::SymlinkSyncStats, String> {
+    Err("Linked theme placement requires a unix filesystem".to_string())
+}
+
+/// The adapter's themes dir is the sibling `themes/` of its configured
+/// config file — NOT a hardcoded default path, so custom config locations
+/// (e.g. ~/.config/zed-custom/settings.json) are wired correctly.
+fn app_themes_dir(config_path: &str) -> Option<std::path::PathBuf> {
+    let path = std::path::Path::new(config_path);
+    Some(path.parent()?.join("themes"))
 }
 
 /// Persist the greeting's "continue without" choice so hand-managed setups
@@ -197,33 +300,6 @@ async fn download_theme_inner(app: AppName) -> Result<u32, DownloadError> {
     let file_count = extract::extract_tarball(&bytes, dist.layout, &root, app.as_str())
         .map_err(DownloadError::Failed)?;
 
-    // Placement tail — part of the sync, never a separate step. Zed and
-    // ghostty only load themes by bare name from their own themes dir
-    // (ghostty rejects `~` paths), so they get flat managed symlinks.
-    #[cfg(unix)]
-    if let Some((app_themes_dir, extension)) = match app {
-        AppName::Zed => Some((".config/zed/themes", ".json")),
-        AppName::Ghostty => Some((".config/ghostty/themes", ".conf")),
-        _ => None,
-    } {
-        let home = dirs::home_dir()
-            .ok_or_else(|| DownloadError::Failed("Cannot determine home directory".to_string()))?;
-        let stats = symlinks::sync_flat_symlinks(
-            &root.join(app.as_str()),
-            &home.join(app_themes_dir),
-            extension,
-        )
-        .map_err(DownloadError::Failed)?;
-        if !stats.skipped.is_empty() {
-            log::warn!(
-                "{} symlink sync skipped {} real file(s): {}",
-                app.as_str(),
-                stats.skipped.len(),
-                stats.skipped.join(", ")
-            );
-        }
-    }
-
     let fetched_at_epoch = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
@@ -240,4 +316,23 @@ async fn download_theme_inner(app: AppName) -> Result<u32, DownloadError> {
     .map_err(DownloadError::Failed)?;
 
     Ok(file_count)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_app_themes_dir_derives_from_config_path_sibling() {
+        assert_eq!(
+            app_themes_dir("/Users/x/.config/zed/settings.json"),
+            Some(std::path::PathBuf::from("/Users/x/.config/zed/themes"))
+        );
+        assert_eq!(
+            app_themes_dir("/Users/x/.config/zed-custom/settings.json"),
+            Some(std::path::PathBuf::from(
+                "/Users/x/.config/zed-custom/themes"
+            ))
+        );
+    }
 }

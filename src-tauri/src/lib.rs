@@ -11,6 +11,7 @@ pub fn start_app() {
         config::commands::save_config,
         themes::commands::download_theme,
         themes::commands::get_themes_status,
+        themes::commands::link_app_themes,
         themes::commands::dismiss_themes_greeting,
         updaters::update_app,
         updaters::update_system_appearance,

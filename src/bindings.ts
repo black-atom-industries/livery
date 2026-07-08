@@ -18,8 +18,8 @@ async saveConfig(config: Config) : Promise<Result<null, string>> {
 },
 /**
  * Download one adapter's theme files into the managed themes directory.
- * Placement wiring that belongs to the adapter (e.g. zed symlinks) is part
- * of this call, not a separate step.
+ * Pure fetch — wiring apps to the files is adapter setup (link_app_themes
+ * for zed/ghostty, config-pointed themes_path for tmux/lazygit).
  */
 async downloadTheme(app: AppName) : Promise<DownloadResult> {
     return await TAURI_INVOKE("download_theme", { app });
@@ -30,6 +30,16 @@ async downloadTheme(app: AppName) : Promise<DownloadResult> {
  */
 async getThemesStatus() : Promise<ThemesStatus> {
     return await TAURI_INVOKE("get_themes_status");
+},
+/**
+ * Wire an adapter's own themes dir to the managed downloads via flat
+ * symlinks (create, heal, prune). Explicit adapter-setup action — never
+ * runs implicitly on download. The target dir is derived from the
+ * adapter's CONFIGURED config_path (its sibling `themes/`), so custom
+ * setups link into the right place.
+ */
+async linkAppThemes(app: AppName) : Promise<LinkThemesResult> {
+    return await TAURI_INVOKE("link_app_themes", { app });
 },
 /**
  * Persist the greeting's "continue without" choice so hand-managed setups
@@ -79,7 +89,12 @@ async verifyAppPath(app: AppName) : Promise<AppPathVerification> {
 
 /** user-defined types **/
 
-export type AdapterThemesStatus = { downloaded: boolean; etag?: string | null; 
+export type AdapterThemesStatus = { downloaded: boolean; 
+/**
+ * True for adapters wired via LINK THEMES (zed, ghostty) — drives the
+ * action's visibility in the settings adapter row.
+ */
+linked_placement: boolean; etag?: string | null; 
 /**
  * Unix epoch seconds (u32 carries us to 2106; tauri-specta has no u64).
  */
@@ -109,6 +124,10 @@ export type Config = { system_appearance: boolean; keymappings?: Keymappings; ap
  */
 export type DownloadResult = { app: string; status: UpdateStatus; message?: string | null; file_count: number | null; duration_ms: number | null }
 export type Keymappings = { toggle_window: string }
+/**
+ * Outcome of wiring one adapter's themes dir via managed symlinks.
+ */
+export type LinkThemesResult = { app: string; status: UpdateStatus; message?: string | null; linked: number | null; pruned: number | null }
 /**
  * Theme metadata passed from the frontend.
  */

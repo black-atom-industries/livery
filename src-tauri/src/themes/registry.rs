@@ -52,3 +52,15 @@ pub fn distribution(app: AppName) -> Option<AdapterDistribution> {
         AppName::Delta | AppName::Helm => None,
     }
 }
+
+/// Theme-file extension for adapters wired via flat symlinks in their own
+/// themes dir (they load themes by bare name only: zed can't look outside
+/// its dir, ghostty rejects `~` paths). `None` = adapter is wired by config
+/// (tmux/lazygit themes_path) or needs no placement at all.
+pub fn linked_placement_extension(app: AppName) -> Option<&'static str> {
+    match app {
+        AppName::Zed => Some(".json"),
+        AppName::Ghostty => Some(".conf"),
+        _ => None,
+    }
+}

@@ -32,9 +32,24 @@ Deno.test("formatFetchedAt renders a local YYYY-MM-DD HH:MM stamp", () => {
 Deno.test("latestFetchedAtEpoch picks the newest adapter fetch", () => {
     assertEquals(
         latestFetchedAtEpoch({
-            tmux: { downloaded: true, fetched_at_epoch: 100, file_count: 44 },
-            zed: { downloaded: true, fetched_at_epoch: 300, file_count: 44 },
-            ghostty: { downloaded: false, fetched_at_epoch: null, file_count: null },
+            tmux: {
+                downloaded: true,
+                linked_placement: false,
+                fetched_at_epoch: 100,
+                file_count: 44,
+            },
+            zed: {
+                downloaded: true,
+                linked_placement: true,
+                fetched_at_epoch: 300,
+                file_count: 44,
+            },
+            ghostty: {
+                downloaded: false,
+                linked_placement: true,
+                fetched_at_epoch: null,
+                file_count: null,
+            },
         }),
         300,
     );
@@ -43,7 +58,12 @@ Deno.test("latestFetchedAtEpoch picks the newest adapter fetch", () => {
 Deno.test("latestFetchedAtEpoch is null when nothing was downloaded", () => {
     assertEquals(
         latestFetchedAtEpoch({
-            tmux: { downloaded: false, fetched_at_epoch: null, file_count: null },
+            tmux: {
+                downloaded: false,
+                linked_placement: false,
+                fetched_at_epoch: null,
+                file_count: null,
+            },
         }),
         null,
     );
