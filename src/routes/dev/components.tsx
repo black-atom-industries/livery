@@ -327,6 +327,8 @@ function Page() {
                         }, 600);
                     }}
                     testApplyResults={settingsTestApplyResults}
+                    linkableApps={new Set<AppName>(["zed", "ghostty"])}
+                    onLinkThemes={() => {}}
                     onVerifyPath={(appName) => {
                         setSettingsVerifyPathResults((prev) => ({
                             ...prev,

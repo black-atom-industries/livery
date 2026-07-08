@@ -22,6 +22,12 @@ export type VerifyPathResult =
     | { status: "verified"; exists: boolean; patternMatches: boolean | null }
     | { status: "unverifiable"; message: string };
 
+/** Session-local result of a "LINK THEMES" run — never persisted. */
+export type LinkThemesRowResult =
+    | { status: "running" }
+    | { status: "ok"; linked: number; pruned: number; message: string | null }
+    | { status: "error"; message: string };
+
 /** The qualifier a verify fault puts on the row, or null when all clear. */
 function verifyFaultLabel(result?: VerifyPathResult): string | null {
     if (!result) return null;
@@ -49,6 +55,12 @@ type Props = {
     onVerifyPath: (appName: AppName) => void;
     /** Session-local verification result per app — a fault puts a CHECK qualifier on the row. */
     verifyPathResults?: Partial<Record<AppName, VerifyPathResult>>;
+    /** Adapters wired via managed symlinks (zed, ghostty) — shows LINK THEMES. */
+    linkableApps?: ReadonlySet<AppName>;
+    /** Symlinks the adapter's themes dir to the managed downloads (LINK THEMES). */
+    onLinkThemes: (appName: AppName) => void;
+    /** Session-local link result per app. */
+    linkThemesResults?: Partial<Record<AppName, LinkThemesRowResult>>;
     /** Ref to the first input of the expanded row — the "e" hotkey focuses it. */
     firstFieldRef?: React.Ref<HTMLInputElement>;
     className?: string;
@@ -71,6 +83,9 @@ export function AdapterRows(
         testApplyResults,
         onVerifyPath,
         verifyPathResults,
+        linkableApps,
+        onLinkThemes,
+        linkThemesResults,
         firstFieldRef,
         className,
     }: Props,
@@ -97,6 +112,9 @@ export function AdapterRows(
                         testApplyResult={testApplyResults?.[appName]}
                         onVerifyPath={() => onVerifyPath(appName)}
                         verifyPathResult={verifyPathResults?.[appName]}
+                        linkable={linkableApps?.has(appName) ?? false}
+                        onLinkThemes={() => onLinkThemes(appName)}
+                        linkThemesResult={linkThemesResults?.[appName]}
                         firstFieldRef={expandedApp === appName ? firstFieldRef : undefined}
                     />
                 ))}
@@ -117,6 +135,9 @@ type RowProps = {
     testApplyResult?: TestApplyResult;
     onVerifyPath: () => void;
     verifyPathResult?: VerifyPathResult;
+    linkable: boolean;
+    onLinkThemes: () => void;
+    linkThemesResult?: LinkThemesRowResult;
     firstFieldRef?: React.Ref<HTMLInputElement>;
 };
 
@@ -133,6 +154,9 @@ function AdapterRow(
         testApplyResult,
         onVerifyPath,
         verifyPathResult,
+        linkable,
+        onLinkThemes,
+        linkThemesResult,
         firstFieldRef,
     }: RowProps,
 ) {
@@ -177,6 +201,9 @@ function AdapterRow(
                     onVerifyPath={onVerifyPath}
                     testApplyResult={testApplyResult}
                     verifyPathResult={verifyPathResult}
+                    linkable={linkable}
+                    onLinkThemes={onLinkThemes}
+                    linkThemesResult={linkThemesResult}
                 />
             </DisclosurePanel>
         </div>
@@ -190,25 +217,61 @@ type ActionRowProps = {
     onVerifyPath: () => void;
     testApplyResult?: TestApplyResult;
     verifyPathResult?: VerifyPathResult;
+    linkable: boolean;
+    onLinkThemes: () => void;
+    linkThemesResult?: LinkThemesRowResult;
 };
 
 function ActionRow(
-    { testRunning, verifyRunning, onTestApply, onVerifyPath, testApplyResult, verifyPathResult }:
-        ActionRowProps,
+    {
+        testRunning,
+        verifyRunning,
+        onTestApply,
+        onVerifyPath,
+        testApplyResult,
+        verifyPathResult,
+        linkable,
+        onLinkThemes,
+        linkThemesResult,
+    }: ActionRowProps,
 ) {
+    const linkRunning = linkThemesResult?.status === "running";
+
     return (
         <div className={styles.actionRow}>
             <Button intent="primary" onClick={onVerifyPath} disabled={verifyRunning}>
                 {verifyRunning ? "VERIFYING…" : "VERIFY PATH"}
             </Button>
+            {linkable && (
+                <Button intent="secondary" onClick={onLinkThemes} disabled={linkRunning}>
+                    {linkRunning ? "LINKING…" : "LINK THEMES"}
+                </Button>
+            )}
             <Button intent="secondary" onClick={onTestApply} disabled={testRunning}>
                 {testRunning ? "TESTING…" : "TEST APPLY"}
             </Button>
             <span className={styles.metas}>
                 <VerifyPathMeta result={verifyPathResult} />
+                <LinkThemesMeta result={linkThemesResult} />
                 <LastAppliedMeta result={testApplyResult} />
             </span>
         </div>
+    );
+}
+
+/** Link verdict: counts on success, reason on failure. */
+function LinkThemesMeta({ result }: { result?: LinkThemesRowResult }) {
+    if (!result || result.status === "running") return null;
+
+    if (result.status === "error") {
+        return <span className={styles.lastAppliedError}>LINK FAILED — {result.message}</span>;
+    }
+
+    return (
+        <span className={styles.lastAppliedOk}>
+            {result.linked} LINKED{result.pruned > 0 ? ` · ${result.pruned} PRUNED` : ""}
+            {result.message ? ` · ${result.message.toUpperCase()}` : ""}
+        </span>
     );
 }
 

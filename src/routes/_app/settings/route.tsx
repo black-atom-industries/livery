@@ -16,6 +16,7 @@ import { AdapterRows } from "../../../components/settings/adapter-rows/index.ts"
 import { GeneralPanel } from "../../../components/settings/general-panel/index.ts";
 import type {
     AdapterField,
+    LinkThemesRowResult,
     TestApplyResult,
     VerifyPathResult,
 } from "../../../components/settings/adapter-rows/index.ts";
@@ -54,7 +55,43 @@ function SettingsRoute() {
     const themesStatus = useThemesStatus();
     const [syncResults, setSyncResults] = useState<DownloadRowResult[] | null>(null);
     const [syncing, setSyncing] = useState(false);
+    // Session-local LINK THEMES results per adapter.
+    const [linkThemesResults, setLinkThemesResults] = useState<
+        Partial<Record<AppName, LinkThemesRowResult>>
+    >({});
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
+
+    // Adapters wired via managed symlinks — drives LINK THEMES visibility.
+    const linkableApps = new Set(
+        (Object.entries(themesStatus.query.data?.adapters ?? {}) as [
+            AppName,
+            { linked_placement: boolean },
+        ][])
+            .filter(([, status]) => status.linked_placement)
+            .map(([name]) => name),
+    );
+
+    async function linkAppThemes(appName: AppName) {
+        setLinkThemesResults((prev) => ({ ...prev, [appName]: { status: "running" } }));
+        try {
+            const result = await commands.linkAppThemes(appName);
+            const next: LinkThemesRowResult = result.status === "done"
+                ? {
+                    status: "ok",
+                    linked: result.linked ?? 0,
+                    pruned: result.pruned ?? 0,
+                    message: result.message ?? null,
+                }
+                : { status: "error", message: result.message ?? "Unknown error" };
+            setLinkThemesResults((prev) => ({ ...prev, [appName]: next }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            setLinkThemesResults((prev) => ({
+                ...prev,
+                [appName]: { status: "error", message },
+            }));
+        }
+    }
 
     async function syncThemes() {
         if (syncing) return;
@@ -257,6 +294,9 @@ function SettingsRoute() {
                         testApplyResults={testApplyResults}
                         onVerifyPath={verifyAdapterPath}
                         verifyPathResults={verifyPathResults}
+                        linkableApps={linkableApps}
+                        onLinkThemes={linkAppThemes}
+                        linkThemesResults={linkThemesResults}
                         firstFieldRef={firstFieldRef}
                     />
                 )
