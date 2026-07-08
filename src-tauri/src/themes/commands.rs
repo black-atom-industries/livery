@@ -9,7 +9,7 @@ use crate::updaters::UpdateStatus;
 
 use super::manifest::ManifestEntry;
 #[cfg(unix)]
-use super::zed_symlinks;
+use super::symlinks;
 use super::{extract, manifest, registry};
 
 /// Outcome of one adapter's theme download. Shares `UpdateStatus` with the
@@ -197,19 +197,27 @@ async fn download_theme_inner(app: AppName) -> Result<u32, DownloadError> {
     let file_count = extract::extract_tarball(&bytes, dist.layout, &root, app.as_str())
         .map_err(DownloadError::Failed)?;
 
-    // Placement tail — part of the sync, never a separate step.
+    // Placement tail — part of the sync, never a separate step. Zed and
+    // ghostty only load themes by bare name from their own themes dir
+    // (ghostty rejects `~` paths), so they get flat managed symlinks.
     #[cfg(unix)]
-    if app == AppName::Zed {
+    if let Some((app_themes_dir, extension)) = match app {
+        AppName::Zed => Some((".config/zed/themes", ".json")),
+        AppName::Ghostty => Some((".config/ghostty/themes", ".conf")),
+        _ => None,
+    } {
         let home = dirs::home_dir()
             .ok_or_else(|| DownloadError::Failed("Cannot determine home directory".to_string()))?;
-        let stats = zed_symlinks::sync_zed_symlinks(
+        let stats = symlinks::sync_flat_symlinks(
             &root.join(app.as_str()),
-            &home.join(".config/zed/themes"),
+            &home.join(app_themes_dir),
+            extension,
         )
         .map_err(DownloadError::Failed)?;
         if !stats.skipped.is_empty() {
             log::warn!(
-                "zed symlink sync skipped {} real file(s): {}",
+                "{} symlink sync skipped {} real file(s): {}",
+                app.as_str(),
                 stats.skipped.len(),
                 stats.skipped.join(", ")
             );

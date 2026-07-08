@@ -10,13 +10,12 @@ impl Default for Config {
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/ghostty/config".to_string(),
-                // Ghostty loads absolute theme paths; {themesPath} expands at
-                // apply time, so the stored config stays tilde-portable.
-                themes_path: Some("~/.config/black-atom/themes/ghostty".to_string()),
+                // Name-based lookup: ghostty rejects `~` theme paths, so the
+                // download placement tail symlinks each theme file into
+                // ~/.config/ghostty/themes instead (themes::symlinks).
+                themes_path: None,
                 match_pattern: Some(r"^theme\s*=\s*.+$".to_string()),
-                replace_template: Some(
-                    "theme = {themesPath}/{collectionKey}/{themeKey}.conf".to_string(),
-                ),
+                replace_template: Some("theme = {themeKey}.conf".to_string()),
             },
         );
         apps.insert(

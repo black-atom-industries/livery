@@ -82,7 +82,15 @@ pub fn ensure_config_exists() {
 }
 
 /// Expand tilde in config_path so the frontend receives absolute paths.
-/// themes_path is NOT expanded — it's used in replace templates and should keep ~ for portability.
+///
+/// themes_path is deliberately NOT expanded: it feeds the {themesPath}
+/// template var, whose rendered line lands in the user's OWN config files
+/// (tmux.conf `source-file ~/...`), which are often dotfiles synced across
+/// machines — an expanded absolute home prefix would break them elsewhere.
+/// Consumers handle `~` themselves (tmux expands it; file_ops expand on
+/// read). Apps that cannot consume a `~` path at all (ghostty rejects it:
+/// "cannot include path separators unless it is an absolute path") are
+/// placed via managed symlinks instead — see themes::symlinks.
 pub fn expand_app_paths(config: &mut Config) {
     for app_config in config.apps.values_mut() {
         app_config.config_path = shellexpand::tilde(&app_config.config_path).to_string();
@@ -104,5 +112,39 @@ pub fn collapse_app_paths(config: &mut Config) {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_expand_covers_config_path_but_keeps_themes_path_portable() {
+        let mut config = Config::default();
+        let tmux = config
+            .apps
+            .get(&crate::config::types::AppName::Tmux)
+            .unwrap();
+        assert!(tmux.config_path.starts_with("~/"));
+        assert!(tmux.themes_path.as_deref().unwrap().starts_with("~/"));
+
+        expand_app_paths(&mut config);
+        let tmux = config
+            .apps
+            .get(&crate::config::types::AppName::Tmux)
+            .unwrap();
+        assert!(!tmux.config_path.contains('~'));
+        // {themesPath} lands verbatim in dotfile-synced configs — it must
+        // stay `~`-portable. See the expand_app_paths doc comment.
+        assert!(tmux.themes_path.as_deref().unwrap().starts_with("~/"));
+
+        collapse_app_paths(&mut config);
+        let tmux = config
+            .apps
+            .get(&crate::config::types::AppName::Tmux)
+            .unwrap();
+        assert!(tmux.config_path.starts_with("~/"));
+        assert!(tmux.themes_path.as_deref().unwrap().starts_with("~/"));
     }
 }
