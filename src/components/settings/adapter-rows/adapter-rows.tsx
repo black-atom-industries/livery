@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import type { AppConfig, AppName } from "../../../bindings.ts";
+import type { AppConfig, AppName, ThemeProvisioning } from "../../../bindings.ts";
+import type { SetUpOutcome } from "../../../lib/adapter-setup.ts";
+import {
+    type AdapterPrerequisite,
+    adapterPrerequisites,
+    provisioningCopy,
+} from "../../../lib/adapter-copy.ts";
 import { SectionHeader } from "../../primitives/section-header/section-header.tsx";
 import { DisclosurePanel } from "../../primitives/disclosure-panel/disclosure-panel.tsx";
 import { Toggle } from "../../primitives/toggle/toggle.tsx";
@@ -21,6 +27,12 @@ export type VerifyPathResult =
     | { status: "running" }
     | { status: "verified"; exists: boolean; patternMatches: boolean | null }
     | { status: "unverifiable"; message: string };
+
+/** Session-local result of a "LINK THEMES" run — never persisted. */
+export type LinkThemesRowResult =
+    | { status: "running" }
+    | { status: "ok"; linked: number; pruned: number; message: string | null }
+    | { status: "error"; message: string };
 
 /** The qualifier a verify fault puts on the row, or null when all clear. */
 function verifyFaultLabel(result?: VerifyPathResult): string | null {
@@ -49,6 +61,22 @@ type Props = {
     onVerifyPath: (appName: AppName) => void;
     /** Session-local verification result per app — a fault puts a CHECK qualifier on the row. */
     verifyPathResults?: Partial<Record<AppName, VerifyPathResult>>;
+    /** Adapters wired via managed symlinks — shows LINK THEMES. */
+    linkableApps?: ReadonlySet<AppName>;
+    /** Symlinks the adapter's themes dir to the managed downloads (LINK THEMES). */
+    onLinkThemes: (appName: AppName) => void;
+    /** Session-local link result per app. */
+    linkThemesResults?: Partial<Record<AppName, LinkThemesRowResult>>;
+    /** Provisioning class per adapter — drives the expanded row's class note. */
+    provisioning?: Partial<Record<AppName, ThemeProvisioning>>;
+    /** AUTO-DETECT results — null until a scan ran; found apps get a badge. */
+    detectedApps?: ReadonlySet<AppName> | null;
+    /** Runs the class-appropriate setup chain (SET UP). */
+    onSetUp: (appName: AppName) => void;
+    /** Session-local SET UP outcome per app. */
+    setUpResults?: Partial<Record<AppName, SetUpOutcome>>;
+    /** Opens a prerequisite link in the OS browser (webview must not navigate). */
+    onOpenUrl?: (url: string) => void;
     /** Ref to the first input of the expanded row — the "e" hotkey focuses it. */
     firstFieldRef?: React.Ref<HTMLInputElement>;
     className?: string;
@@ -71,6 +99,14 @@ export function AdapterRows(
         testApplyResults,
         onVerifyPath,
         verifyPathResults,
+        linkableApps,
+        onLinkThemes,
+        linkThemesResults,
+        provisioning,
+        detectedApps,
+        onSetUp,
+        setUpResults,
+        onOpenUrl,
         firstFieldRef,
         className,
     }: Props,
@@ -97,6 +133,14 @@ export function AdapterRows(
                         testApplyResult={testApplyResults?.[appName]}
                         onVerifyPath={() => onVerifyPath(appName)}
                         verifyPathResult={verifyPathResults?.[appName]}
+                        linkable={linkableApps?.has(appName) ?? false}
+                        onLinkThemes={() => onLinkThemes(appName)}
+                        linkThemesResult={linkThemesResults?.[appName]}
+                        provisioning={provisioning?.[appName]}
+                        detected={detectedApps?.has(appName) ?? false}
+                        onSetUp={() => onSetUp(appName)}
+                        setUpResult={setUpResults?.[appName]}
+                        onOpenUrl={onOpenUrl}
                         firstFieldRef={expandedApp === appName ? firstFieldRef : undefined}
                     />
                 ))}
@@ -117,6 +161,14 @@ type RowProps = {
     testApplyResult?: TestApplyResult;
     onVerifyPath: () => void;
     verifyPathResult?: VerifyPathResult;
+    linkable: boolean;
+    onLinkThemes: () => void;
+    linkThemesResult?: LinkThemesRowResult;
+    provisioning?: ThemeProvisioning;
+    detected: boolean;
+    onSetUp: () => void;
+    setUpResult?: SetUpOutcome;
+    onOpenUrl?: (url: string) => void;
     firstFieldRef?: React.Ref<HTMLInputElement>;
 };
 
@@ -133,6 +185,14 @@ function AdapterRow(
         testApplyResult,
         onVerifyPath,
         verifyPathResult,
+        linkable,
+        onLinkThemes,
+        linkThemesResult,
+        provisioning,
+        detected,
+        onSetUp,
+        setUpResult,
+        onOpenUrl,
         firstFieldRef,
     }: RowProps,
 ) {
@@ -155,6 +215,7 @@ function AdapterRow(
                             <span className={styles.path}>{appConfig.config_path}</span>
                             {fault && <span className={styles.pathFault}>— {fault}</span>}
                         </span>
+                        {detected && !enabled && <StatusPip intent="warn">FOUND</StatusPip>}
                         {enabled && fault
                             ? <StatusPip intent="warn">CHECK</StatusPip>
                             : (
@@ -165,6 +226,17 @@ function AdapterRow(
                     </div>
                 }
             >
+                {provisioning && (
+                    <p className={styles.classNote}>
+                        <span className={styles.classLabel}>{provisioning.toUpperCase()}</span>
+                        {" — "}
+                        {provisioningCopy[provisioning]}
+                        <Prerequisite
+                            prerequisite={adapterPrerequisites[appName]}
+                            onOpenUrl={onOpenUrl}
+                        />
+                    </p>
+                )}
                 <FieldGrid
                     appConfig={appConfig}
                     onFieldCommit={onFieldCommit}
@@ -177,9 +249,49 @@ function AdapterRow(
                     onVerifyPath={onVerifyPath}
                     testApplyResult={testApplyResult}
                     verifyPathResult={verifyPathResult}
+                    linkable={linkable}
+                    onLinkThemes={onLinkThemes}
+                    linkThemesResult={linkThemesResult}
+                    onSetUp={onSetUp}
+                    setUpResult={setUpResult}
                 />
             </DisclosurePanel>
         </div>
+    );
+}
+
+/** The one-time prerequisite line, with its reference as a real link. */
+function Prerequisite(
+    { prerequisite, onOpenUrl }: {
+        prerequisite?: AdapterPrerequisite;
+        onOpenUrl?: (url: string) => void;
+    },
+) {
+    if (!prerequisite) return null;
+    return (
+        <>
+            <br />
+            <span className={styles.classPrerequisite}>
+                {prerequisite.link && (
+                    <>
+                        <a
+                            href={prerequisite.link.url}
+                            className={styles.classLink}
+                            onClick={(event) => {
+                                // The webview must never navigate — hand the
+                                // URL to the OS browser instead.
+                                event.preventDefault();
+                                onOpenUrl?.(prerequisite.link!.url);
+                            }}
+                        >
+                            {prerequisite.link.label}
+                        </a>
+                        {" — "}
+                    </>
+                )}
+                {prerequisite.text}
+            </span>
+        </>
     );
 }
 
@@ -190,25 +302,113 @@ type ActionRowProps = {
     onVerifyPath: () => void;
     testApplyResult?: TestApplyResult;
     verifyPathResult?: VerifyPathResult;
+    linkable: boolean;
+    onLinkThemes: () => void;
+    linkThemesResult?: LinkThemesRowResult;
+    onSetUp: () => void;
+    setUpResult?: SetUpOutcome;
 };
 
+/** True while any chain step is still pending or running. */
+function setUpRunning(outcome?: SetUpOutcome): boolean {
+    if (!outcome || outcome.blocked) return false;
+    return outcome.steps.length > 0 &&
+        outcome.steps.some((s) => s.status === "pending" || s.status === "running");
+}
+
 function ActionRow(
-    { testRunning, verifyRunning, onTestApply, onVerifyPath, testApplyResult, verifyPathResult }:
-        ActionRowProps,
+    {
+        testRunning,
+        verifyRunning,
+        onTestApply,
+        onVerifyPath,
+        testApplyResult,
+        verifyPathResult,
+        linkable,
+        onLinkThemes,
+        linkThemesResult,
+        onSetUp,
+        setUpResult,
+    }: ActionRowProps,
 ) {
+    const linkRunning = linkThemesResult?.status === "running";
+    const settingUp = setUpRunning(setUpResult);
+
     return (
         <div className={styles.actionRow}>
-            <Button intent="primary" onClick={onVerifyPath} disabled={verifyRunning}>
-                {verifyRunning ? "VERIFYING…" : "VERIFY PATH"}
-            </Button>
-            <Button intent="secondary" onClick={onTestApply} disabled={testRunning}>
-                {testRunning ? "TESTING…" : "TEST APPLY"}
-            </Button>
-            <span className={styles.metas}>
+            <div className={styles.actionButtons}>
+                <Button intent="primary" onClick={onSetUp} disabled={settingUp}>
+                    {settingUp ? "SETTING UP…" : "SET UP"}
+                </Button>
+                <Button intent="secondary" onClick={onVerifyPath} disabled={verifyRunning}>
+                    {verifyRunning ? "VERIFYING…" : "VERIFY PATH"}
+                </Button>
+                {linkable && (
+                    <Button intent="secondary" onClick={onLinkThemes} disabled={linkRunning}>
+                        {linkRunning ? "LINKING…" : "LINK THEMES"}
+                    </Button>
+                )}
+                <Button intent="secondary" onClick={onTestApply} disabled={testRunning}>
+                    {testRunning ? "TESTING…" : "TEST APPLY"}
+                </Button>
+            </div>
+            <div className={styles.metas}>
+                <SetUpMeta result={setUpResult} />
                 <VerifyPathMeta result={verifyPathResult} />
+                <LinkThemesMeta result={linkThemesResult} />
                 <LastAppliedMeta result={testApplyResult} />
-            </span>
+            </div>
         </div>
+    );
+}
+
+/**
+ * SET UP verdict. Link and verify outcomes land in their own metas via the
+ * route, so this only narrates the chain itself: progress, the blocked
+ * precondition, enable/download failures, or the all-clear.
+ */
+function SetUpMeta({ result }: { result?: SetUpOutcome }) {
+    if (!result) return null;
+
+    if (result.blocked) {
+        return <span className={styles.lastAppliedError}>{result.blocked.toUpperCase()}</span>;
+    }
+
+    const running = result.steps.find((s) => s.status === "running");
+    if (running || setUpRunning(result)) {
+        return (
+            <span className={styles.verifyFault}>
+                {running ? `${running.step.toUpperCase()}…` : "SETTING UP…"}
+            </span>
+        );
+    }
+
+    const failed = result.steps.find((s) => s.status === "error");
+    if (failed) {
+        return (
+            <span className={styles.lastAppliedError}>
+                SET UP FAILED — {failed.step.toUpperCase()}
+                {failed.message ? `: ${failed.message.toUpperCase()}` : ""}
+            </span>
+        );
+    }
+
+    return <span className={styles.lastAppliedOk}>SET UP OK</span>;
+}
+
+/** Link verdict: counts on success, reason on failure. */
+function LinkThemesMeta({ result }: { result?: LinkThemesRowResult }) {
+    if (!result || result.status === "running") return null;
+
+    if (result.status === "error") {
+        return <span className={styles.lastAppliedError}>LINK FAILED — {result.message}</span>;
+    }
+
+    return (
+        <span className={styles.lastAppliedOk}>
+            {result.linked} LINKED{result.pruned > 0 ? ` · ${result.pruned} PRUNED` : ""}
+            {result.message ? ` · ${result.message.toUpperCase()}` : ""}
+        </span>
     );
 }
 
@@ -264,6 +464,7 @@ function FieldGrid({ appConfig, onFieldCommit, firstFieldRef }: FieldGridProps) 
         <div className={styles.fieldGrid}>
             <DraftField
                 label="CONFIG_PATH"
+                note="THE FILE LIVERY PATCHES"
                 value={appConfig.config_path}
                 onCommit={(value) => onFieldCommit("config_path", value)}
                 inputRef={firstFieldRef}
@@ -271,19 +472,26 @@ function FieldGrid({ appConfig, onFieldCommit, firstFieldRef }: FieldGridProps) 
             <DraftField
                 label="THEMES_PATH"
                 optional
+                note="WHERE THEME FILES LIVE"
                 value={appConfig.themes_path ?? ""}
                 onCommit={(value) => onFieldCommit("themes_path", value)}
             />
             <DraftField
                 label="MATCH_PATTERN"
+                note="REGEX — FINDS THE THEME LINE"
                 value={appConfig.match_pattern ?? ""}
                 onCommit={(value) => onFieldCommit("match_pattern", value)}
             />
             <DraftField
                 label="REPLACE_TEMPLATE"
+                note="REPLACES THE MATCHED LINE"
                 value={appConfig.replace_template ?? ""}
                 onCommit={(value) => onFieldCommit("replace_template", value)}
             />
+            <p className={styles.fieldGridNote}>
+                Template variables: {"{themeKey}"} · {"{themesPath}"} · {"{collectionKey}"} ·{" "}
+                {"{appearance}"}
+            </p>
         </div>
     );
 }
@@ -292,6 +500,7 @@ type DraftFieldProps = {
     label: string;
     value: string;
     optional?: boolean;
+    note?: string;
     onCommit: (value: string) => void;
     inputRef?: React.Ref<HTMLInputElement>;
 };
@@ -306,7 +515,7 @@ type DraftFieldProps = {
  * input) reaches the route's handler, which collapses the row; a third
  * Escape navigates back. Revert-before-collapse-before-back.
  */
-function DraftField({ label, value, optional, onCommit, inputRef }: DraftFieldProps) {
+function DraftField({ label, value, optional, note, onCommit, inputRef }: DraftFieldProps) {
     const [draft, setDraft] = useState(value);
     const [focused, setFocused] = useState(false);
 
@@ -327,6 +536,7 @@ function DraftField({ label, value, optional, onCommit, inputRef }: DraftFieldPr
         <TextInput
             label={label}
             optional={optional}
+            note={note}
             value={draft}
             editing={editing}
             hint={editing ? "⏎ SAVE · esc REVERT" : undefined}

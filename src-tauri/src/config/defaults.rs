@@ -10,6 +10,9 @@ impl Default for Config {
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/ghostty/config".to_string(),
+                // Name-based lookup: ghostty rejects `~` theme paths, so the
+                // download placement tail symlinks each theme file into
+                // ~/.config/ghostty/themes instead (themes::symlinks).
                 themes_path: None,
                 match_pattern: Some(r"^theme\s*=\s*.+$".to_string()),
                 replace_template: Some("theme = {themeKey}.conf".to_string()),
@@ -30,11 +33,13 @@ impl Default for Config {
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/tmux/tmux.conf".to_string(),
-                themes_path: None, // user must set this to their tmux themes directory
+                // Linked placement: LINK THEMES flat-symlinks the managed
+                // files into the app-local themes dir, so the source-file
+                // pointer never references livery internals. Theme keys are
+                // globally unique — flattening collections loses nothing.
+                themes_path: Some("~/.config/tmux/themes".to_string()),
                 match_pattern: Some(r"^source-file\s+.+/themes/.+\.conf$".to_string()),
-                replace_template: Some(
-                    "source-file {themesPath}/{collectionKey}/{themeKey}.conf".to_string(),
-                ),
+                replace_template: Some("source-file {themesPath}/{themeKey}.conf".to_string()),
             },
         );
         apps.insert(
@@ -62,7 +67,7 @@ impl Default for Config {
             AppConfig {
                 enabled: false,
                 config_path: "~/.config/lazygit/config.yml".to_string(),
-                themes_path: None,
+                themes_path: Some("~/.config/black-atom/themes/lazygit".to_string()),
                 match_pattern: None,
                 replace_template: None,
             },

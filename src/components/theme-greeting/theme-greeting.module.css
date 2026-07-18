@@ -1,13 +1,15 @@
 /* =============================================================
-   EmptyState — first-run / no-match guidance panel.
-   Datasheet voice: eyebrow, display headline, body, keyed actions.
+   ThemeGreeting — first-launch download prompt.
+   Datasheet voice: eyebrow, display headline, body, keyed actions,
+   apply-rail-style per-adapter rows once a download pass starts.
    ============================================================= */
 
 .root {
     display: flex;
     flex-direction: column;
     gap: var(--ba-size-3);
-    max-width: 44ch;
+    max-width: 52ch;
+    padding: var(--ba-size-8) var(--ba-size-6);
 }
 
 .eyebrow {
@@ -32,6 +34,12 @@
     font-size: var(--ba-font-size-1);
     line-height: var(--ba-font-lineheight-body);
     color: var(--ba-color-fg-hint);
+}
+
+.rows {
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--ba-size-2);
 }
 
 .actions {

@@ -17,6 +17,52 @@ async saveConfig(config: Config) : Promise<Result<null, string>> {
 }
 },
 /**
+ * Download one adapter's theme files into the managed themes directory.
+ * Pure fetch — wiring apps to the files is adapter setup (link_app_themes
+ * for zed/ghostty, config-pointed themes_path for tmux/lazygit).
+ */
+async downloadTheme(app: AppName) : Promise<DownloadResult> {
+    return await TAURI_INVOKE("download_theme", { app });
+},
+/**
+ * Read the managed themes manifest for the frontend's greeting gate and
+ * the settings SYNC display.
+ */
+async getThemesStatus() : Promise<ThemesStatus> {
+    return await TAURI_INVOKE("get_themes_status");
+},
+/**
+ * Wire an adapter's own themes location to the managed downloads via
+ * symlinks (create, heal, prune). Explicit adapter-setup action — never
+ * runs implicitly on download. The target dir is derived from the
+ * adapter's CONFIGURED config_path (its sibling `themes/`; for obsidian
+ * that is `<vault>/.obsidian/themes/`), so custom setups link into the
+ * right place.
+ */
+async linkAppThemes(app: AppName) : Promise<LinkThemesResult> {
+    return await TAURI_INVOKE("link_app_themes", { app });
+},
+/**
+ * Persist the greeting's "continue without" choice so hand-managed setups
+ * aren't greeted on every launch.
+ */
+async dismissThemesGreeting() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("dismiss_themes_greeting") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Conservative app detection: an app counts as found iff its configured
+ * config file exists on disk. No binary lookups, no alternative-path
+ * guessing (wizard territory, #35) — better to miss than misconfigure.
+ */
+async detectApps() : Promise<AppDetection[]> {
+    return await TAURI_INVOKE("detect_apps");
+},
+/**
  * Single entry point for all app updates. The frontend calls this once per app.
  * 
  * Each invocation reads config from disk independently — this is inherent to the
@@ -52,7 +98,25 @@ async verifyAppPath(app: AppName) : Promise<AppPathVerification> {
 
 /** user-defined types **/
 
+export type AdapterThemesStatus = { 
+/**
+ * Who consumes the managed theme files — drives the class-specific
+ * settings row content and the SET UP chain.
+ */
+provisioning: ThemeProvisioning; downloaded: boolean; etag?: string | null; 
+/**
+ * Unix epoch seconds (u32 carries us to 2106; tauri-specta has no u64).
+ */
+fetched_at_epoch: number | null; file_count: number | null }
 export type AppConfig = { enabled?: boolean; config_path: string; themes_path?: string | null; match_pattern?: string | null; replace_template?: string | null }
+/**
+ * One adapter's detection outcome — backs the settings AUTO-DETECT action.
+ */
+export type AppDetection = { app: AppName; 
+/**
+ * The expanded path that was checked (empty = nothing to check).
+ */
+config_path: string; found: boolean }
 /**
  * Supported app names. TypeScript bindings are auto-generated via tauri-specta.
  */
@@ -71,11 +135,41 @@ pattern_matches: boolean | null;
  */
 message?: string | null }
 export type Config = { system_appearance: boolean; keymappings?: Keymappings; apps: { [key in AppName]: AppConfig } }
+/**
+ * Outcome of one adapter's theme download. Shares `UpdateStatus` with the
+ * apply flow so the frontend reuses the same row-status mapping.
+ */
+export type DownloadResult = { app: string; status: UpdateStatus; message?: string | null; file_count: number | null; duration_ms: number | null }
 export type Keymappings = { toggle_window: string }
+/**
+ * Outcome of wiring one adapter's themes dir via managed symlinks.
+ */
+export type LinkThemesResult = { app: string; status: UpdateStatus; message?: string | null; linked: number | null; pruned: number | null }
 /**
  * Theme metadata passed from the frontend.
  */
 export type ThemeContext = { theme_key: string; appearance: string; collection_key: string; theme_label: string | null }
+/**
+ * Theme provisioning — who consumes the managed theme files (see ADAPTERS.md).
+ * 
+ * - `External`: the app's theme files are provided outside of livery (plugin,
+ * compiled binary, or the user), so livery only performs switching.
+ * - `Linked`: livery symlinks the downloaded files into a location the app
+ * itself reads; switching selects one via a pointer in the app's config.
+ * - `Merged`: the app cannot read external theme files, so on every switch
+ * livery reads the downloaded theme and writes its values into the config.
+ */
+export type ThemeProvisioning = "external" | "linked" | "merged"
+export type ThemesStatus = { 
+/**
+ * One entry per adapter; External adapters carry their class with
+ * `downloaded: false` — nothing is ever fetched for them.
+ */
+adapters: { [key in AppName]: AdapterThemesStatus }; any_downloaded: boolean; 
+/**
+ * The first-run greeting's "continue without" flag.
+ */
+dismissed: boolean }
 export type UpdateResult = { app: string; status: UpdateStatus; message?: string | null; 
 /**
  * Time taken by the updater in milliseconds.

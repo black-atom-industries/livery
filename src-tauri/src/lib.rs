@@ -1,17 +1,27 @@
 pub mod config;
+pub mod themes;
 pub mod updaters;
 
 use tauri_specta::{collect_commands, Builder};
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn start_app() {
-    let builder = Builder::<tauri::Wry>::new().commands(collect_commands![
+fn specta_builder() -> Builder<tauri::Wry> {
+    Builder::<tauri::Wry>::new().commands(collect_commands![
         config::commands::get_config,
         config::commands::save_config,
+        themes::commands::download_theme,
+        themes::commands::get_themes_status,
+        themes::commands::link_app_themes,
+        themes::commands::dismiss_themes_greeting,
+        themes::detect::detect_apps,
         updaters::update_app,
         updaters::update_system_appearance,
         updaters::verify_app_path,
-    ]);
+    ])
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn start_app() {
+    let builder = specta_builder();
 
     #[cfg(debug_assertions)]
     builder
@@ -23,6 +33,7 @@ pub fn start_app() {
 
     tauri::Builder::default()
         .invoke_handler(builder.invoke_handler())
+        .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)
@@ -76,4 +87,19 @@ pub fn start_app() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    /// Regenerates ../src/bindings.ts on every test run, so command/type
+    /// changes never ship stale bindings — no GUI launch required.
+    #[test]
+    fn export_typescript_bindings() {
+        super::specta_builder()
+            .export(
+                specta_typescript::Typescript::default(),
+                "../src/bindings.ts",
+            )
+            .expect("Failed to export typescript bindings");
+    }
 }

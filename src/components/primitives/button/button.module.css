@@ -3,6 +3,10 @@
     font-size: var(--ba-font-size-1);
     letter-spacing: var(--ba-font-letterspacing-chip);
     text-transform: uppercase;
+    /* A bracketed actuator is one line by definition — never wrap or let a
+       flex parent squeeze the brackets onto separate lines. */
+    white-space: nowrap;
+    flex-shrink: 0;
     padding: 6px 14px;
     cursor: pointer;
     background: transparent;

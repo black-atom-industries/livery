@@ -21,6 +21,8 @@ type Props = VariantProps<typeof textInputVariants> & {
     placeholder?: string;
     /** Appends "· OPTIONAL" to the label. */
     optional?: boolean;
+    /** Explanatory label suffix, e.g. "REGEX — FINDS THE THEME LINE". */
+    note?: string;
     /** Editing hint, e.g. "⏎ SAVE · esc REVERT". Shown only while editing. */
     hint?: string;
     disabled?: boolean;
@@ -50,6 +52,7 @@ export function TextInput(
         value,
         placeholder,
         optional,
+        note,
         editing,
         hint,
         disabled,
@@ -68,6 +71,7 @@ export function TextInput(
                     <span className={styles.label}>
                         {label}
                         {optional ? <span className={styles.optional}>· OPTIONAL</span> : null}
+                        {note ? <span className={styles.optional}>· {note}</span> : null}
                     </span>
                 )
                 : null}

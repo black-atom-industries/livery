@@ -73,24 +73,74 @@
     white-space: nowrap;
 }
 
+/* Provisioning class note — how this adapter gets its theme files. */
+.classNote {
+    margin: 0 0 var(--ba-size-4);
+    font-size: var(--ba-font-size-0);
+    line-height: 1.6;
+    color: var(--ba-color-fg-hint);
+}
+
+.classLabel {
+    font-weight: var(--ba-font-weight-bold);
+    letter-spacing: var(--ba-font-letterspacing-label);
+    color: var(--ba-color-fg-subtle);
+}
+
+.classPrerequisite {
+    color: var(--ba-color-fg-warn);
+}
+
+.classLink {
+    color: var(--ba-color-fg-warn);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+}
+
+.classLink:hover {
+    color: var(--ba-color-fg-default);
+}
+
 .fieldGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--ba-size-4);
 }
 
+/* Full-width footnote under the pattern fields. */
+.fieldGridNote {
+    grid-column: 1 / -1;
+    margin: calc(-1 * var(--ba-size-2)) 0 0;
+    font-size: var(--ba-font-size-0);
+    letter-spacing: var(--ba-font-letterspacing-label);
+    color: var(--ba-color-fg-hint);
+}
+
 .actionRow {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: var(--ba-size-3);
     margin-top: var(--ba-size-4);
 }
 
-.metas {
-    margin-left: auto;
+.actionButtons {
     display: flex;
     align-items: center;
-    gap: var(--ba-size-4);
+    gap: var(--ba-size-3);
+}
+
+/* Results line under the actuators — full width, never squeezed. */
+.metas {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    column-gap: var(--ba-size-5);
+    row-gap: var(--ba-size-1);
+}
+
+.metas:empty {
+    display: none;
 }
 
 .lastAppliedOk {

@@ -4,17 +4,34 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { Typo } from "../../../components/typo/index.ts";
 import { useConfig } from "../../../queries/use-config.ts";
+import { useThemesStatus } from "../../../queries/use-themes-status.ts";
+import {
+    downloadableApps,
+    type DownloadRowResult,
+    downloadThemes,
+    latestFetchedAtEpoch,
+} from "../../../lib/theme-downloads.ts";
 import { App } from "../../../components/layouts/app.ts";
 import { ListRow } from "../../../components/primitives/list-row/list-row.tsx";
 import { AdapterRows } from "../../../components/settings/adapter-rows/index.ts";
 import { GeneralPanel } from "../../../components/settings/general-panel/index.ts";
 import type {
     AdapterField,
+    LinkThemesRowResult,
     TestApplyResult,
     VerifyPathResult,
 } from "../../../components/settings/adapter-rows/index.ts";
 import { commands } from "../../../bindings.ts";
-import type { AppConfig, AppName, Config } from "../../../bindings.ts";
+import type {
+    AdapterThemesStatus,
+    AppConfig,
+    AppName,
+    Config,
+    ThemeProvisioning,
+} from "../../../bindings.ts";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { setUpAdapter, type SetUpOutcome } from "../../../lib/adapter-setup.ts";
+import { Button } from "../../../components/primitives/button/button.tsx";
 import { appStore } from "../../../store/app.ts";
 import denoConfig from "../../../../deno.json" with { type: "json" };
 import styles from "./route.module.css";
@@ -44,7 +61,159 @@ function SettingsRoute() {
     const [verifyPathResults, setVerifyPathResults] = useState<
         Partial<Record<AppName, VerifyPathResult>>
     >({});
+    // Session-local SYNC THEMES results — same runner as the first-run greeting.
+    const themesStatus = useThemesStatus();
+    const [syncResults, setSyncResults] = useState<DownloadRowResult[] | null>(null);
+    const [syncing, setSyncing] = useState(false);
+    // Session-local LINK THEMES results per adapter.
+    const [linkThemesResults, setLinkThemesResults] = useState<
+        Partial<Record<AppName, LinkThemesRowResult>>
+    >({});
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
+
+    // Linked adapters (symlink placement) — drives LINK THEMES visibility.
+    const adapterEntries = Object.entries(themesStatus.query.data?.adapters ?? {}) as [
+        AppName,
+        AdapterThemesStatus,
+    ][];
+    const linkableApps = new Set(
+        adapterEntries
+            .filter(([, status]) => status.provisioning === "linked")
+            .map(([name]) => name),
+    );
+    const provisioningByApp = Object.fromEntries(
+        adapterEntries.map(([name, status]) => [name, status.provisioning]),
+    ) as Partial<Record<AppName, ThemeProvisioning>>;
+
+    // AUTO-DETECT scan — session-local, null until the first run.
+    const [detecting, setDetecting] = useState(false);
+    const [detections, setDetections] = useState<Partial<Record<AppName, boolean>> | null>(null);
+    const [detectError, setDetectError] = useState<string | null>(null);
+    const [setUpResults, setSetUpResults] = useState<Partial<Record<AppName, SetUpOutcome>>>({});
+
+    const detectedApps = detections
+        ? new Set(
+            (Object.entries(detections) as [AppName, boolean][])
+                .filter(([, found]) => found)
+                .map(([name]) => name),
+        )
+        : null;
+
+    async function autoDetectApps() {
+        if (detecting) return;
+        setDetecting(true);
+        try {
+            const results = await commands.detectApps();
+            setDetections(Object.fromEntries(results.map((d) => [d.app, d.found])));
+            setDetectError(null);
+        } catch (error) {
+            // A failed scan must never read as "scanned, found nothing".
+            setDetections(null);
+            setDetectError(error instanceof Error ? error.message : String(error));
+        } finally {
+            setDetecting(false);
+        }
+    }
+
+    /** SET UP — the class-appropriate chain, ending in the row's verify state. */
+    async function setUpAdapterRow(appName: AppName) {
+        const current = config.query.data;
+        const provisioningClass = provisioningByApp[appName];
+        if (!current || !provisioningClass) return;
+
+        const outcome = await setUpAdapter(
+            appName,
+            provisioningClass,
+            current.apps[appName]?.config_path ?? "",
+            {
+                enable: async (app) => {
+                    const latest = config.query.data;
+                    if (!latest) throw new Error("Config not loaded");
+                    if (latest.apps[app]?.enabled) return;
+                    const next: Config = {
+                        ...latest,
+                        apps: {
+                            ...latest.apps,
+                            [app]: { ...latest.apps[app], enabled: true },
+                        },
+                    };
+                    const result = await config.save.mutateAsync(next);
+                    if (result.status === "error") throw new Error(result.error);
+                },
+                download: (app) => commands.downloadTheme(app),
+                link: (app) => commands.linkAppThemes(app),
+                verify: (app) => commands.verifyAppPath(app),
+            },
+            (partial) => setSetUpResults((prev) => ({ ...prev, [appName]: partial })),
+        );
+        setSetUpResults((prev) => ({ ...prev, [appName]: outcome }));
+
+        // Land the chain's terminal results in the standard row metas.
+        if (outcome.link) {
+            const link = outcome.link;
+            setLinkThemesResults((prev) => ({
+                ...prev,
+                [appName]: link.status === "done"
+                    ? {
+                        status: "ok",
+                        linked: link.linked ?? 0,
+                        pruned: link.pruned ?? 0,
+                        message: link.message ?? null,
+                    }
+                    : { status: "error", message: link.message ?? "Unknown error" },
+            }));
+        }
+        if (outcome.verify) {
+            const verify = outcome.verify;
+            setVerifyPathResults((prev) => ({
+                ...prev,
+                [appName]: verify.message != null
+                    ? { status: "unverifiable", message: verify.message }
+                    : {
+                        status: "verified",
+                        exists: verify.exists,
+                        patternMatches: verify.pattern_matches,
+                    },
+            }));
+        }
+        themesStatus.query.refetch();
+    }
+
+    async function linkAppThemes(appName: AppName) {
+        setLinkThemesResults((prev) => ({ ...prev, [appName]: { status: "running" } }));
+        try {
+            const result = await commands.linkAppThemes(appName);
+            const next: LinkThemesRowResult = result.status === "done"
+                ? {
+                    status: "ok",
+                    linked: result.linked ?? 0,
+                    pruned: result.pruned ?? 0,
+                    message: result.message ?? null,
+                }
+                : { status: "error", message: result.message ?? "Unknown error" };
+            setLinkThemesResults((prev) => ({ ...prev, [appName]: next }));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            setLinkThemesResults((prev) => ({
+                ...prev,
+                [appName]: { status: "error", message },
+            }));
+        }
+    }
+
+    async function syncThemes() {
+        if (syncing) return;
+        setSyncing(true);
+        try {
+            let adapters = themesStatus.query.data?.adapters;
+            if (!adapters) adapters = (await themesStatus.query.refetch()).data?.adapters;
+            if (!adapters) return;
+            await downloadThemes(downloadableApps(adapters), setSyncResults);
+        } finally {
+            setSyncing(false);
+            themesStatus.query.refetch();
+        }
+    }
 
     const data = config.query.data;
     const appEntries = (data ? Object.entries(data.apps) : []) as [AppName, AppConfig][];
@@ -213,31 +382,71 @@ function SettingsRoute() {
             }
             right={section === "adapters"
                 ? (
-                    <AdapterRows
-                        apps={appEntries}
-                        cursorIndex={clampedCursor}
-                        expandedApp={effectiveExpandedApp}
-                        onToggleEnabled={toggleAppEnabled}
-                        onToggleExpanded={(appName) => {
-                            // Mouse path: move the row cursor along — the
-                            // disclosure only renders on the cursored row.
-                            const index = appEntries.findIndex(([name]) => name === appName);
-                            if (index !== -1) setCursorIndex(index);
-                            setExpandedApp((current) => (current === appName ? null : appName));
-                        }}
-                        onFieldCommit={commitAdapterField}
-                        onTestApply={testApplyAdapter}
-                        testApplyResults={testApplyResults}
-                        onVerifyPath={verifyAdapterPath}
-                        verifyPathResults={verifyPathResults}
-                        firstFieldRef={firstFieldRef}
-                    />
+                    <>
+                        <div className={styles.detectBar}>
+                            <Button
+                                intent="secondary"
+                                onClick={autoDetectApps}
+                                disabled={detecting}
+                            >
+                                {detecting ? "DETECTING…" : "AUTO-DETECT"}
+                            </Button>
+                            {detectError
+                                ? (
+                                    <span className={styles.detectError}>
+                                        DETECT FAILED — {detectError.toUpperCase()}
+                                    </span>
+                                )
+                                : (
+                                    <span className={styles.detectMeta}>
+                                        {detectedApps
+                                            ? `${detectedApps.size} FOUND — SET UP wires detected apps in one step`
+                                            : "Scan for installed apps by their config files"}
+                                    </span>
+                                )}
+                        </div>
+                        <AdapterRows
+                            apps={appEntries}
+                            cursorIndex={clampedCursor}
+                            expandedApp={effectiveExpandedApp}
+                            onToggleEnabled={toggleAppEnabled}
+                            onToggleExpanded={(appName) => {
+                                // Mouse path: move the row cursor along — the
+                                // disclosure only renders on the cursored row.
+                                const index = appEntries.findIndex(([name]) => name === appName);
+                                if (index !== -1) setCursorIndex(index);
+                                setExpandedApp((current) => (current === appName ? null : appName));
+                            }}
+                            onFieldCommit={commitAdapterField}
+                            onTestApply={testApplyAdapter}
+                            testApplyResults={testApplyResults}
+                            onVerifyPath={verifyAdapterPath}
+                            verifyPathResults={verifyPathResults}
+                            linkableApps={linkableApps}
+                            onLinkThemes={linkAppThemes}
+                            linkThemesResults={linkThemesResults}
+                            provisioning={provisioningByApp}
+                            detectedApps={detectedApps}
+                            onSetUp={setUpAdapterRow}
+                            setUpResults={setUpResults}
+                            onOpenUrl={(url) => {
+                                openUrl(url).catch((error) => console.error(error));
+                            }}
+                            firstFieldRef={firstFieldRef}
+                        />
+                    </>
                 )
                 : (
                     <GeneralPanel
                         followOsAppearance={data.system_appearance}
                         onToggleFollowOsAppearance={toggleSystemAppearance}
                         liveryVersion={denoConfig.version}
+                        themesLastSyncedEpoch={latestFetchedAtEpoch(
+                            themesStatus.query.data?.adapters ?? {},
+                        )}
+                        syncResults={syncResults}
+                        syncing={syncing}
+                        onSyncThemes={syncThemes}
                         cursored={clampedCursor === 0}
                     />
                 )}

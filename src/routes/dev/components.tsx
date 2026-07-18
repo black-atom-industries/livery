@@ -327,6 +327,20 @@ function Page() {
                         }, 600);
                     }}
                     testApplyResults={settingsTestApplyResults}
+                    linkableApps={new Set<AppName>(["zed", "ghostty", "tmux", "obsidian"])}
+                    onLinkThemes={() => {}}
+                    provisioning={{
+                        nvim: "external",
+                        helm: "external",
+                        delta: "external",
+                        ghostty: "linked",
+                        zed: "linked",
+                        tmux: "linked",
+                        obsidian: "linked",
+                        lazygit: "merged",
+                    }}
+                    detectedApps={new Set<AppName>(["ghostty", "tmux"])}
+                    onSetUp={() => {}}
                     onVerifyPath={(appName) => {
                         setSettingsVerifyPathResults((prev) => ({
                             ...prev,
