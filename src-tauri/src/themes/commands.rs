@@ -124,7 +124,7 @@ pub async fn get_themes_status() -> ThemesStatus {
             *app,
             AdapterThemesStatus {
                 downloaded: entry.is_some(),
-                linked_placement: registry::linked_placement_extension(*app).is_some(),
+                linked_placement: registry::linked_placement(*app).is_some(),
                 etag: entry.and_then(|e| e.etag.clone()),
                 fetched_at_epoch: entry.map(|e| e.fetched_at_epoch as u32),
                 file_count: entry.map(|e| e.file_count),
@@ -160,11 +160,21 @@ pub struct LinkThemesResult {
 pub async fn link_app_themes(app: AppName) -> LinkThemesResult {
     let app_str = app.as_str();
 
-    let Some(extension) = registry::linked_placement_extension(app) else {
+    let Some(placement) = registry::linked_placement(app) else {
         return LinkThemesResult {
             app: app_str.to_string(),
             status: UpdateStatus::Skipped,
             message: Some(format!("{app_str} is not wired via linked themes")),
+            linked: None,
+            pruned: None,
+        };
+    };
+    let registry::LinkedPlacement::FlatByExtension(extension) = placement else {
+        // Vault placement (obsidian) lands with the placement dispatch commit.
+        return LinkThemesResult {
+            app: app_str.to_string(),
+            status: UpdateStatus::Skipped,
+            message: Some(format!("{app_str} vault placement is not wired yet")),
             linked: None,
             pruned: None,
         };

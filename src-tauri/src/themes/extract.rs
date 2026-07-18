@@ -113,10 +113,6 @@ fn theme_relative_path(entry_path: &Path, layout: ExtractLayout) -> Option<PathB
             }
             _ => None,
         },
-        ExtractLayout::NvimColors => match repo_relative.as_slice() {
-            ["colors", file] if file.starts_with("black-atom-") => Some(PathBuf::from(file)),
-            _ => None,
-        },
         ExtractLayout::ObsidianMerged => match repo_relative.as_slice() {
             ["themes", file] if file.starts_with("black-atom-") => Some(PathBuf::from(file)),
             // The vault-installable pair at the repo root.
@@ -309,20 +305,6 @@ mod tests {
         assert!(result.unwrap_err().contains("no theme files"));
         // Previous download stays intact.
         assert_eq!(managed_dir_listing(&root.path().join("tmux")).len(), 3);
-    }
-
-    #[test]
-    fn test_nvim_colors_layout_maps_flat() {
-        let take = |p: &str| theme_relative_path(Path::new(p), ExtractLayout::NvimColors);
-        assert_eq!(
-            take("nvim-main/colors/black-atom-default-dark.lua"),
-            Some(PathBuf::from("black-atom-default-dark.lua"))
-        );
-        assert_eq!(take("nvim-main/colors/README.md"), None);
-        assert_eq!(
-            take("nvim-main/lua/black-atom/themes/default/collection.template.lua"),
-            None
-        );
     }
 
     #[test]
