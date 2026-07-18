@@ -11,6 +11,7 @@ import {
 function status(overrides: Partial<AdapterThemesStatus> = {}): AdapterThemesStatus {
     return {
         provisioning: "linked",
+        editable_fields: [],
         downloaded: false,
         fetched_at_epoch: null,
         file_count: null,

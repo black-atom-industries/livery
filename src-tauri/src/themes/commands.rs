@@ -59,6 +59,9 @@ pub struct AdapterThemesStatus {
     /// Who consumes the managed theme files — drives the class-specific
     /// settings row content and the SET UP chain.
     pub provisioning: registry::ThemeProvisioning,
+    /// Config fields this adapter's updater actually reads — trims the
+    /// settings field grid to what's safe to edit.
+    pub editable_fields: Vec<registry::AdapterEditableField>,
     pub downloaded: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub etag: Option<String>,
@@ -123,6 +126,7 @@ pub async fn get_themes_status() -> ThemesStatus {
             *app,
             AdapterThemesStatus {
                 provisioning: registry::provisioning(*app),
+                editable_fields: registry::editable_fields(*app),
                 downloaded: entry.is_some(),
                 etag: entry.and_then(|e| e.etag.clone()),
                 fetched_at_epoch: entry.map(|e| e.fetched_at_epoch as u32),

@@ -97,9 +97,75 @@ pub fn linked_placement(app: AppName) -> Option<LinkedPlacement> {
     }
 }
 
+/// A config field an adapter's updater actually reads. Drives which inputs
+/// the settings UI offers per adapter — editing a field the updater ignores
+/// is silent noise; editing one it does read, wrongly, breaks switching.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum AdapterEditableField {
+    ConfigPath,
+    ThemesPath,
+    MatchPattern,
+    ReplaceTemplate,
+}
+
+/// Config fields each adapter's updater actually reads — HAND-MAINTAINED
+/// against `src-tauri/src/updaters/*` and the `dispatch_update` router in
+/// `updaters/mod.rs`. Update this alongside any updater change.
+///
+/// nvim/ghostty/tmux have dedicated updaters; delta and helm route through
+/// the shared `patch_text_updater`, so all five read pattern+template. zed
+/// and obsidian patch structurally (JSONC) off `config_path` alone. tmux and
+/// lazygit additionally point `themes_path` at the managed download dir.
+pub fn editable_fields(app: AppName) -> Vec<AdapterEditableField> {
+    use AdapterEditableField::*;
+    match app {
+        AppName::Nvim | AppName::Ghostty | AppName::Helm | AppName::Delta => {
+            vec![ConfigPath, MatchPattern, ReplaceTemplate]
+        }
+        AppName::Tmux => vec![ConfigPath, ThemesPath, MatchPattern, ReplaceTemplate],
+        AppName::Zed | AppName::Obsidian => vec![ConfigPath],
+        AppName::Lazygit => vec![ConfigPath, ThemesPath],
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_editable_fields_matches_updaters() {
+        use AdapterEditableField::*;
+
+        // Pins the hand-maintained matrix against updaters/* — a future
+        // updater change must consciously update this alongside it.
+        assert_eq!(
+            editable_fields(AppName::Nvim),
+            vec![ConfigPath, MatchPattern, ReplaceTemplate]
+        );
+        assert_eq!(
+            editable_fields(AppName::Ghostty),
+            vec![ConfigPath, MatchPattern, ReplaceTemplate]
+        );
+        assert_eq!(
+            editable_fields(AppName::Helm),
+            vec![ConfigPath, MatchPattern, ReplaceTemplate]
+        );
+        assert_eq!(
+            editable_fields(AppName::Delta),
+            vec![ConfigPath, MatchPattern, ReplaceTemplate]
+        );
+        assert_eq!(
+            editable_fields(AppName::Tmux),
+            vec![ConfigPath, ThemesPath, MatchPattern, ReplaceTemplate]
+        );
+        assert_eq!(editable_fields(AppName::Zed), vec![ConfigPath]);
+        assert_eq!(editable_fields(AppName::Obsidian), vec![ConfigPath]);
+        assert_eq!(
+            editable_fields(AppName::Lazygit),
+            vec![ConfigPath, ThemesPath]
+        );
+    }
 
     #[test]
     fn test_placement_exists_iff_linked() {
