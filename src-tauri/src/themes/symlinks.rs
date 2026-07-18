@@ -1,9 +1,9 @@
-//! Symlink placement tail for apps that only load themes from their own
-//! config directory by bare name (zed: ~/.config/zed/themes; ghostty:
-//! ~/.config/ghostty/themes — ghostty rejects `~` paths in `theme =`).
-//! Each downloaded theme gets a flat symlink there pointing into the
-//! managed dir. Re-running heals dangling links and prunes managed-owned
-//! leftovers; real files a user placed themselves are never touched.
+//! Symlink placement for Linked adapters — apps that read theme files from
+//! an app-defined location (zed/ghostty/tmux: flat `themes/` dir next to
+//! the config; obsidian: the vault's per-theme subdirectory). Each managed
+//! file gets a symlink there pointing into the managed dir. Re-running
+//! heals dangling links and prunes managed-owned leftovers; real files a
+//! user placed themselves are never touched.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -34,28 +34,7 @@ pub fn sync_flat_symlinks(
     let mut stats = SymlinkSyncStats::default();
 
     for (name, target) in &fresh {
-        let link = app_themes_dir.join(name);
-        match std::fs::symlink_metadata(&link) {
-            Ok(meta) if meta.file_type().is_symlink() => {
-                // Replace unless it already points at the fresh target —
-                // this heals dangling links and re-aims clone-farm links.
-                if std::fs::read_link(&link).ok().as_deref() != Some(target.as_path()) {
-                    std::fs::remove_file(&link)
-                        .map_err(|e| format!("Failed to replace {}: {e}", link.display()))?;
-                    std::os::unix::fs::symlink(target, &link)
-                        .map_err(|e| format!("Failed to link {}: {e}", link.display()))?;
-                }
-                stats.linked += 1;
-            }
-            Ok(_) => {
-                stats.skipped.push(name.clone());
-            }
-            Err(_) => {
-                std::os::unix::fs::symlink(target, &link)
-                    .map_err(|e| format!("Failed to link {}: {e}", link.display()))?;
-                stats.linked += 1;
-            }
-        }
+        place_link(&app_themes_dir.join(name), target, name, &mut stats)?;
     }
 
     // Prune: managed-owned links whose theme vanished upstream.
@@ -85,6 +64,68 @@ pub fn sync_flat_symlinks(
     }
 
     Ok(stats)
+}
+
+/// The vault theme folder Obsidian discovers — must match the adapter
+/// manifest's `name` field.
+pub const OBSIDIAN_THEME_DIR: &str = "Black Atom";
+
+/// Link the managed obsidian `theme.css` + `manifest.json` pair into
+/// `<vault_themes_dir>/Black Atom/` — Obsidian discovers themes as
+/// per-name subdirectories of the vault's themes dir. Same heal/skip
+/// semantics as the flat sync; nothing to prune (fixed two-file set).
+#[cfg(unix)]
+pub fn sync_vault_theme_links(
+    managed_dir: &Path,
+    vault_themes_dir: &Path,
+) -> Result<SymlinkSyncStats, String> {
+    let theme_dir = vault_themes_dir.join(OBSIDIAN_THEME_DIR);
+    std::fs::create_dir_all(&theme_dir)
+        .map_err(|e| format!("Failed to create {}: {e}", theme_dir.display()))?;
+    super::extract::ensure_under_home(&theme_dir)?;
+    super::extract::ensure_under_home(managed_dir)?;
+
+    let mut stats = SymlinkSyncStats::default();
+    for name in ["theme.css", "manifest.json"] {
+        let target = managed_dir.join(name);
+        if !target.is_file() {
+            return Err(format!("Managed {name} is missing — run SYNC THEMES first"));
+        }
+        place_link(&theme_dir.join(name), &target, name, &mut stats)?;
+    }
+    Ok(stats)
+}
+
+/// Create or heal one symlink: re-aim symlinks that don't point at the
+/// fresh target (heals dangling and clone-farm links), never touch a real
+/// file already sitting there.
+#[cfg(unix)]
+fn place_link(
+    link: &Path,
+    target: &Path,
+    name: &str,
+    stats: &mut SymlinkSyncStats,
+) -> Result<(), String> {
+    match std::fs::symlink_metadata(link) {
+        Ok(meta) if meta.file_type().is_symlink() => {
+            if std::fs::read_link(link).ok().as_deref() != Some(target) {
+                std::fs::remove_file(link)
+                    .map_err(|e| format!("Failed to replace {}: {e}", link.display()))?;
+                std::os::unix::fs::symlink(target, link)
+                    .map_err(|e| format!("Failed to link {}: {e}", link.display()))?;
+            }
+            stats.linked += 1;
+        }
+        Ok(_) => {
+            stats.skipped.push(name.to_string());
+        }
+        Err(_) => {
+            std::os::unix::fs::symlink(target, link)
+                .map_err(|e| format!("Failed to link {}: {e}", link.display()))?;
+            stats.linked += 1;
+        }
+    }
+    Ok(())
 }
 
 /// Filename → absolute managed path for every theme file one collection
@@ -233,5 +274,52 @@ mod tests {
         assert_eq!(stats.linked, 1);
         assert_eq!(stats.pruned, 0);
         assert!(stats.skipped.is_empty());
+    }
+
+    fn vault_setup() -> Setup {
+        let s = setup(".css");
+        std::fs::write(s.managed.join("theme.css"), "merged css").unwrap();
+        std::fs::write(s.managed.join("manifest.json"), "{\"name\":\"Black Atom\"}").unwrap();
+        s
+    }
+
+    #[test]
+    fn test_vault_links_theme_pair_into_named_dir() {
+        let s = vault_setup();
+        let stats = sync_vault_theme_links(&s.managed, &s.app_dir).unwrap();
+
+        assert_eq!(stats.linked, 2);
+        let theme_dir = s.app_dir.join(OBSIDIAN_THEME_DIR);
+        for name in ["theme.css", "manifest.json"] {
+            let target = std::fs::read_link(theme_dir.join(name)).unwrap();
+            assert!(target.starts_with(&s.managed));
+        }
+    }
+
+    #[test]
+    fn test_vault_missing_managed_pair_is_an_error() {
+        let s = setup(".css"); // no theme.css/manifest.json written
+        let err = sync_vault_theme_links(&s.managed, &s.app_dir).unwrap_err();
+        assert!(err.contains("SYNC THEMES"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn test_vault_never_touches_real_files_and_rerun_is_stable() {
+        let s = vault_setup();
+        let theme_dir = s.app_dir.join(OBSIDIAN_THEME_DIR);
+        std::fs::create_dir_all(&theme_dir).unwrap();
+        std::fs::write(theme_dir.join("theme.css"), "hand-installed").unwrap();
+
+        let stats = sync_vault_theme_links(&s.managed, &s.app_dir).unwrap();
+        assert_eq!(stats.skipped, vec!["theme.css"]);
+        assert_eq!(stats.linked, 1);
+        assert_eq!(
+            std::fs::read_to_string(theme_dir.join("theme.css")).unwrap(),
+            "hand-installed"
+        );
+
+        let rerun = sync_vault_theme_links(&s.managed, &s.app_dir).unwrap();
+        assert_eq!(rerun.linked, 1);
+        assert_eq!(rerun.skipped, vec!["theme.css"]);
     }
 }

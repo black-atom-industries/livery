@@ -180,11 +180,12 @@ pub struct LinkThemesResult {
     pub pruned: Option<u32>,
 }
 
-/// Wire an adapter's own themes dir to the managed downloads via flat
+/// Wire an adapter's own themes location to the managed downloads via
 /// symlinks (create, heal, prune). Explicit adapter-setup action — never
 /// runs implicitly on download. The target dir is derived from the
-/// adapter's CONFIGURED config_path (its sibling `themes/`), so custom
-/// setups link into the right place.
+/// adapter's CONFIGURED config_path (its sibling `themes/`; for obsidian
+/// that is `<vault>/.obsidian/themes/`), so custom setups link into the
+/// right place.
 #[tauri::command]
 #[specta::specta]
 pub async fn link_app_themes(app: AppName) -> LinkThemesResult {
@@ -199,18 +200,8 @@ pub async fn link_app_themes(app: AppName) -> LinkThemesResult {
             pruned: None,
         };
     };
-    let registry::LinkedPlacement::FlatByExtension(extension) = placement else {
-        // Vault placement (obsidian) lands with the placement dispatch commit.
-        return LinkThemesResult {
-            app: app_str.to_string(),
-            status: UpdateStatus::Skipped,
-            message: Some(format!("{app_str} vault placement is not wired yet")),
-            linked: None,
-            pruned: None,
-        };
-    };
 
-    match link_app_themes_inner(app, extension) {
+    match link_app_themes_inner(app, placement) {
         Ok(stats) => LinkThemesResult {
             app: app_str.to_string(),
             status: UpdateStatus::Done,
@@ -237,7 +228,7 @@ pub async fn link_app_themes(app: AppName) -> LinkThemesResult {
 #[cfg(unix)]
 fn link_app_themes_inner(
     app: AppName,
-    extension: &str,
+    placement: registry::LinkedPlacement,
 ) -> Result<symlinks::SymlinkSyncStats, String> {
     let root = extract::managed_themes_root()?;
     let managed_dir = root.join(app.as_str());
@@ -261,13 +252,20 @@ fn link_app_themes_inner(
         )
     })?;
 
-    symlinks::sync_flat_symlinks(&managed_dir, &themes_dir, extension)
+    match placement {
+        registry::LinkedPlacement::FlatByExtension(extension) => {
+            symlinks::sync_flat_symlinks(&managed_dir, &themes_dir, extension)
+        }
+        registry::LinkedPlacement::VaultThemeDir => {
+            symlinks::sync_vault_theme_links(&managed_dir, &themes_dir)
+        }
+    }
 }
 
 #[cfg(not(unix))]
 fn link_app_themes_inner(
     _app: AppName,
-    _extension: &str,
+    _placement: registry::LinkedPlacement,
 ) -> Result<symlinks::SymlinkSyncStats, String> {
     Err("Linked theme placement requires a unix filesystem".to_string())
 }
