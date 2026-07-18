@@ -24,6 +24,12 @@ export default defineConfig({
             ),
         },
     },
+    optimizeDeps: {
+        // Only imported by the lazy settings route — without pre-bundling,
+        // Vite discovers it mid-session on first navigation and the Tauri
+        // webview trips over the re-optimize reload (504 Outdated Dep).
+        include: ["@tauri-apps/plugin-opener"],
+    },
     server: {
         port: 1420,
         strictPort: true,
