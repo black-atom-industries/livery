@@ -22,7 +22,7 @@ import type {
     VerifyPathResult,
 } from "../../../components/settings/adapter-rows/index.ts";
 import { commands } from "../../../bindings.ts";
-import type { AppConfig, AppName, Config } from "../../../bindings.ts";
+import type { AdapterThemesStatus, AppConfig, AppName, Config } from "../../../bindings.ts";
 import { appStore } from "../../../store/app.ts";
 import denoConfig from "../../../../deno.json" with { type: "json" };
 import styles from "./route.module.css";
@@ -62,13 +62,13 @@ function SettingsRoute() {
     >({});
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
 
-    // Adapters wired via managed symlinks — drives LINK THEMES visibility.
+    // Linked adapters (symlink placement) — drives LINK THEMES visibility.
     const linkableApps = new Set(
         (Object.entries(themesStatus.query.data?.adapters ?? {}) as [
             AppName,
-            { linked_placement: boolean },
+            AdapterThemesStatus,
         ][])
-            .filter(([, status]) => status.linked_placement)
+            .filter(([, status]) => status.provisioning === "linked")
             .map(([name]) => name),
     );
 
