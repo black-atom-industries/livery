@@ -305,11 +305,11 @@ async fn download_theme_inner(app: AppName) -> Result<u32, DownloadError> {
     let root = extract::managed_themes_root().map_err(DownloadError::Failed)?;
 
     // HEAD resolves each repo's default branch (obsidian uses master, the
-    // rest main) — no per-adapter branch knowledge needed.
-    let url = format!(
-        "https://codeload.github.com/black-atom-industries/{}/tar.gz/HEAD",
-        dist.repo
-    );
+    // rest main) — no per-adapter branch knowledge needed. The base URL is
+    // env-injectable so the hermetic smoke suite can serve fixture tarballs.
+    let base = std::env::var("LIVERY_THEMES_BASE_URL")
+        .unwrap_or_else(|_| "https://codeload.github.com/black-atom-industries".to_string());
+    let url = format!("{base}/{}/tar.gz/HEAD", dist.repo);
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(60))
         .build()
