@@ -112,6 +112,7 @@ pub async fn get_themes_status() -> ThemesStatus {
             dismissed: false,
         };
     };
+    self_heal_stale_downloads(&root);
     let stored = manifest::read_manifest(&root);
 
     let mut adapters = HashMap::new();
@@ -136,6 +137,33 @@ pub async fn get_themes_status() -> ThemesStatus {
         any_downloaded: adapters.values().any(|a| a.downloaded),
         dismissed: stored.greeting_dismissed,
         adapters,
+    }
+}
+
+/// Drop managed downloads for apps that are no longer downloadable — a
+/// leftover dir/manifest entry would otherwise claim themes nothing can
+/// consume (nvim's colors files turned out to be plugin-entry stubs).
+/// Strictly scoped to `<managed_root>/<app>` for known app names.
+fn self_heal_stale_downloads(root: &std::path::Path) {
+    for app in AppName::all() {
+        if registry::distribution(*app).is_some() {
+            continue;
+        }
+        let leftover = root.join(app.as_str());
+        if leftover.is_dir() {
+            match std::fs::remove_dir_all(&leftover) {
+                Ok(()) => log::info!("Removed stale managed themes dir for {}", app.as_str()),
+                Err(e) => {
+                    log::warn!(
+                        "Failed to remove stale themes dir for {}: {e}",
+                        app.as_str()
+                    )
+                }
+            }
+        }
+        if let Err(e) = manifest::remove_entry(root, app.as_str()) {
+            log::warn!("Failed to prune manifest entry for {}: {e}", app.as_str());
+        }
     }
 }
 
@@ -331,6 +359,34 @@ async fn download_theme_inner(app: AppName) -> Result<u32, DownloadError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_self_heal_removes_only_non_downloadable_leftovers() {
+        let home = dirs::home_dir().expect("Cannot determine home directory");
+        let root = tempfile::TempDir::new_in(home).unwrap();
+
+        for app in ["nvim", "ghostty"] {
+            std::fs::create_dir_all(root.path().join(app)).unwrap();
+            manifest::upsert_entry(
+                root.path(),
+                app,
+                ManifestEntry {
+                    etag: None,
+                    fetched_at_epoch: 1,
+                    file_count: 3,
+                },
+            )
+            .unwrap();
+        }
+
+        self_heal_stale_downloads(root.path());
+
+        let stored = manifest::read_manifest(root.path());
+        assert!(!root.path().join("nvim").exists());
+        assert!(!stored.adapters.contains_key("nvim"));
+        assert!(root.path().join("ghostty").is_dir());
+        assert!(stored.adapters.contains_key("ghostty"));
+    }
 
     #[test]
     fn test_app_themes_dir_derives_from_config_path_sibling() {

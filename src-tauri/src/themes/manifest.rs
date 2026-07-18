@@ -62,6 +62,15 @@ pub fn upsert_entry(managed_root: &Path, app: &str, entry: ManifestEntry) -> Res
     write_manifest(managed_root, &manifest)
 }
 
+/// Remove a single adapter entry; absent entries are a no-op, not an error.
+pub fn remove_entry(managed_root: &Path, app: &str) -> Result<(), String> {
+    let mut manifest = read_manifest(managed_root);
+    if manifest.adapters.remove(app).is_none() {
+        return Ok(());
+    }
+    write_manifest(managed_root, &manifest)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -117,6 +126,27 @@ mod tests {
         assert_eq!(entry.fetched_at_epoch, 1_751_888_400);
         assert_eq!(entry.file_count, 45);
         assert_eq!(entry.etag, None);
+    }
+
+    #[test]
+    fn test_remove_entry_is_idempotent() {
+        let root = temp_root();
+        upsert_entry(
+            root.path(),
+            "nvim",
+            ManifestEntry {
+                etag: None,
+                fetched_at_epoch: 1,
+                file_count: 7,
+            },
+        )
+        .unwrap();
+
+        remove_entry(root.path(), "nvim").unwrap();
+        assert!(read_manifest(root.path()).adapters.is_empty());
+        // Removing an absent entry succeeds quietly.
+        remove_entry(root.path(), "nvim").unwrap();
+        remove_entry(root.path(), "never-existed").unwrap();
     }
 
     #[test]
