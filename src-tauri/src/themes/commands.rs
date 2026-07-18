@@ -60,9 +60,6 @@ pub struct AdapterThemesStatus {
     /// settings row content and the SET UP chain.
     pub provisioning: registry::ThemeProvisioning,
     pub downloaded: bool,
-    /// True for adapters wired via LINK THEMES — drives the action's
-    /// visibility in the settings adapter row.
-    pub linked_placement: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub etag: Option<String>,
     /// Unix epoch seconds (u32 carries us to 2106; tauri-specta has no u64).
@@ -127,7 +124,6 @@ pub async fn get_themes_status() -> ThemesStatus {
             AdapterThemesStatus {
                 provisioning: registry::provisioning(*app),
                 downloaded: entry.is_some(),
-                linked_placement: registry::linked_placement(*app).is_some(),
                 etag: entry.and_then(|e| e.etag.clone()),
                 fetched_at_epoch: entry.map(|e| e.fetched_at_epoch as u32),
                 file_count: entry.map(|e| e.file_count),

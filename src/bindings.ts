@@ -32,11 +32,12 @@ async getThemesStatus() : Promise<ThemesStatus> {
     return await TAURI_INVOKE("get_themes_status");
 },
 /**
- * Wire an adapter's own themes dir to the managed downloads via flat
+ * Wire an adapter's own themes location to the managed downloads via
  * symlinks (create, heal, prune). Explicit adapter-setup action — never
  * runs implicitly on download. The target dir is derived from the
- * adapter's CONFIGURED config_path (its sibling `themes/`), so custom
- * setups link into the right place.
+ * adapter's CONFIGURED config_path (its sibling `themes/`; for obsidian
+ * that is `<vault>/.obsidian/themes/`), so custom setups link into the
+ * right place.
  */
 async linkAppThemes(app: AppName) : Promise<LinkThemesResult> {
     return await TAURI_INVOKE("link_app_themes", { app });
@@ -102,12 +103,7 @@ export type AdapterThemesStatus = {
  * Who consumes the managed theme files — drives the class-specific
  * settings row content and the SET UP chain.
  */
-provisioning: ThemeProvisioning; downloaded: boolean; 
-/**
- * True for adapters wired via LINK THEMES — drives the action's
- * visibility in the settings adapter row.
- */
-linked_placement: boolean; etag?: string | null; 
+provisioning: ThemeProvisioning; downloaded: boolean; etag?: string | null; 
 /**
  * Unix epoch seconds (u32 carries us to 2106; tauri-specta has no u64).
  */

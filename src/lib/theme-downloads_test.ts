@@ -12,7 +12,6 @@ function status(overrides: Partial<AdapterThemesStatus> = {}): AdapterThemesStat
     return {
         provisioning: "linked",
         downloaded: false,
-        linked_placement: false,
         fetched_at_epoch: null,
         file_count: null,
         ...overrides,
@@ -58,13 +57,8 @@ Deno.test("latestFetchedAtEpoch picks the newest adapter fetch", () => {
     assertEquals(
         latestFetchedAtEpoch({
             tmux: status({ downloaded: true, fetched_at_epoch: 100, file_count: 44 }),
-            zed: status({
-                downloaded: true,
-                linked_placement: true,
-                fetched_at_epoch: 300,
-                file_count: 44,
-            }),
-            ghostty: status({ linked_placement: true }),
+            zed: status({ downloaded: true, fetched_at_epoch: 300, file_count: 44 }),
+            ghostty: status(),
         }),
         300,
     );
