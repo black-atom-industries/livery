@@ -54,6 +54,14 @@ async dismissThemesGreeting() : Promise<Result<null, string>> {
 }
 },
 /**
+ * Conservative app detection: an app counts as found iff its configured
+ * config file exists on disk. No binary lookups, no alternative-path
+ * guessing (wizard territory, #35) — better to miss than misconfigure.
+ */
+async detectApps() : Promise<AppDetection[]> {
+    return await TAURI_INVOKE("detect_apps");
+},
+/**
  * Single entry point for all app updates. The frontend calls this once per app.
  * 
  * Each invocation reads config from disk independently — this is inherent to the
@@ -100,6 +108,14 @@ linked_placement: boolean; etag?: string | null;
  */
 fetched_at_epoch: number | null; file_count: number | null }
 export type AppConfig = { enabled?: boolean; config_path: string; themes_path?: string | null; match_pattern?: string | null; replace_template?: string | null }
+/**
+ * One adapter's detection outcome — backs the settings AUTO-DETECT action.
+ */
+export type AppDetection = { app: AppName; 
+/**
+ * The expanded path that was checked (empty = nothing to check).
+ */
+config_path: string; found: boolean }
 /**
  * Supported app names. TypeScript bindings are auto-generated via tauri-specta.
  */
