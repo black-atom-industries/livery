@@ -87,6 +87,7 @@ function SettingsRoute() {
     // AUTO-DETECT scan — session-local, null until the first run.
     const [detecting, setDetecting] = useState(false);
     const [detections, setDetections] = useState<Partial<Record<AppName, boolean>> | null>(null);
+    const [detectError, setDetectError] = useState<string | null>(null);
     const [setUpResults, setSetUpResults] = useState<Partial<Record<AppName, SetUpOutcome>>>({});
 
     const detectedApps = detections
@@ -103,8 +104,11 @@ function SettingsRoute() {
         try {
             const results = await commands.detectApps();
             setDetections(Object.fromEntries(results.map((d) => [d.app, d.found])));
-        } catch {
-            setDetections({});
+            setDetectError(null);
+        } catch (error) {
+            // A failed scan must never read as "scanned, found nothing".
+            setDetections(null);
+            setDetectError(error instanceof Error ? error.message : String(error));
         } finally {
             setDetecting(false);
         }
@@ -386,11 +390,19 @@ function SettingsRoute() {
                             >
                                 {detecting ? "DETECTING…" : "AUTO-DETECT"}
                             </Button>
-                            <span className={styles.detectMeta}>
-                                {detectedApps
-                                    ? `${detectedApps.size} FOUND — SET UP wires detected apps in one step`
-                                    : "Scan for installed apps by their config files"}
-                            </span>
+                            {detectError
+                                ? (
+                                    <span className={styles.detectError}>
+                                        DETECT FAILED — {detectError.toUpperCase()}
+                                    </span>
+                                )
+                                : (
+                                    <span className={styles.detectMeta}>
+                                        {detectedApps
+                                            ? `${detectedApps.size} FOUND — SET UP wires detected apps in one step`
+                                            : "Scan for installed apps by their config files"}
+                                    </span>
+                                )}
                         </div>
                         <AdapterRows
                             apps={appEntries}
