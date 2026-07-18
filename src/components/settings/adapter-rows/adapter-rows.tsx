@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import type { AppConfig, AppName, ThemeProvisioning } from "../../../bindings.ts";
 import type { SetUpOutcome } from "../../../lib/adapter-setup.ts";
-import { adapterPrerequisites, provisioningCopy } from "../../../lib/adapter-copy.ts";
+import {
+    type AdapterPrerequisite,
+    adapterPrerequisites,
+    provisioningCopy,
+} from "../../../lib/adapter-copy.ts";
 import { SectionHeader } from "../../primitives/section-header/section-header.tsx";
 import { DisclosurePanel } from "../../primitives/disclosure-panel/disclosure-panel.tsx";
 import { Toggle } from "../../primitives/toggle/toggle.tsx";
@@ -71,6 +75,8 @@ type Props = {
     onSetUp: (appName: AppName) => void;
     /** Session-local SET UP outcome per app. */
     setUpResults?: Partial<Record<AppName, SetUpOutcome>>;
+    /** Opens a prerequisite link in the OS browser (webview must not navigate). */
+    onOpenUrl?: (url: string) => void;
     /** Ref to the first input of the expanded row — the "e" hotkey focuses it. */
     firstFieldRef?: React.Ref<HTMLInputElement>;
     className?: string;
@@ -100,6 +106,7 @@ export function AdapterRows(
         detectedApps,
         onSetUp,
         setUpResults,
+        onOpenUrl,
         firstFieldRef,
         className,
     }: Props,
@@ -133,6 +140,7 @@ export function AdapterRows(
                         detected={detectedApps?.has(appName) ?? false}
                         onSetUp={() => onSetUp(appName)}
                         setUpResult={setUpResults?.[appName]}
+                        onOpenUrl={onOpenUrl}
                         firstFieldRef={expandedApp === appName ? firstFieldRef : undefined}
                     />
                 ))}
@@ -160,6 +168,7 @@ type RowProps = {
     detected: boolean;
     onSetUp: () => void;
     setUpResult?: SetUpOutcome;
+    onOpenUrl?: (url: string) => void;
     firstFieldRef?: React.Ref<HTMLInputElement>;
 };
 
@@ -183,6 +192,7 @@ function AdapterRow(
         detected,
         onSetUp,
         setUpResult,
+        onOpenUrl,
         firstFieldRef,
     }: RowProps,
 ) {
@@ -221,14 +231,10 @@ function AdapterRow(
                         <span className={styles.classLabel}>{provisioning.toUpperCase()}</span>
                         {" — "}
                         {provisioningCopy[provisioning]}
-                        {adapterPrerequisites[appName] && (
-                            <>
-                                <br />
-                                <span className={styles.classPrerequisite}>
-                                    {adapterPrerequisites[appName]}
-                                </span>
-                            </>
-                        )}
+                        <Prerequisite
+                            prerequisite={adapterPrerequisites[appName]}
+                            onOpenUrl={onOpenUrl}
+                        />
                     </p>
                 )}
                 <FieldGrid
@@ -251,6 +257,41 @@ function AdapterRow(
                 />
             </DisclosurePanel>
         </div>
+    );
+}
+
+/** The one-time prerequisite line, with its reference as a real link. */
+function Prerequisite(
+    { prerequisite, onOpenUrl }: {
+        prerequisite?: AdapterPrerequisite;
+        onOpenUrl?: (url: string) => void;
+    },
+) {
+    if (!prerequisite) return null;
+    return (
+        <>
+            <br />
+            <span className={styles.classPrerequisite}>
+                {prerequisite.link && (
+                    <>
+                        <a
+                            href={prerequisite.link.url}
+                            className={styles.classLink}
+                            onClick={(event) => {
+                                // The webview must never navigate — hand the
+                                // URL to the OS browser instead.
+                                event.preventDefault();
+                                onOpenUrl?.(prerequisite.link!.url);
+                            }}
+                        >
+                            {prerequisite.link.label}
+                        </a>
+                        {" — "}
+                    </>
+                )}
+                {prerequisite.text}
+            </span>
+        </>
     );
 }
 
@@ -295,26 +336,28 @@ function ActionRow(
 
     return (
         <div className={styles.actionRow}>
-            <Button intent="primary" onClick={onSetUp} disabled={settingUp}>
-                {settingUp ? "SETTING UP…" : "SET UP"}
-            </Button>
-            <Button intent="secondary" onClick={onVerifyPath} disabled={verifyRunning}>
-                {verifyRunning ? "VERIFYING…" : "VERIFY PATH"}
-            </Button>
-            {linkable && (
-                <Button intent="secondary" onClick={onLinkThemes} disabled={linkRunning}>
-                    {linkRunning ? "LINKING…" : "LINK THEMES"}
+            <div className={styles.actionButtons}>
+                <Button intent="primary" onClick={onSetUp} disabled={settingUp}>
+                    {settingUp ? "SETTING UP…" : "SET UP"}
                 </Button>
-            )}
-            <Button intent="secondary" onClick={onTestApply} disabled={testRunning}>
-                {testRunning ? "TESTING…" : "TEST APPLY"}
-            </Button>
-            <span className={styles.metas}>
+                <Button intent="secondary" onClick={onVerifyPath} disabled={verifyRunning}>
+                    {verifyRunning ? "VERIFYING…" : "VERIFY PATH"}
+                </Button>
+                {linkable && (
+                    <Button intent="secondary" onClick={onLinkThemes} disabled={linkRunning}>
+                        {linkRunning ? "LINKING…" : "LINK THEMES"}
+                    </Button>
+                )}
+                <Button intent="secondary" onClick={onTestApply} disabled={testRunning}>
+                    {testRunning ? "TESTING…" : "TEST APPLY"}
+                </Button>
+            </div>
+            <div className={styles.metas}>
                 <SetUpMeta result={setUpResult} />
                 <VerifyPathMeta result={verifyPathResult} />
                 <LinkThemesMeta result={linkThemesResult} />
                 <LastAppliedMeta result={testApplyResult} />
-            </span>
+            </div>
         </div>
     );
 }
@@ -421,6 +464,7 @@ function FieldGrid({ appConfig, onFieldCommit, firstFieldRef }: FieldGridProps) 
         <div className={styles.fieldGrid}>
             <DraftField
                 label="CONFIG_PATH"
+                note="THE FILE LIVERY PATCHES"
                 value={appConfig.config_path}
                 onCommit={(value) => onFieldCommit("config_path", value)}
                 inputRef={firstFieldRef}
@@ -428,19 +472,26 @@ function FieldGrid({ appConfig, onFieldCommit, firstFieldRef }: FieldGridProps) 
             <DraftField
                 label="THEMES_PATH"
                 optional
+                note="WHERE THEME FILES LIVE"
                 value={appConfig.themes_path ?? ""}
                 onCommit={(value) => onFieldCommit("themes_path", value)}
             />
             <DraftField
                 label="MATCH_PATTERN"
+                note="REGEX — FINDS THE THEME LINE"
                 value={appConfig.match_pattern ?? ""}
                 onCommit={(value) => onFieldCommit("match_pattern", value)}
             />
             <DraftField
                 label="REPLACE_TEMPLATE"
+                note="REPLACES THE MATCHED LINE"
                 value={appConfig.replace_template ?? ""}
                 onCommit={(value) => onFieldCommit("replace_template", value)}
             />
+            <p className={styles.fieldGridNote}>
+                Template variables: {"{themeKey}"} · {"{themesPath}"} · {"{collectionKey}"} ·{" "}
+                {"{appearance}"}
+            </p>
         </div>
     );
 }
@@ -449,6 +500,7 @@ type DraftFieldProps = {
     label: string;
     value: string;
     optional?: boolean;
+    note?: string;
     onCommit: (value: string) => void;
     inputRef?: React.Ref<HTMLInputElement>;
 };
@@ -463,7 +515,7 @@ type DraftFieldProps = {
  * input) reaches the route's handler, which collapses the row; a third
  * Escape navigates back. Revert-before-collapse-before-back.
  */
-function DraftField({ label, value, optional, onCommit, inputRef }: DraftFieldProps) {
+function DraftField({ label, value, optional, note, onCommit, inputRef }: DraftFieldProps) {
     const [draft, setDraft] = useState(value);
     const [focused, setFocused] = useState(false);
 
@@ -484,6 +536,7 @@ function DraftField({ label, value, optional, onCommit, inputRef }: DraftFieldPr
         <TextInput
             label={label}
             optional={optional}
+            note={note}
             value={draft}
             editing={editing}
             hint={editing ? "⏎ SAVE · esc REVERT" : undefined}

@@ -29,6 +29,7 @@ import type {
     Config,
     ThemeProvisioning,
 } from "../../../bindings.ts";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { setUpAdapter, type SetUpOutcome } from "../../../lib/adapter-setup.ts";
 import { Button } from "../../../components/primitives/button/button.tsx";
 import { appStore } from "../../../store/app.ts";
@@ -428,6 +429,9 @@ function SettingsRoute() {
                             detectedApps={detectedApps}
                             onSetUp={setUpAdapterRow}
                             setUpResults={setUpResults}
+                            onOpenUrl={(url) => {
+                                openUrl(url).catch((error) => console.error(error));
+                            }}
                             firstFieldRef={firstFieldRef}
                         />
                     </>

@@ -33,6 +33,7 @@ pub fn start_app() {
 
     tauri::Builder::default()
         .invoke_handler(builder.invoke_handler())
+        .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)

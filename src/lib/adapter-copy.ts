@@ -13,12 +13,28 @@ export const provisioningCopy: Record<ThemeProvisioning, string> = {
         "The app cannot read external theme files — livery writes the theme's values into its config on every switch.",
 };
 
+export type AdapterPrerequisite = {
+    text: string;
+    /** Rendered as a real link, opened in the OS browser. */
+    link?: { label: string; url: string };
+};
+
 /** One-time setup prerequisites livery cannot automate, per adapter. */
-export const adapterPrerequisites: Partial<Record<AppName, string>> = {
-    nvim:
-        "Install the black-atom-industries/nvim plugin via your plugin manager and keep a colorscheme line in your config.",
-    helm: "Themes are compiled into the helm binary — nothing to install.",
-    delta: "Maintain your own ~/.gitconfig.delta with black-atom-dark/light features.",
-    obsidian: "Point CONFIG_PATH at your vault's .obsidian/appearance.json, then run SET UP.",
-    tmux: "Keep a source-file line in tmux.conf pointing at ~/.config/tmux/themes.",
+export const adapterPrerequisites: Partial<Record<AppName, AdapterPrerequisite>> = {
+    nvim: {
+        text:
+            "Install the plugin via your plugin manager and keep a colorscheme line in your config.",
+        link: {
+            label: "black-atom-industries/nvim",
+            url: "https://github.com/black-atom-industries/nvim",
+        },
+    },
+    helm: { text: "Themes are compiled into the helm binary — nothing to install." },
+    delta: { text: "Maintain your own ~/.gitconfig.delta with black-atom-dark/light features." },
+    obsidian: {
+        text: "Point CONFIG_PATH at your vault's .obsidian/appearance.json, then run SET UP.",
+    },
+    tmux: {
+        text: "Keep a source-file line in tmux.conf pointing at ~/.config/tmux/themes.",
+    },
 };

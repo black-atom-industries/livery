@@ -95,6 +95,7 @@
         "vite": "npm:vite@^6",
         "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4",
         "@tauri-apps/api": "npm:@tauri-apps/api@^2",
-        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2"
+        "@tauri-apps/cli": "npm:@tauri-apps/cli@^2",
+        "@tauri-apps/plugin-opener": "npm:@tauri-apps/plugin-opener@^2"
     }
 }
