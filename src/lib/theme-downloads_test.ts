@@ -1,10 +1,23 @@
 import { assert, assertEquals } from "@std/assert";
+import type { AdapterThemesStatus } from "../bindings.ts";
 import {
+    downloadableApps,
     formatFetchedAt,
     hasDownloadErrors,
     initialDownloadRows,
     latestFetchedAtEpoch,
 } from "./theme-downloads.ts";
+
+function status(overrides: Partial<AdapterThemesStatus> = {}): AdapterThemesStatus {
+    return {
+        provisioning: "linked",
+        downloaded: false,
+        linked_placement: false,
+        fetched_at_epoch: null,
+        file_count: null,
+        ...overrides,
+    };
+}
 
 Deno.test("initialDownloadRows sorts apps and starts them pending", () => {
     const rows = initialDownloadRows(["zed", "ghostty", "tmux"]);
@@ -29,42 +42,34 @@ Deno.test("formatFetchedAt renders a local YYYY-MM-DD HH:MM stamp", () => {
     assert(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(stamp), `unexpected format: ${stamp}`);
 });
 
+Deno.test("downloadableApps excludes external adapters", () => {
+    assertEquals(
+        downloadableApps({
+            nvim: status({ provisioning: "external" }),
+            helm: status({ provisioning: "external" }),
+            ghostty: status({ provisioning: "linked" }),
+            lazygit: status({ provisioning: "merged" }),
+        }).sort(),
+        ["ghostty", "lazygit"],
+    );
+});
+
 Deno.test("latestFetchedAtEpoch picks the newest adapter fetch", () => {
     assertEquals(
         latestFetchedAtEpoch({
-            tmux: {
-                downloaded: true,
-                linked_placement: false,
-                fetched_at_epoch: 100,
-                file_count: 44,
-            },
-            zed: {
+            tmux: status({ downloaded: true, fetched_at_epoch: 100, file_count: 44 }),
+            zed: status({
                 downloaded: true,
                 linked_placement: true,
                 fetched_at_epoch: 300,
                 file_count: 44,
-            },
-            ghostty: {
-                downloaded: false,
-                linked_placement: true,
-                fetched_at_epoch: null,
-                file_count: null,
-            },
+            }),
+            ghostty: status({ linked_placement: true }),
         }),
         300,
     );
 });
 
 Deno.test("latestFetchedAtEpoch is null when nothing was downloaded", () => {
-    assertEquals(
-        latestFetchedAtEpoch({
-            tmux: {
-                downloaded: false,
-                linked_placement: false,
-                fetched_at_epoch: null,
-                file_count: null,
-            },
-        }),
-        null,
-    );
+    assertEquals(latestFetchedAtEpoch({ tmux: status() }), null);
 });

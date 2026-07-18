@@ -56,9 +56,12 @@ impl DownloadResult {
 
 #[derive(Debug, Serialize, Type)]
 pub struct AdapterThemesStatus {
+    /// Who consumes the managed theme files — drives the class-specific
+    /// settings row content and the SET UP chain.
+    pub provisioning: registry::ThemeProvisioning,
     pub downloaded: bool,
-    /// True for adapters wired via LINK THEMES (zed, ghostty) — drives the
-    /// action's visibility in the settings adapter row.
+    /// True for adapters wired via LINK THEMES — drives the action's
+    /// visibility in the settings adapter row.
     pub linked_placement: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub etag: Option<String>,
@@ -69,7 +72,8 @@ pub struct AdapterThemesStatus {
 
 #[derive(Debug, Serialize, Type)]
 pub struct ThemesStatus {
-    /// One entry per downloadable adapter (helm/delta have none).
+    /// One entry per adapter; External adapters carry their class with
+    /// `downloaded: false` — nothing is ever fetched for them.
     pub adapters: HashMap<AppName, AdapterThemesStatus>,
     pub any_downloaded: bool,
     /// The first-run greeting's "continue without" flag.
@@ -117,13 +121,11 @@ pub async fn get_themes_status() -> ThemesStatus {
 
     let mut adapters = HashMap::new();
     for app in AppName::all() {
-        if registry::distribution(*app).is_none() {
-            continue;
-        }
         let entry = stored.adapters.get(app.as_str());
         adapters.insert(
             *app,
             AdapterThemesStatus {
+                provisioning: registry::provisioning(*app),
                 downloaded: entry.is_some(),
                 linked_placement: registry::linked_placement(*app).is_some(),
                 etag: entry.and_then(|e| e.etag.clone()),

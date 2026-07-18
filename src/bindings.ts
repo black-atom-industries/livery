@@ -97,10 +97,15 @@ async verifyAppPath(app: AppName) : Promise<AppPathVerification> {
 
 /** user-defined types **/
 
-export type AdapterThemesStatus = { downloaded: boolean; 
+export type AdapterThemesStatus = { 
 /**
- * True for adapters wired via LINK THEMES (zed, ghostty) — drives the
- * action's visibility in the settings adapter row.
+ * Who consumes the managed theme files — drives the class-specific
+ * settings row content and the SET UP chain.
+ */
+provisioning: ThemeProvisioning; downloaded: boolean; 
+/**
+ * True for adapters wired via LINK THEMES — drives the action's
+ * visibility in the settings adapter row.
  */
 linked_placement: boolean; etag?: string | null; 
 /**
@@ -148,9 +153,21 @@ export type LinkThemesResult = { app: string; status: UpdateStatus; message?: st
  * Theme metadata passed from the frontend.
  */
 export type ThemeContext = { theme_key: string; appearance: string; collection_key: string; theme_label: string | null }
+/**
+ * Theme provisioning — who consumes the managed theme files (see ADAPTERS.md).
+ * 
+ * - `External`: the app's theme files are provided outside of livery (plugin,
+ * compiled binary, or the user), so livery only performs switching.
+ * - `Linked`: livery symlinks the downloaded files into a location the app
+ * itself reads; switching selects one via a pointer in the app's config.
+ * - `Merged`: the app cannot read external theme files, so on every switch
+ * livery reads the downloaded theme and writes its values into the config.
+ */
+export type ThemeProvisioning = "external" | "linked" | "merged"
 export type ThemesStatus = { 
 /**
- * One entry per downloadable adapter (helm/delta have none).
+ * One entry per adapter; External adapters carry their class with
+ * `downloaded: false` — nothing is ever fetched for them.
  */
 adapters: { [key in AppName]: AdapterThemesStatus }; any_downloaded: boolean; 
 /**

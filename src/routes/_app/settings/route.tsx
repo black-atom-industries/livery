@@ -6,6 +6,7 @@ import { Typo } from "../../../components/typo/index.ts";
 import { useConfig } from "../../../queries/use-config.ts";
 import { useThemesStatus } from "../../../queries/use-themes-status.ts";
 import {
+    downloadableApps,
     type DownloadRowResult,
     downloadThemes,
     latestFetchedAtEpoch,
@@ -100,10 +101,7 @@ function SettingsRoute() {
             let adapters = themesStatus.query.data?.adapters;
             if (!adapters) adapters = (await themesStatus.query.refetch()).data?.adapters;
             if (!adapters) return;
-            await downloadThemes(
-                Object.keys(adapters) as (keyof typeof adapters)[],
-                setSyncResults,
-            );
+            await downloadThemes(downloadableApps(adapters), setSyncResults);
         } finally {
             setSyncing(false);
             themesStatus.query.refetch();

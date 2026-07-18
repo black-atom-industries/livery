@@ -8,6 +8,7 @@ import { appStore } from "../../store/app.ts";
 import { commands } from "../../bindings.ts";
 import { applyTheme, createUpdaters, getEnabledApps } from "../../lib/updaters.ts";
 import {
+    downloadableApps,
     type DownloadRowResult,
     downloadThemes,
     hasDownloadErrors,
@@ -50,10 +51,7 @@ function Component() {
             let adapters = themesStatus.query.data?.adapters;
             if (!adapters) adapters = (await themesStatus.query.refetch()).data?.adapters;
             if (!adapters) return;
-            await downloadThemes(
-                Object.keys(adapters) as (keyof typeof adapters)[],
-                setDownloadResults,
-            );
+            await downloadThemes(downloadableApps(adapters), setDownloadResults);
         } finally {
             setDownloading(false);
             themesStatus.query.refetch();

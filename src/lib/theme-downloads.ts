@@ -10,6 +10,15 @@ export type DownloadRowResult = Omit<BackendDownloadResult, "status"> & {
     status: BackendDownloadResult["status"] | "pending" | "running";
 };
 
+/** Apps with anything to fetch — External adapters provision their own files. */
+export function downloadableApps(
+    adapters: Partial<Record<AppName, AdapterThemesStatus>>,
+): AppName[] {
+    return (Object.entries(adapters) as [AppName, AdapterThemesStatus][])
+        .filter(([, status]) => status.provisioning !== "external")
+        .map(([app]) => app);
+}
+
 /** Pending rows for a download pass, in stable alphabetical order. */
 export function initialDownloadRows(apps: AppName[]): DownloadRowResult[] {
     return [...apps].sort().map((app) => ({
