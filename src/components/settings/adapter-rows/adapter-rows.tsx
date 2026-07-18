@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import type { AppConfig, AppName } from "../../../bindings.ts";
+import type { AppConfig, AppName, ThemeProvisioning } from "../../../bindings.ts";
+import type { SetUpOutcome } from "../../../lib/adapter-setup.ts";
+import { adapterPrerequisites, provisioningCopy } from "../../../lib/adapter-copy.ts";
 import { SectionHeader } from "../../primitives/section-header/section-header.tsx";
 import { DisclosurePanel } from "../../primitives/disclosure-panel/disclosure-panel.tsx";
 import { Toggle } from "../../primitives/toggle/toggle.tsx";
@@ -55,12 +57,20 @@ type Props = {
     onVerifyPath: (appName: AppName) => void;
     /** Session-local verification result per app — a fault puts a CHECK qualifier on the row. */
     verifyPathResults?: Partial<Record<AppName, VerifyPathResult>>;
-    /** Adapters wired via managed symlinks (zed, ghostty) — shows LINK THEMES. */
+    /** Adapters wired via managed symlinks — shows LINK THEMES. */
     linkableApps?: ReadonlySet<AppName>;
     /** Symlinks the adapter's themes dir to the managed downloads (LINK THEMES). */
     onLinkThemes: (appName: AppName) => void;
     /** Session-local link result per app. */
     linkThemesResults?: Partial<Record<AppName, LinkThemesRowResult>>;
+    /** Provisioning class per adapter — drives the expanded row's class note. */
+    provisioning?: Partial<Record<AppName, ThemeProvisioning>>;
+    /** AUTO-DETECT results — null until a scan ran; found apps get a badge. */
+    detectedApps?: ReadonlySet<AppName> | null;
+    /** Runs the class-appropriate setup chain (SET UP). */
+    onSetUp: (appName: AppName) => void;
+    /** Session-local SET UP outcome per app. */
+    setUpResults?: Partial<Record<AppName, SetUpOutcome>>;
     /** Ref to the first input of the expanded row — the "e" hotkey focuses it. */
     firstFieldRef?: React.Ref<HTMLInputElement>;
     className?: string;
@@ -86,6 +96,10 @@ export function AdapterRows(
         linkableApps,
         onLinkThemes,
         linkThemesResults,
+        provisioning,
+        detectedApps,
+        onSetUp,
+        setUpResults,
         firstFieldRef,
         className,
     }: Props,
@@ -115,6 +129,10 @@ export function AdapterRows(
                         linkable={linkableApps?.has(appName) ?? false}
                         onLinkThemes={() => onLinkThemes(appName)}
                         linkThemesResult={linkThemesResults?.[appName]}
+                        provisioning={provisioning?.[appName]}
+                        detected={detectedApps?.has(appName) ?? false}
+                        onSetUp={() => onSetUp(appName)}
+                        setUpResult={setUpResults?.[appName]}
                         firstFieldRef={expandedApp === appName ? firstFieldRef : undefined}
                     />
                 ))}
@@ -138,6 +156,10 @@ type RowProps = {
     linkable: boolean;
     onLinkThemes: () => void;
     linkThemesResult?: LinkThemesRowResult;
+    provisioning?: ThemeProvisioning;
+    detected: boolean;
+    onSetUp: () => void;
+    setUpResult?: SetUpOutcome;
     firstFieldRef?: React.Ref<HTMLInputElement>;
 };
 
@@ -157,6 +179,10 @@ function AdapterRow(
         linkable,
         onLinkThemes,
         linkThemesResult,
+        provisioning,
+        detected,
+        onSetUp,
+        setUpResult,
         firstFieldRef,
     }: RowProps,
 ) {
@@ -179,6 +205,7 @@ function AdapterRow(
                             <span className={styles.path}>{appConfig.config_path}</span>
                             {fault && <span className={styles.pathFault}>— {fault}</span>}
                         </span>
+                        {detected && !enabled && <StatusPip intent="warn">FOUND</StatusPip>}
                         {enabled && fault
                             ? <StatusPip intent="warn">CHECK</StatusPip>
                             : (
@@ -189,6 +216,21 @@ function AdapterRow(
                     </div>
                 }
             >
+                {provisioning && (
+                    <p className={styles.classNote}>
+                        <span className={styles.classLabel}>{provisioning.toUpperCase()}</span>
+                        {" — "}
+                        {provisioningCopy[provisioning]}
+                        {adapterPrerequisites[appName] && (
+                            <>
+                                <br />
+                                <span className={styles.classPrerequisite}>
+                                    {adapterPrerequisites[appName]}
+                                </span>
+                            </>
+                        )}
+                    </p>
+                )}
                 <FieldGrid
                     appConfig={appConfig}
                     onFieldCommit={onFieldCommit}
@@ -204,6 +246,8 @@ function AdapterRow(
                     linkable={linkable}
                     onLinkThemes={onLinkThemes}
                     linkThemesResult={linkThemesResult}
+                    onSetUp={onSetUp}
+                    setUpResult={setUpResult}
                 />
             </DisclosurePanel>
         </div>
@@ -220,7 +264,16 @@ type ActionRowProps = {
     linkable: boolean;
     onLinkThemes: () => void;
     linkThemesResult?: LinkThemesRowResult;
+    onSetUp: () => void;
+    setUpResult?: SetUpOutcome;
 };
+
+/** True while any chain step is still pending or running. */
+function setUpRunning(outcome?: SetUpOutcome): boolean {
+    if (!outcome || outcome.blocked) return false;
+    return outcome.steps.length > 0 &&
+        outcome.steps.some((s) => s.status === "pending" || s.status === "running");
+}
 
 function ActionRow(
     {
@@ -233,13 +286,19 @@ function ActionRow(
         linkable,
         onLinkThemes,
         linkThemesResult,
+        onSetUp,
+        setUpResult,
     }: ActionRowProps,
 ) {
     const linkRunning = linkThemesResult?.status === "running";
+    const settingUp = setUpRunning(setUpResult);
 
     return (
         <div className={styles.actionRow}>
-            <Button intent="primary" onClick={onVerifyPath} disabled={verifyRunning}>
+            <Button intent="primary" onClick={onSetUp} disabled={settingUp}>
+                {settingUp ? "SETTING UP…" : "SET UP"}
+            </Button>
+            <Button intent="secondary" onClick={onVerifyPath} disabled={verifyRunning}>
                 {verifyRunning ? "VERIFYING…" : "VERIFY PATH"}
             </Button>
             {linkable && (
@@ -251,12 +310,47 @@ function ActionRow(
                 {testRunning ? "TESTING…" : "TEST APPLY"}
             </Button>
             <span className={styles.metas}>
+                <SetUpMeta result={setUpResult} />
                 <VerifyPathMeta result={verifyPathResult} />
                 <LinkThemesMeta result={linkThemesResult} />
                 <LastAppliedMeta result={testApplyResult} />
             </span>
         </div>
     );
+}
+
+/**
+ * SET UP verdict. Link and verify outcomes land in their own metas via the
+ * route, so this only narrates the chain itself: progress, the blocked
+ * precondition, enable/download failures, or the all-clear.
+ */
+function SetUpMeta({ result }: { result?: SetUpOutcome }) {
+    if (!result) return null;
+
+    if (result.blocked) {
+        return <span className={styles.lastAppliedError}>{result.blocked.toUpperCase()}</span>;
+    }
+
+    const running = result.steps.find((s) => s.status === "running");
+    if (running || setUpRunning(result)) {
+        return (
+            <span className={styles.verifyFault}>
+                {running ? `${running.step.toUpperCase()}…` : "SETTING UP…"}
+            </span>
+        );
+    }
+
+    const failed = result.steps.find((s) => s.status === "error");
+    if (failed) {
+        return (
+            <span className={styles.lastAppliedError}>
+                SET UP FAILED — {failed.step.toUpperCase()}
+                {failed.message ? `: ${failed.message.toUpperCase()}` : ""}
+            </span>
+        );
+    }
+
+    return <span className={styles.lastAppliedOk}>SET UP OK</span>;
 }
 
 /** Link verdict: counts on success, reason on failure. */

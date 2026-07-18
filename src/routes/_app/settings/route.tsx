@@ -22,7 +22,15 @@ import type {
     VerifyPathResult,
 } from "../../../components/settings/adapter-rows/index.ts";
 import { commands } from "../../../bindings.ts";
-import type { AdapterThemesStatus, AppConfig, AppName, Config } from "../../../bindings.ts";
+import type {
+    AdapterThemesStatus,
+    AppConfig,
+    AppName,
+    Config,
+    ThemeProvisioning,
+} from "../../../bindings.ts";
+import { setUpAdapter, type SetUpOutcome } from "../../../lib/adapter-setup.ts";
+import { Button } from "../../../components/primitives/button/button.tsx";
 import { appStore } from "../../../store/app.ts";
 import denoConfig from "../../../../deno.json" with { type: "json" };
 import styles from "./route.module.css";
@@ -63,14 +71,108 @@ function SettingsRoute() {
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
 
     // Linked adapters (symlink placement) — drives LINK THEMES visibility.
+    const adapterEntries = Object.entries(themesStatus.query.data?.adapters ?? {}) as [
+        AppName,
+        AdapterThemesStatus,
+    ][];
     const linkableApps = new Set(
-        (Object.entries(themesStatus.query.data?.adapters ?? {}) as [
-            AppName,
-            AdapterThemesStatus,
-        ][])
+        adapterEntries
             .filter(([, status]) => status.provisioning === "linked")
             .map(([name]) => name),
     );
+    const provisioningByApp = Object.fromEntries(
+        adapterEntries.map(([name, status]) => [name, status.provisioning]),
+    ) as Partial<Record<AppName, ThemeProvisioning>>;
+
+    // AUTO-DETECT scan — session-local, null until the first run.
+    const [detecting, setDetecting] = useState(false);
+    const [detections, setDetections] = useState<Partial<Record<AppName, boolean>> | null>(null);
+    const [setUpResults, setSetUpResults] = useState<Partial<Record<AppName, SetUpOutcome>>>({});
+
+    const detectedApps = detections
+        ? new Set(
+            (Object.entries(detections) as [AppName, boolean][])
+                .filter(([, found]) => found)
+                .map(([name]) => name),
+        )
+        : null;
+
+    async function autoDetectApps() {
+        if (detecting) return;
+        setDetecting(true);
+        try {
+            const results = await commands.detectApps();
+            setDetections(Object.fromEntries(results.map((d) => [d.app, d.found])));
+        } catch {
+            setDetections({});
+        } finally {
+            setDetecting(false);
+        }
+    }
+
+    /** SET UP — the class-appropriate chain, ending in the row's verify state. */
+    async function setUpAdapterRow(appName: AppName) {
+        const current = config.query.data;
+        const provisioningClass = provisioningByApp[appName];
+        if (!current || !provisioningClass) return;
+
+        const outcome = await setUpAdapter(
+            appName,
+            provisioningClass,
+            current.apps[appName]?.config_path ?? "",
+            {
+                enable: async (app) => {
+                    const latest = config.query.data;
+                    if (!latest) throw new Error("Config not loaded");
+                    if (latest.apps[app]?.enabled) return;
+                    const next: Config = {
+                        ...latest,
+                        apps: {
+                            ...latest.apps,
+                            [app]: { ...latest.apps[app], enabled: true },
+                        },
+                    };
+                    const result = await config.save.mutateAsync(next);
+                    if (result.status === "error") throw new Error(result.error);
+                },
+                download: (app) => commands.downloadTheme(app),
+                link: (app) => commands.linkAppThemes(app),
+                verify: (app) => commands.verifyAppPath(app),
+            },
+            (partial) => setSetUpResults((prev) => ({ ...prev, [appName]: partial })),
+        );
+        setSetUpResults((prev) => ({ ...prev, [appName]: outcome }));
+
+        // Land the chain's terminal results in the standard row metas.
+        if (outcome.link) {
+            const link = outcome.link;
+            setLinkThemesResults((prev) => ({
+                ...prev,
+                [appName]: link.status === "done"
+                    ? {
+                        status: "ok",
+                        linked: link.linked ?? 0,
+                        pruned: link.pruned ?? 0,
+                        message: link.message ?? null,
+                    }
+                    : { status: "error", message: link.message ?? "Unknown error" },
+            }));
+        }
+        if (outcome.verify) {
+            const verify = outcome.verify;
+            setVerifyPathResults((prev) => ({
+                ...prev,
+                [appName]: verify.message != null
+                    ? { status: "unverifiable", message: verify.message }
+                    : {
+                        status: "verified",
+                        exists: verify.exists,
+                        patternMatches: verify.pattern_matches,
+                    },
+            }));
+        }
+        themesStatus.query.refetch();
+    }
 
     async function linkAppThemes(appName: AppName) {
         setLinkThemesResults((prev) => ({ ...prev, [appName]: { status: "running" } }));
@@ -275,28 +377,48 @@ function SettingsRoute() {
             }
             right={section === "adapters"
                 ? (
-                    <AdapterRows
-                        apps={appEntries}
-                        cursorIndex={clampedCursor}
-                        expandedApp={effectiveExpandedApp}
-                        onToggleEnabled={toggleAppEnabled}
-                        onToggleExpanded={(appName) => {
-                            // Mouse path: move the row cursor along — the
-                            // disclosure only renders on the cursored row.
-                            const index = appEntries.findIndex(([name]) => name === appName);
-                            if (index !== -1) setCursorIndex(index);
-                            setExpandedApp((current) => (current === appName ? null : appName));
-                        }}
-                        onFieldCommit={commitAdapterField}
-                        onTestApply={testApplyAdapter}
-                        testApplyResults={testApplyResults}
-                        onVerifyPath={verifyAdapterPath}
-                        verifyPathResults={verifyPathResults}
-                        linkableApps={linkableApps}
-                        onLinkThemes={linkAppThemes}
-                        linkThemesResults={linkThemesResults}
-                        firstFieldRef={firstFieldRef}
-                    />
+                    <>
+                        <div className={styles.detectBar}>
+                            <Button
+                                intent="secondary"
+                                onClick={autoDetectApps}
+                                disabled={detecting}
+                            >
+                                {detecting ? "DETECTING…" : "AUTO-DETECT"}
+                            </Button>
+                            <span className={styles.detectMeta}>
+                                {detectedApps
+                                    ? `${detectedApps.size} FOUND — SET UP wires detected apps in one step`
+                                    : "Scan for installed apps by their config files"}
+                            </span>
+                        </div>
+                        <AdapterRows
+                            apps={appEntries}
+                            cursorIndex={clampedCursor}
+                            expandedApp={effectiveExpandedApp}
+                            onToggleEnabled={toggleAppEnabled}
+                            onToggleExpanded={(appName) => {
+                                // Mouse path: move the row cursor along — the
+                                // disclosure only renders on the cursored row.
+                                const index = appEntries.findIndex(([name]) => name === appName);
+                                if (index !== -1) setCursorIndex(index);
+                                setExpandedApp((current) => (current === appName ? null : appName));
+                            }}
+                            onFieldCommit={commitAdapterField}
+                            onTestApply={testApplyAdapter}
+                            testApplyResults={testApplyResults}
+                            onVerifyPath={verifyAdapterPath}
+                            verifyPathResults={verifyPathResults}
+                            linkableApps={linkableApps}
+                            onLinkThemes={linkAppThemes}
+                            linkThemesResults={linkThemesResults}
+                            provisioning={provisioningByApp}
+                            detectedApps={detectedApps}
+                            onSetUp={setUpAdapterRow}
+                            setUpResults={setUpResults}
+                            firstFieldRef={firstFieldRef}
+                        />
+                    </>
                 )
                 : (
                     <GeneralPanel

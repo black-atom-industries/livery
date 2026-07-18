@@ -73,6 +73,24 @@
     white-space: nowrap;
 }
 
+/* Provisioning class note — how this adapter gets its theme files. */
+.classNote {
+    margin: 0 0 var(--ba-size-4);
+    font-size: var(--ba-font-size-0);
+    line-height: 1.6;
+    color: var(--ba-color-fg-hint);
+}
+
+.classLabel {
+    font-weight: var(--ba-font-weight-bold);
+    letter-spacing: var(--ba-font-letterspacing-label);
+    color: var(--ba-color-fg-subtle);
+}
+
+.classPrerequisite {
+    color: var(--ba-color-fg-warn);
+}
+
 .fieldGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
