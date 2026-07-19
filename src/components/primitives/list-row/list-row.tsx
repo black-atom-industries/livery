@@ -27,6 +27,8 @@ type Props = VariantProps<typeof listRowVariants> & {
     pips?: string[];
     /** Appearance letter: "D" | "L". */
     appearance?: string;
+    /** Extra content after the name/pips/appearance — e.g. a status badge. */
+    trailing?: React.ReactNode;
     onClick?: () => void;
     /** Root element ref — e.g. to scroll the selected row into view. */
     rootRef?: React.Ref<HTMLDivElement>;
@@ -43,7 +45,7 @@ type Props = VariantProps<typeof listRowVariants> & {
  * Spec: docs/design-system/reference/components/display/ListRow.jsx
  */
 export function ListRow(
-    { selected, dimmed, name, pips, appearance, onClick, rootRef, className }: Props,
+    { selected, dimmed, name, pips, appearance, trailing, onClick, rootRef, className }: Props,
 ) {
     return (
         <div
@@ -61,6 +63,7 @@ export function ListRow(
             </span>
             {pips && !dimmed ? <Swatch variant="pips" colors={pips} /> : null}
             {appearance ? <Badge size="mini">{appearance}</Badge> : null}
+            {trailing}
         </div>
     );
 }

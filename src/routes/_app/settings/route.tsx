@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
+import { themeMap } from "@black-atom/core";
 import { Typo } from "../../../components/typo/index.ts";
 import { useConfig } from "../../../queries/use-config.ts";
 import { useThemesStatus } from "../../../queries/use-themes-status.ts";
@@ -11,16 +12,20 @@ import {
     downloadThemes,
     latestFetchedAtEpoch,
 } from "../../../lib/theme-downloads.ts";
+import { pickRandomOtherTheme } from "../../../lib/themes.ts";
 import { App } from "../../../components/layouts/app.ts";
 import { ListRow } from "../../../components/primitives/list-row/list-row.tsx";
-import { AdapterRows } from "../../../components/settings/adapter-rows/index.ts";
+import { AdapterNav } from "../../../components/settings/adapter-nav/index.ts";
+import {
+    type AdapterField,
+    adapterSettingsPages,
+} from "../../../components/settings/adapter-pages/index.ts";
 import { GeneralPanel } from "../../../components/settings/general-panel/index.ts";
 import type {
-    AdapterField,
     LinkThemesRowResult,
     TestApplyResult,
     VerifyPathResult,
-} from "../../../components/settings/adapter-rows/index.ts";
+} from "../../../components/settings/adapter-shared/index.ts";
 import { commands } from "../../../bindings.ts";
 import type {
     AdapterThemesStatus,
@@ -31,16 +36,36 @@ import type {
 } from "../../../bindings.ts";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { setUpAdapter, type SetUpOutcome } from "../../../lib/adapter-setup.ts";
-import { Button } from "../../../components/primitives/button/button.tsx";
 import { appStore } from "../../../store/app.ts";
 import denoConfig from "../../../../deno.json" with { type: "json" };
 import styles from "./route.module.css";
 
 export type SettingsSection = "adapters" | "general";
 
+const APP_NAMES: readonly AppName[] = [
+    "nvim",
+    "ghostty",
+    "helm",
+    "delta",
+    "tmux",
+    "zed",
+    "lazygit",
+    "obsidian",
+];
+
+function isAppName(value: unknown): value is AppName {
+    return typeof value === "string" && (APP_NAMES as readonly string[]).includes(value);
+}
+
+/** How long a TEST APPLY probe theme stays applied before reverting. */
+const TEST_APPLY_REVERT_DELAY_MS = 3000;
+
 export const Route = createFileRoute("/_app/settings")({
-    validateSearch: (search: Record<string, unknown>): { section: SettingsSection } => ({
+    validateSearch: (
+        search: Record<string, unknown>,
+    ): { section: SettingsSection; adapter?: AppName } => ({
         section: search.section === "general" ? "general" : "adapters",
+        adapter: isAppName(search.adapter) ? search.adapter : undefined,
     }),
     component: SettingsRoute,
 });
@@ -48,11 +73,11 @@ export const Route = createFileRoute("/_app/settings")({
 function SettingsRoute() {
     const config = useConfig();
     const navigate = useNavigate();
-    const { section } = Route.useSearch();
+    const { section, adapter } = Route.useSearch();
 
-    const [cursorIndex, setCursorIndex] = useState(0);
-    const [expandedApp, setExpandedApp] = useState<AppName | null>(null);
     const firstFieldRef = useRef<HTMLInputElement>(null);
+    const selectedRowRef = useRef<HTMLDivElement>(null);
+    const detailPaneRef = useRef<HTMLDivElement>(null);
     // Session-local TEST APPLY results — never persisted, starts empty.
     const [testApplyResults, setTestApplyResults] = useState<
         Partial<Record<AppName, TestApplyResult>>
@@ -115,7 +140,7 @@ function SettingsRoute() {
         }
     }
 
-    /** SET UP — the class-appropriate chain, ending in the row's verify state. */
+    /** SET UP — the class-appropriate chain, ending in the page's verify state. */
     async function setUpAdapterRow(appName: AppName) {
         const current = config.query.data;
         const provisioningClass = provisioningByApp[appName];
@@ -146,36 +171,11 @@ function SettingsRoute() {
             },
             (partial) => setSetUpResults((prev) => ({ ...prev, [appName]: partial })),
         );
+        // SET UP's own result line narrates the whole chain (including link
+        // count and verify state via outcome.link/outcome.verify) — it does
+        // not cross-populate the VERIFY PATH / LINK THEMES rows below, which
+        // only reflect a direct run of those actions.
         setSetUpResults((prev) => ({ ...prev, [appName]: outcome }));
-
-        // Land the chain's terminal results in the standard row metas.
-        if (outcome.link) {
-            const link = outcome.link;
-            setLinkThemesResults((prev) => ({
-                ...prev,
-                [appName]: link.status === "done"
-                    ? {
-                        status: "ok",
-                        linked: link.linked ?? 0,
-                        pruned: link.pruned ?? 0,
-                        message: link.message ?? null,
-                    }
-                    : { status: "error", message: link.message ?? "Unknown error" },
-            }));
-        }
-        if (outcome.verify) {
-            const verify = outcome.verify;
-            setVerifyPathResults((prev) => ({
-                ...prev,
-                [appName]: verify.message != null
-                    ? { status: "unverifiable", message: verify.message }
-                    : {
-                        status: "verified",
-                        exists: verify.exists,
-                        patternMatches: verify.pattern_matches,
-                    },
-            }));
-        }
         themesStatus.query.refetch();
     }
 
@@ -217,19 +217,27 @@ function SettingsRoute() {
 
     const data = config.query.data;
     const appEntries = (data ? Object.entries(data.apps) : []) as [AppName, AppConfig][];
-    const rowCount = section === "adapters" ? appEntries.length : 1;
-    const clampedCursor = Math.min(cursorIndex, Math.max(0, rowCount - 1));
-    const cursoredApp = section === "adapters" ? appEntries[clampedCursor]?.[0] : undefined;
-    // The disclosure only ever shows the row under the cursor — moving the
-    // cursor off an expanded row implicitly collapses it, no effect needed.
-    const effectiveExpandedApp = expandedApp && cursoredApp === expandedApp ? expandedApp : null;
 
-    // Section switches reset the row cursor and any expansion — the two
-    // panels don't share a row cursor namespace.
+    // `?adapter` is the single source of truth for selection — no separate
+    // cursor state to desync from it. Missing/invalid resolves to the first
+    // configured adapter so the detail pane never renders empty.
+    const selectedApp = section === "adapters"
+        ? (adapter && appEntries.some(([name]) => name === adapter) ? adapter : appEntries[0]?.[0])
+        : undefined;
+    const cursorIndex = selectedApp
+        ? Math.max(0, appEntries.findIndex(([name]) => name === selectedApp))
+        : 0;
+
     function setSection(next: SettingsSection) {
-        setCursorIndex(0);
-        setExpandedApp(null);
         navigate({ to: "/settings", search: { section: next } });
+    }
+
+    function selectAdapter(appName: AppName) {
+        navigate({
+            to: "/settings",
+            search: { section: "adapters", adapter: appName },
+            replace: true,
+        });
     }
 
     function toggleAppEnabled(appName: AppName) {
@@ -258,19 +266,57 @@ function SettingsRoute() {
         config.save.mutate(next);
     }
 
+    /**
+     * TEST APPLY — applies a random *other* theme so the change is visible,
+     * then reverts to the theme active before the test after a short delay.
+     * Reverting is silent (the row just clears) — the steady state after a
+     * test is "back to normal", not "still showing a stale test result".
+     */
     async function testApplyAdapter(appName: AppName) {
+        const before = currentTheme;
+        const probe = pickRandomOtherTheme(themeMap, before.meta.key);
+        if (!probe) return;
+
         setTestApplyResults((prev) => ({ ...prev, [appName]: { status: "running" } }));
         try {
             const result = await commands.updateApp(appName, {
-                theme_key: currentTheme.meta.key,
-                appearance: currentTheme.meta.appearance,
-                collection_key: currentTheme.meta.collection.key,
-                theme_label: currentTheme.meta.label,
+                theme_key: probe.meta.key,
+                appearance: probe.meta.appearance,
+                collection_key: probe.meta.collection.key,
+                theme_label: probe.meta.label,
             });
-            const next: TestApplyResult = result.status === "error"
-                ? { status: "error", message: result.message ?? "Unknown error" }
-                : { status: "ok", durationMs: result.duration_ms };
-            setTestApplyResults((prev) => ({ ...prev, [appName]: next }));
+            if (result.status === "error") {
+                setTestApplyResults((prev) => ({
+                    ...prev,
+                    [appName]: { status: "error", message: result.message ?? "Unknown error" },
+                }));
+                return;
+            }
+            setTestApplyResults((prev) => ({
+                ...prev,
+                [appName]: {
+                    status: "ok",
+                    durationMs: result.duration_ms,
+                    testedThemeLabel: probe.meta.label,
+                },
+            }));
+
+            setTimeout(async () => {
+                setTestApplyResults((prev) => ({ ...prev, [appName]: { status: "reverting" } }));
+                try {
+                    await commands.updateApp(appName, {
+                        theme_key: before.meta.key,
+                        appearance: before.meta.appearance,
+                        collection_key: before.meta.collection.key,
+                        theme_label: before.meta.label,
+                    });
+                } finally {
+                    setTestApplyResults((prev) => {
+                        const { [appName]: _discard, ...rest } = prev;
+                        return rest;
+                    });
+                }
+            }, TEST_APPLY_REVERT_DELAY_MS);
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             setTestApplyResults((prev) => ({ ...prev, [appName]: { status: "error", message } }));
@@ -304,44 +350,40 @@ function SettingsRoute() {
         config.save.mutate(next);
     }
 
-    function moveCursor(delta: number) {
-        setCursorIndex((i) => Math.min(Math.max(0, rowCount - 1), Math.max(0, i + delta)));
+    function moveSelection(delta: number) {
+        if (section !== "adapters") return;
+        const nextIndex = Math.min(Math.max(0, appEntries.length - 1), cursorIndex + delta);
+        const entry = appEntries[nextIndex];
+        if (entry) selectAdapter(entry[0]);
     }
 
-    function toggleCursoredRow() {
+    function toggleSelected() {
         if (section === "adapters") {
-            const entry = appEntries[clampedCursor];
-            if (entry) toggleAppEnabled(entry[0]);
+            if (selectedApp) toggleAppEnabled(selectedApp);
         } else {
             toggleSystemAppearance();
         }
     }
 
-    function toggleExpandCursoredRow() {
-        if (section !== "adapters") return;
-        const entry = appEntries[clampedCursor];
-        if (!entry) return;
-        const [appName] = entry;
-        setExpandedApp((current) => (current === appName ? null : appName));
-    }
-
     function focusFirstField() {
-        if (section !== "adapters" || !effectiveExpandedApp) return;
+        if (section !== "adapters" || !selectedApp) return;
         firstFieldRef.current?.focus();
     }
 
+    /**
+     * Global fallback — only reached when focus isn't inside the detail
+     * pane (the pane's own capture-phase handler intercepts Escape first
+     * and returns focus to the sidebar instead of navigating).
+     */
     function handleEscape() {
-        if (section === "adapters" && effectiveExpandedApp) {
-            setExpandedApp(null);
-            return;
-        }
+        if (detailPaneRef.current?.contains(document.activeElement)) return;
         navigate({ to: "/" });
     }
 
-    useHotkey("J", () => moveCursor(1));
-    useHotkey("K", () => moveCursor(-1));
-    useHotkey("Space", toggleCursoredRow);
-    useHotkey("Enter", toggleExpandCursoredRow);
+    useHotkey("J", () => moveSelection(1));
+    useHotkey("K", () => moveSelection(-1));
+    useHotkey("Space", toggleSelected);
+    useHotkey("Enter", focusFirstField);
     useHotkey("E", focusFirstField);
     useHotkey("Escape", handleEscape);
 
@@ -363,6 +405,9 @@ function SettingsRoute() {
         );
     }
 
+    const selectedConfig = selectedApp ? data.apps[selectedApp] : undefined;
+    const AdapterSettings = selectedApp ? adapterSettingsPages[selectedApp] : undefined;
+
     return (
         <App.SplitPanel
             left={
@@ -373,6 +418,19 @@ function SettingsRoute() {
                         selected={section === "adapters"}
                         onClick={() => setSection("adapters")}
                     />
+                    {section === "adapters" && (
+                        <AdapterNav
+                            apps={appEntries}
+                            selectedApp={selectedApp}
+                            onSelect={selectAdapter}
+                            detectedApps={detectedApps}
+                            detecting={detecting}
+                            onAutoDetect={autoDetectApps}
+                            detectError={detectError}
+                            verifyPathResults={verifyPathResults}
+                            selectedRowRef={selectedRowRef}
+                        />
+                    )}
                     <ListRow
                         name="GENERAL"
                         selected={section === "general"}
@@ -381,61 +439,44 @@ function SettingsRoute() {
                 </>
             }
             right={section === "adapters"
-                ? (
-                    <>
-                        <div className={styles.detectBar}>
-                            <Button
-                                intent="secondary"
-                                onClick={autoDetectApps}
-                                disabled={detecting}
-                            >
-                                {detecting ? "DETECTING…" : "AUTO-DETECT"}
-                            </Button>
-                            {detectError
-                                ? (
-                                    <span className={styles.detectError}>
-                                        DETECT FAILED — {detectError.toUpperCase()}
-                                    </span>
-                                )
-                                : (
-                                    <span className={styles.detectMeta}>
-                                        {detectedApps
-                                            ? `${detectedApps.size} FOUND — SET UP wires detected apps in one step`
-                                            : "Scan for installed apps by their config files"}
-                                    </span>
-                                )}
+                ? (selectedApp && selectedConfig && AdapterSettings
+                    ? (
+                        <div
+                            ref={detailPaneRef}
+                            onKeyDownCapture={(event) => {
+                                // Escape on a clean/blurred field: return
+                                // focus to the sidebar instead of letting
+                                // the global Escape hotkey navigate back.
+                                // A dirty field's own handler reverts and
+                                // stops propagation before this ever runs.
+                                if (event.key !== "Escape") return;
+                                event.stopPropagation();
+                                selectedRowRef.current?.focus();
+                            }}
+                        >
+                            <AdapterSettings
+                                appConfig={selectedConfig}
+                                detected={detectedApps?.has(selectedApp) ?? false}
+                                onToggleEnabled={() => toggleAppEnabled(selectedApp)}
+                                onFieldCommit={(field, value) =>
+                                    commitAdapterField(selectedApp, field, value)}
+                                firstFieldRef={firstFieldRef}
+                                onOpenUrl={(url) => {
+                                    openUrl(url).catch((error) => console.error(error));
+                                }}
+                                onSetUp={() => setUpAdapterRow(selectedApp)}
+                                setUpResult={setUpResults[selectedApp]}
+                                onVerifyPath={() => verifyAdapterPath(selectedApp)}
+                                verifyPathResult={verifyPathResults[selectedApp]}
+                                linkable={linkableApps.has(selectedApp)}
+                                onLinkThemes={() => linkAppThemes(selectedApp)}
+                                linkThemesResult={linkThemesResults[selectedApp]}
+                                onTestApply={() => testApplyAdapter(selectedApp)}
+                                testApplyResult={testApplyResults[selectedApp]}
+                            />
                         </div>
-                        <AdapterRows
-                            apps={appEntries}
-                            cursorIndex={clampedCursor}
-                            expandedApp={effectiveExpandedApp}
-                            onToggleEnabled={toggleAppEnabled}
-                            onToggleExpanded={(appName) => {
-                                // Mouse path: move the row cursor along — the
-                                // disclosure only renders on the cursored row.
-                                const index = appEntries.findIndex(([name]) => name === appName);
-                                if (index !== -1) setCursorIndex(index);
-                                setExpandedApp((current) => (current === appName ? null : appName));
-                            }}
-                            onFieldCommit={commitAdapterField}
-                            onTestApply={testApplyAdapter}
-                            testApplyResults={testApplyResults}
-                            onVerifyPath={verifyAdapterPath}
-                            verifyPathResults={verifyPathResults}
-                            linkableApps={linkableApps}
-                            onLinkThemes={linkAppThemes}
-                            linkThemesResults={linkThemesResults}
-                            provisioning={provisioningByApp}
-                            detectedApps={detectedApps}
-                            onSetUp={setUpAdapterRow}
-                            setUpResults={setUpResults}
-                            onOpenUrl={(url) => {
-                                openUrl(url).catch((error) => console.error(error));
-                            }}
-                            firstFieldRef={firstFieldRef}
-                        />
-                    </>
-                )
+                    )
+                    : null)
                 : (
                     <GeneralPanel
                         followOsAppearance={data.system_appearance}
@@ -447,7 +488,7 @@ function SettingsRoute() {
                         syncResults={syncResults}
                         syncing={syncing}
                         onSyncThemes={syncThemes}
-                        cursored={clampedCursor === 0}
+                        cursored
                     />
                 )}
         />

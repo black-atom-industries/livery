@@ -1,7 +1,7 @@
-import { assertEquals, assertGreater } from "@std/assert";
+import { assertEquals, assertGreater, assertNotEquals } from "@std/assert";
 import { themeMap } from "@black-atom/core";
 import { collectionOrder } from "@black-atom/core";
-import { formatCollectionTitle, getGroupedThemes } from "./themes.ts";
+import { formatCollectionTitle, getGroupedThemes, pickRandomOtherTheme } from "./themes.ts";
 
 Deno.test("formatCollectionTitle collapses a label that merely echoes the key", () => {
     assertEquals(formatCollectionTitle("jpn", "JPN"), "JPN");
@@ -40,4 +40,19 @@ Deno.test("getGroupedThemes includes all themes from themeMap", () => {
     const totalThemes = Object.values(themeMap).filter(Boolean).length;
     assertGreater(flatCount, 0);
     assertEquals(flatCount, totalThemes);
+});
+
+Deno.test("pickRandomOtherTheme never returns the current theme", () => {
+    const currentKey = "black-atom-default-dark";
+    for (let i = 0; i < 20; i++) {
+        const picked = pickRandomOtherTheme(themeMap, currentKey, () => i / 20);
+        assertNotEquals(picked?.meta.key, currentKey);
+    }
+});
+
+Deno.test("pickRandomOtherTheme is deterministic given a fixed random source", () => {
+    const currentKey = "black-atom-default-dark";
+    const first = pickRandomOtherTheme(themeMap, currentKey, () => 0);
+    const second = pickRandomOtherTheme(themeMap, currentKey, () => 0);
+    assertEquals(first?.meta.key, second?.meta.key);
 });

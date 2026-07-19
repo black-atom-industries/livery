@@ -41,8 +41,7 @@ type Props = VariantProps<typeof textInputVariants> & {
  * Datasheet text field — uppercase mono label above, recessed 1px-bordered
  * value below. All user input renders in monospace.
  *
- * Editing state: positive border + block caret (native caret hidden via
- * `caret-color: transparent`), optional right-side hint.
+ * Editing state: positive border, native caret, optional right-side hint.
  *
  * Spec: docs/design-system/reference/components/forms/TextInput.jsx
  */
@@ -89,7 +88,6 @@ export function TextInput(
                     onKeyDown={onKeyDown}
                     readOnly={!onChange}
                 />
-                {editing ? <span className={styles.caret} /> : null}
                 {editing && hint ? <span className={styles.hint}>{hint}</span> : null}
             </span>
         </div>

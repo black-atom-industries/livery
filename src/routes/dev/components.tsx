@@ -15,12 +15,12 @@ import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx
 import { ThemeList } from "../../components/theme-list/index.ts";
 import { ThemeDetail } from "../../components/theme-detail/index.ts";
 import { AdapterStatusRow } from "../../components/primitives/adapter-status-row/adapter-status-row.tsx";
-import { AdapterRows } from "../../components/settings/adapter-rows/index.ts";
+import { AdapterNav } from "../../components/settings/adapter-nav/index.ts";
+import { adapterSettingsPages } from "../../components/settings/adapter-pages/index.ts";
 import type {
-    AdapterField,
     TestApplyResult,
     VerifyPathResult,
-} from "../../components/settings/adapter-rows/index.ts";
+} from "../../components/settings/adapter-shared/index.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";
 import type { UpdateResult } from "../../lib/updaters.ts";
 import type { AppConfig, AppName, Config } from "../../bindings.ts";
@@ -137,11 +137,10 @@ function Page() {
     const [collectionValue, setCollectionValue] = useState("jpn");
     const [panelExpanded, setPanelExpanded] = useState(true);
     const [settingsFixture, setSettingsFixture] = useState(SETTINGS_ADAPTERS_FIXTURE);
-    const [settingsExpandedApp, setSettingsExpandedApp] = useState<AppName | null>("ghostty");
-    const [settingsCursorIndex, setSettingsCursorIndex] = useState(1);
+    const [settingsSelectedApp, setSettingsSelectedApp] = useState<AppName>("ghostty");
     const [settingsTestApplyResults, setSettingsTestApplyResults] = useState<
         Partial<Record<AppName, TestApplyResult>>
-    >({ ghostty: { status: "ok", durationMs: 412 } });
+    >({ ghostty: { status: "ok", durationMs: 412, testedThemeLabel: "Koyo Yoru" } });
     const [settingsVerifyPathResults, setSettingsVerifyPathResults] = useState<
         Partial<Record<AppName, VerifyPathResult>>
     >({ obsidian: { status: "verified", exists: false, patternMatches: null } });
@@ -269,98 +268,116 @@ function Page() {
                 />
             </div>
 
-            <SectionLabel>Settings — adapters panel</SectionLabel>
+            <SectionLabel>Settings — adapters panel (master-detail)</SectionLabel>
             <div
                 style={{
                     border: "1px solid var(--ba-color-fg-hint)",
                     marginBottom: 32,
-                    padding: "24px 28px",
-                    maxWidth: 720,
+                    display: "flex",
+                    maxWidth: 900,
                 }}
             >
-                <AdapterRows
-                    apps={Object.entries(settingsFixture.apps) as [AppName, AppConfig][]}
-                    cursorIndex={settingsCursorIndex}
-                    expandedApp={settingsExpandedApp}
-                    onToggleEnabled={(appName) => {
-                        setSettingsFixture((prev) => ({
-                            ...prev,
-                            apps: {
-                                ...prev.apps,
-                                [appName]: {
-                                    ...prev.apps[appName],
-                                    enabled: prev.apps[appName].enabled === false,
-                                },
-                            },
-                        }));
-                    }}
-                    onToggleExpanded={(appName) => {
-                        setSettingsExpandedApp((current) => (current === appName ? null : appName));
-                        setSettingsCursorIndex(
-                            Object.keys(settingsFixture.apps).indexOf(appName),
+                <div style={{ width: 220, borderRight: "1px solid var(--ba-color-fg-hint)" }}>
+                    <AdapterNav
+                        apps={Object.entries(settingsFixture.apps) as [AppName, AppConfig][]}
+                        selectedApp={settingsSelectedApp}
+                        onSelect={setSettingsSelectedApp}
+                        detectedApps={new Set<AppName>(["ghostty", "tmux"])}
+                        detecting={false}
+                        onAutoDetect={() => {}}
+                        detectError={null}
+                        verifyPathResults={settingsVerifyPathResults}
+                    />
+                </div>
+                <div style={{ flex: 1, padding: "24px 28px" }}>
+                    {(() => {
+                        const AdapterSettings = adapterSettingsPages[settingsSelectedApp];
+                        return (
+                            <AdapterSettings
+                                appConfig={settingsFixture.apps[settingsSelectedApp]}
+                                detected={["ghostty", "tmux"].includes(settingsSelectedApp)}
+                                onToggleEnabled={() => {
+                                    setSettingsFixture((prev) => ({
+                                        ...prev,
+                                        apps: {
+                                            ...prev.apps,
+                                            [settingsSelectedApp]: {
+                                                ...prev.apps[settingsSelectedApp],
+                                                enabled: prev.apps[settingsSelectedApp].enabled ===
+                                                    false,
+                                            },
+                                        },
+                                    }));
+                                }}
+                                onFieldCommit={(field, value) => {
+                                    setSettingsFixture((prev) => ({
+                                        ...prev,
+                                        apps: {
+                                            ...prev.apps,
+                                            [settingsSelectedApp]: {
+                                                ...prev.apps[settingsSelectedApp],
+                                                [field]: value,
+                                            },
+                                        },
+                                    }));
+                                }}
+                                linkable={["zed", "ghostty", "tmux", "obsidian"].includes(
+                                    settingsSelectedApp,
+                                )}
+                                onLinkThemes={() => {}}
+                                onSetUp={() => {}}
+                                setUpResult={undefined}
+                                onTestApply={() => {
+                                    const appName = settingsSelectedApp;
+                                    setSettingsTestApplyResults((prev) => ({
+                                        ...prev,
+                                        [appName]: { status: "running" },
+                                    }));
+                                    setTimeout(() => {
+                                        setSettingsTestApplyResults((prev) => ({
+                                            ...prev,
+                                            [appName]: appName === "obsidian"
+                                                ? { status: "error", message: "config not found" }
+                                                : {
+                                                    status: "ok",
+                                                    durationMs: 380 +
+                                                        Math.round(Math.random() * 80),
+                                                    testedThemeLabel: "Fall Night",
+                                                },
+                                        }));
+                                    }, 600);
+                                }}
+                                testApplyResult={settingsTestApplyResults[settingsSelectedApp]}
+                                onVerifyPath={() => {
+                                    const appName = settingsSelectedApp;
+                                    setSettingsVerifyPathResults((prev) => ({
+                                        ...prev,
+                                        [appName]: { status: "running" },
+                                    }));
+                                    setTimeout(() => {
+                                        setSettingsVerifyPathResults((prev) => ({
+                                            ...prev,
+                                            [appName]: appName === "obsidian"
+                                                ? {
+                                                    status: "verified",
+                                                    exists: false,
+                                                    patternMatches: null,
+                                                }
+                                                : {
+                                                    status: "verified",
+                                                    exists: true,
+                                                    patternMatches: appName === "ghostty"
+                                                        ? true
+                                                        : null,
+                                                },
+                                        }));
+                                    }, 400);
+                                }}
+                                verifyPathResult={settingsVerifyPathResults[settingsSelectedApp]}
+                            />
                         );
-                    }}
-                    onFieldCommit={(appName, field: AdapterField, value) => {
-                        setSettingsFixture((prev) => ({
-                            ...prev,
-                            apps: {
-                                ...prev.apps,
-                                [appName]: { ...prev.apps[appName], [field]: value },
-                            },
-                        }));
-                    }}
-                    onTestApply={(appName) => {
-                        setSettingsTestApplyResults((prev) => ({
-                            ...prev,
-                            [appName]: { status: "running" },
-                        }));
-                        setTimeout(() => {
-                            setSettingsTestApplyResults((prev) => ({
-                                ...prev,
-                                [appName]: appName === "obsidian"
-                                    ? { status: "error", message: "config not found" }
-                                    : {
-                                        status: "ok",
-                                        durationMs: 380 + Math.round(Math.random() * 80),
-                                    },
-                            }));
-                        }, 600);
-                    }}
-                    testApplyResults={settingsTestApplyResults}
-                    linkableApps={new Set<AppName>(["zed", "ghostty", "tmux", "obsidian"])}
-                    onLinkThemes={() => {}}
-                    provisioning={{
-                        nvim: "external",
-                        helm: "external",
-                        delta: "external",
-                        ghostty: "linked",
-                        zed: "linked",
-                        tmux: "linked",
-                        obsidian: "linked",
-                        lazygit: "merged",
-                    }}
-                    detectedApps={new Set<AppName>(["ghostty", "tmux"])}
-                    onSetUp={() => {}}
-                    onVerifyPath={(appName) => {
-                        setSettingsVerifyPathResults((prev) => ({
-                            ...prev,
-                            [appName]: { status: "running" },
-                        }));
-                        setTimeout(() => {
-                            setSettingsVerifyPathResults((prev) => ({
-                                ...prev,
-                                [appName]: appName === "obsidian"
-                                    ? { status: "verified", exists: false, patternMatches: null }
-                                    : {
-                                        status: "verified",
-                                        exists: true,
-                                        patternMatches: appName === "ghostty" ? true : null,
-                                    },
-                            }));
-                        }, 400);
-                    }}
-                    verifyPathResults={settingsVerifyPathResults}
-                />
+                    })()}
+                </div>
             </div>
 
             <SectionLabel>ProgressBar</SectionLabel>
