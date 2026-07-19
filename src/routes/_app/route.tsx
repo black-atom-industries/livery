@@ -175,17 +175,19 @@ function AppLayout() {
                     <div className={styles.content}>
                         <Outlet />
                     </div>
-                    <aside className={styles.rail}>
-                        <ApplyRail
-                            mode={railMode}
-                            themeName={themeName}
-                            results={railResults}
-                            cursorApp={railMode === "active" ? cursorResult?.app ?? null : null}
-                            expandedApp={expandedApp}
-                            onToggleRow={toggleCursoredRow}
-                            onRetryFailed={handleRetryFailed}
-                        />
-                    </aside>
+                    {!isSettings && (
+                        <aside className={styles.rail}>
+                            <ApplyRail
+                                mode={railMode}
+                                themeName={themeName}
+                                results={railResults}
+                                cursorApp={railMode === "active" ? cursorResult?.app ?? null : null}
+                                expandedApp={expandedApp}
+                                onToggleRow={toggleCursoredRow}
+                                onRetryFailed={handleRetryFailed}
+                            />
+                        </aside>
+                    )}
                 </main>
                 <footer className={styles.footer}>
                     <AppFooter
