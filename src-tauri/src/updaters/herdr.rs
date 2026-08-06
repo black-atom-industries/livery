@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::config::types::AppConfig;
 
@@ -10,7 +10,9 @@ const END_MARKER: &str = "# END BLACK ATOM LIVERY THEME";
 const CONFLICTING_THEME_TABLES: &str = r"^\s*\[(?:theme|theme\.custom)\]\s*(?:#.*)?$";
 
 pub fn update(app_str: &str, app_config: &AppConfig, ctx: &UpdateContext) -> UpdateResult {
-    update_with_reload(app_str, app_config, ctx, reload)
+    update_with_reload(app_str, app_config, ctx, || {
+        reload_all_sessions(&app_config.config_path)
+    })
 }
 
 fn update_with_reload<F>(
@@ -88,8 +90,144 @@ struct ReloadReport {
     diagnostics: Vec<String>,
 }
 
-fn reload() -> Result<ReloadReport, String> {
+fn reload_all_sessions(config_path: &str) -> Result<ReloadReport, String> {
+    let mut sockets = discover_session_sockets(config_path)?;
+    match list_registered_session_sockets() {
+        Ok(registered) => sockets.extend(registered),
+        Err(error) => log::warn!("Could not list registered Herdr sessions: {error}"),
+    }
+    sockets.sort();
+    sockets.dedup();
+
+    if sockets.is_empty() {
+        log::info!("Herdr not running — config applies on next launch");
+        return Ok(ReloadReport {
+            status: "applied".to_string(),
+            diagnostics: vec![],
+        });
+    }
+
+    reload_sessions_with(&sockets, reload_socket)
+}
+
+fn discover_session_sockets(config_path: &str) -> Result<Vec<PathBuf>, String> {
+    let config_path = shellexpand::tilde(config_path).to_string();
+    let config_dir = PathBuf::from(&config_path)
+        .parent()
+        .ok_or_else(|| format!("No parent directory for {config_path}"))?
+        .to_path_buf();
+    let mut sockets = Vec::new();
+
+    let default_socket = config_dir.join("herdr.sock");
+    if default_socket.exists() {
+        sockets.push(default_socket);
+    }
+
+    let sessions_dir = config_dir.join("sessions");
+    match std::fs::read_dir(&sessions_dir) {
+        Ok(entries) => {
+            for entry in entries.flatten() {
+                let socket = entry.path().join("herdr.sock");
+                if socket.exists() {
+                    sockets.push(socket);
+                }
+            }
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            return Err(format!(
+                "Failed to inspect Herdr sessions at {}: {error}",
+                sessions_dir.display()
+            ));
+        }
+    }
+
+    sockets.sort();
+    sockets.dedup();
+    Ok(sockets)
+}
+
+fn list_registered_session_sockets() -> Result<Vec<PathBuf>, String> {
     let output = std::process::Command::new("herdr")
+        .args(["session", "list", "--json"])
+        .output()
+        .map_err(|e| format!("Failed to run herdr: {e}"))?;
+    if !output.status.success() {
+        return Err(format!("herdr session list exited with {}", output.status));
+    }
+
+    parse_session_sockets(&String::from_utf8_lossy(&output.stdout))
+}
+
+fn parse_session_sockets(stdout: &str) -> Result<Vec<PathBuf>, String> {
+    let response: serde_json::Value = serde_json::from_str(stdout.trim())
+        .map_err(|e| format!("Herdr returned invalid session JSON: {e}"))?;
+    let sessions = response
+        .get("sessions")
+        .and_then(serde_json::Value::as_array)
+        .ok_or_else(|| "Herdr session response has no sessions array".to_string())?;
+
+    sessions
+        .iter()
+        .filter(|session| {
+            session
+                .get("running")
+                .and_then(serde_json::Value::as_bool)
+                .unwrap_or(false)
+        })
+        .map(|session| {
+            session
+                .get("socket_path")
+                .and_then(serde_json::Value::as_str)
+                .map(PathBuf::from)
+                .ok_or_else(|| "Running Herdr session has no socket_path".to_string())
+        })
+        .collect()
+}
+
+fn reload_sessions_with<F>(sockets: &[PathBuf], mut reload: F) -> Result<ReloadReport, String>
+where
+    F: FnMut(&Path) -> Result<ReloadReport, String>,
+{
+    let mut applied = 0;
+    let mut diagnostics = Vec::new();
+
+    for socket in sockets {
+        match reload(socket) {
+            Ok(report) if report.status == "applied" => applied += 1,
+            Ok(report) => {
+                let detail = if report.diagnostics.is_empty() {
+                    report.status
+                } else {
+                    format!("{}: {}", report.status, report.diagnostics.join("; "))
+                };
+                diagnostics.push(format!("{}: {detail}", socket.display()));
+            }
+            Err(error) => diagnostics.push(format!("{}: {error}", socket.display())),
+        }
+    }
+
+    if diagnostics.is_empty() {
+        log::info!("Reloaded {applied} Herdr session(s)");
+        return Ok(ReloadReport {
+            status: "applied".to_string(),
+            diagnostics,
+        });
+    }
+
+    if applied == 0 {
+        return Err(diagnostics.join("; "));
+    }
+
+    Ok(ReloadReport {
+        status: "partial".to_string(),
+        diagnostics,
+    })
+}
+
+fn reload_socket(socket: &Path) -> Result<ReloadReport, String> {
+    let output = std::process::Command::new("herdr")
+        .env("HERDR_SOCKET_PATH", socket)
         .args(["server", "reload-config"])
         .output()
         .map_err(|e| format!("Failed to run herdr: {e}"))?;
@@ -182,6 +320,100 @@ mod tests {
         ] {
             assert!(parse_reload_response(output).is_err(), "output: {output}");
         }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn discovers_default_named_and_symlinked_session_sockets() {
+        use std::os::unix::fs::symlink;
+
+        let root = tempfile::TempDir::new().unwrap();
+        let config_path = root.path().join("config.toml");
+        std::fs::write(&config_path, "").unwrap();
+        std::fs::write(root.path().join("herdr.sock"), "").unwrap();
+
+        let sessions = root.path().join("sessions");
+        let imfusion = sessions.join("imfusion");
+        std::fs::create_dir_all(&imfusion).unwrap();
+        std::fs::write(imfusion.join("herdr.sock"), "").unwrap();
+
+        let linked_session = tempfile::TempDir::new().unwrap();
+        std::fs::write(linked_session.path().join("herdr.sock"), "").unwrap();
+        symlink(linked_session.path(), sessions.join("black-atom")).unwrap();
+
+        let sockets = discover_session_sockets(&config_path.to_string_lossy()).unwrap();
+        assert_eq!(sockets.len(), 3);
+        assert!(sockets.contains(&root.path().join("herdr.sock")));
+        assert!(sockets.contains(&imfusion.join("herdr.sock")));
+        assert!(sockets.contains(&sessions.join("black-atom/herdr.sock")));
+    }
+
+    #[test]
+    fn reloads_every_discovered_session() {
+        let sockets = vec![PathBuf::from("one.sock"), PathBuf::from("two.sock")];
+        let mut reloaded = Vec::new();
+        let report = reload_sessions_with(&sockets, |socket| {
+            reloaded.push(socket.to_path_buf());
+            Ok(ReloadReport {
+                status: "applied".to_string(),
+                diagnostics: vec![],
+            })
+        })
+        .unwrap();
+
+        assert_eq!(reloaded, sockets);
+        assert_eq!(report.status, "applied");
+        assert!(report.diagnostics.is_empty());
+    }
+
+    #[test]
+    fn reports_partial_when_one_of_multiple_sessions_fails() {
+        let sockets = vec![PathBuf::from("one.sock"), PathBuf::from("two.sock")];
+        let report = reload_sessions_with(&sockets, |socket| {
+            if socket == Path::new("one.sock") {
+                Ok(ReloadReport {
+                    status: "applied".to_string(),
+                    diagnostics: vec![],
+                })
+            } else {
+                Err("connection refused".to_string())
+            }
+        })
+        .unwrap();
+
+        assert_eq!(report.status, "partial");
+        assert_eq!(report.diagnostics.len(), 1);
+        assert!(report.diagnostics[0].contains("two.sock"));
+    }
+
+    #[test]
+    fn reports_error_when_no_session_reloads() {
+        let sockets = vec![PathBuf::from("one.sock"), PathBuf::from("two.sock")];
+        let error =
+            reload_sessions_with(&sockets, |_| Err("connection refused".to_string())).unwrap_err();
+
+        assert!(error.contains("one.sock"));
+        assert!(error.contains("two.sock"));
+    }
+
+    #[test]
+    fn parses_only_running_registered_session_sockets() {
+        let response = r#"{"sessions":[{"running":true,"socket_path":"/tmp/default.sock"},{"running":false,"socket_path":"/tmp/stopped.sock"},{"running":true,"socket_path":"/tmp/work.sock"}]}"#;
+        let sockets = parse_session_sockets(response).unwrap();
+
+        assert_eq!(
+            sockets,
+            vec![
+                PathBuf::from("/tmp/default.sock"),
+                PathBuf::from("/tmp/work.sock")
+            ]
+        );
+    }
+
+    #[test]
+    fn no_running_session_is_a_successful_noop() {
+        let report = reload_sessions_with(&[], |_| unreachable!()).unwrap();
+        assert_eq!(report.status, "applied");
     }
 
     #[test]

@@ -81,8 +81,9 @@ config file exist?), and **SET UP** runs the class-appropriate chain — enable 
 - **Switch pointer:** the complete managed `[theme]` + `[theme.custom]` block. If no markers or
   theme table exist, livery can append it; ambiguous markers or an unmanaged theme table fail safely
   without writing.
-- **Reload:** `herdr server reload-config` over Herdr's socket API. A missing/stopped server leaves
-  the valid config in place for the next launch and reports a degraded apply.
+- **Reload:** `herdr server reload-config` over every running Herdr session socket. With no running
+  session, the valid config applies on next launch; partial reload failures produce a degraded
+  apply.
 - **Precondition:** existing `[theme]` / `[theme.custom]` tables must be wrapped in
   `# BEGIN BLACK ATOM LIVERY THEME` and `# END BLACK ATOM LIVERY THEME` markers before first apply.
 
