@@ -15,6 +15,7 @@ developer tools. Pick a theme once, apply it everywhere.
 | **Delta**             | Switches `features = black-atom-dark/light` | On next git command       |
 | **Zed**               | Patches `theme` in settings.json (JSONC)    | Auto-watches file changes |
 | **Lazygit**           | Merges theme YAML into config               | On next lazygit launch    |
+| **Herdr**             | Replaces a managed TOML theme block         | Socket config reload      |
 | **Obsidian**          | Patches appearance + style settings JSON    | `obsidian reload`         |
 | **System Appearance** | Toggles macOS dark/light mode               | Immediate                 |
 

@@ -22,7 +22,7 @@ pub fn provisioning(app: AppName) -> ThemeProvisioning {
         AppName::Ghostty | AppName::Zed | AppName::Tmux | AppName::Obsidian => {
             ThemeProvisioning::Linked
         }
-        AppName::Lazygit => ThemeProvisioning::Merged,
+        AppName::Lazygit | AppName::Herdr => ThemeProvisioning::Merged,
     }
 }
 
@@ -70,6 +70,10 @@ pub fn distribution(app: AppName) -> Option<AdapterDistribution> {
             repo: "obsidian",
             layout: ExtractLayout::ObsidianMerged,
         }),
+        AppName::Herdr => Some(AdapterDistribution {
+            repo: "herdr",
+            layout: ExtractLayout::Collections,
+        }),
         AppName::Nvim | AppName::Delta | AppName::Helm => None,
     }
 }
@@ -93,7 +97,7 @@ pub fn linked_placement(app: AppName) -> Option<LinkedPlacement> {
         AppName::Ghostty | AppName::Tmux => Some(LinkedPlacement::FlatByExtension(".conf")),
         AppName::Zed => Some(LinkedPlacement::FlatByExtension(".json")),
         AppName::Obsidian => Some(LinkedPlacement::VaultThemeDir),
-        AppName::Nvim | AppName::Helm | AppName::Delta | AppName::Lazygit => None,
+        AppName::Nvim | AppName::Helm | AppName::Delta | AppName::Lazygit | AppName::Herdr => None,
     }
 }
 
@@ -115,8 +119,8 @@ pub enum AdapterEditableField {
 ///
 /// nvim/ghostty/tmux have dedicated updaters; delta and helm route through
 /// the shared `patch_text_updater`, so all five read pattern+template. zed
-/// and obsidian patch structurally (JSONC) off `config_path` alone. tmux and
-/// lazygit additionally point `themes_path` at the managed download dir.
+/// and obsidian patch structurally (JSONC) off `config_path` alone. tmux,
+/// lazygit, and herdr additionally point `themes_path` at the managed download dir.
 pub fn editable_fields(app: AppName) -> Vec<AdapterEditableField> {
     use AdapterEditableField::*;
     match app {
@@ -125,7 +129,7 @@ pub fn editable_fields(app: AppName) -> Vec<AdapterEditableField> {
         }
         AppName::Tmux => vec![ConfigPath, ThemesPath, MatchPattern, ReplaceTemplate],
         AppName::Zed | AppName::Obsidian => vec![ConfigPath],
-        AppName::Lazygit => vec![ConfigPath, ThemesPath],
+        AppName::Lazygit | AppName::Herdr => vec![ConfigPath, ThemesPath],
     }
 }
 
@@ -163,6 +167,10 @@ mod tests {
         assert_eq!(editable_fields(AppName::Obsidian), vec![ConfigPath]);
         assert_eq!(
             editable_fields(AppName::Lazygit),
+            vec![ConfigPath, ThemesPath]
+        );
+        assert_eq!(
+            editable_fields(AppName::Herdr),
             vec![ConfigPath, ThemesPath]
         );
     }

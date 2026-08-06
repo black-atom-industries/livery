@@ -41,6 +41,11 @@ const SETTINGS_ADAPTERS_FIXTURE: Config = {
         zed: { enabled: true, config_path: "~/.config/zed/settings.json" },
         delta: { enabled: true, config_path: "~/.gitconfig" },
         lazygit: { enabled: true, config_path: "~/.config/lazygit/config.yml" },
+        herdr: {
+            enabled: true,
+            config_path: "~/.config/herdr/config.toml",
+            themes_path: "~/.config/black-atom/themes/herdr",
+        },
         helm: { enabled: true, config_path: "~/.config/helm/config.json" },
     },
 };

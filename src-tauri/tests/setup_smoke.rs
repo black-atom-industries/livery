@@ -71,6 +71,13 @@ fn fixture_tarballs() -> HashMap<&'static str, Vec<u8>> {
         )]),
     );
     tarballs.insert(
+        "herdr",
+        gz_tarball(&[(
+            "herdr-HEAD/themes/jpn/black-atom-jpn-koyo-yoru.toml",
+            "# BEGIN BLACK ATOM LIVERY THEME\n[theme]\nname = \"catppuccin\"\n\n[theme.custom]\naccent = \"#e49e22\"\n# END BLACK ATOM LIVERY THEME\n",
+        )]),
+    );
+    tarballs.insert(
         "obsidian",
         gz_tarball(&[
             (
@@ -170,6 +177,10 @@ fn setup_chain_end_to_end() {
         &home.join(".config/tmux/tmux.conf"),
         "source-file ~/.config/tmux/themes/black-atom-jpn-koyo-yoru.conf\n",
     );
+    write_file(
+        &home.join(".config/herdr/config.toml"),
+        "# BEGIN BLACK ATOM LIVERY THEME\n[theme]\nname = \"terminal\"\n# END BLACK ATOM LIVERY THEME\n",
+    );
     let vault_appearance = home.join("vault/.obsidian/appearance.json");
     write_file(&vault_appearance, "{\"cssTheme\":\"Black Atom\"}\n");
 
@@ -185,7 +196,7 @@ fn setup_chain_end_to_end() {
         .map(|d| d.app.as_str())
         .collect();
     found.sort_unstable();
-    assert_eq!(found, ["ghostty", "tmux", "zed"], "detected apps");
+    assert_eq!(found, ["ghostty", "herdr", "tmux", "zed"], "detected apps");
     let obsidian = detections
         .iter()
         .find(|d| d.app == AppName::Obsidian)
@@ -198,7 +209,7 @@ fn setup_chain_end_to_end() {
     // 3. Enable the detected apps + lazygit, supply obsidian's vault path.
     for (app, app_config) in config.apps.iter_mut() {
         match app {
-            AppName::Ghostty | AppName::Zed | AppName::Tmux | AppName::Lazygit => {
+            AppName::Ghostty | AppName::Zed | AppName::Tmux | AppName::Lazygit | AppName::Herdr => {
                 app_config.enabled = true;
             }
             AppName::Obsidian => {
@@ -279,9 +290,11 @@ fn setup_chain_end_to_end() {
     ] {
         assert_managed_symlink(&link, &managed_root);
     }
-    // Merged (lazygit) consumes the managed dir directly — linking it is a skip.
-    let lazygit_link = tauri::async_runtime::block_on(themes::link_app_themes(AppName::Lazygit));
-    assert!(matches!(lazygit_link.status, UpdateStatus::Skipped));
+    // Merged adapters consume the managed dir directly — linking is a skip.
+    for app in [AppName::Lazygit, AppName::Herdr] {
+        let link = tauri::async_runtime::block_on(themes::link_app_themes(app));
+        assert!(matches!(link.status, UpdateStatus::Skipped));
+    }
 
     // 8. Verify lands truthful per adapter.
     let ghostty =
@@ -296,6 +309,11 @@ fn setup_chain_end_to_end() {
     let zed = tauri::async_runtime::block_on(livery_lib::updaters::verify_app_path(AppName::Zed));
     assert!(zed.exists);
     assert_eq!(zed.pattern_matches, None, "zed patches structurally");
+
+    let herdr =
+        tauri::async_runtime::block_on(livery_lib::updaters::verify_app_path(AppName::Herdr));
+    assert!(herdr.exists);
+    assert_eq!(herdr.pattern_matches, None, "herdr patches a managed block");
 
     let nvim = tauri::async_runtime::block_on(livery_lib::updaters::verify_app_path(AppName::Nvim));
     assert!(!nvim.exists, "no nvim config was planted");

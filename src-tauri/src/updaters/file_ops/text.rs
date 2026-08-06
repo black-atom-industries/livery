@@ -1,8 +1,8 @@
 use std::collections::HashMap;
-use std::io::Write;
-use std::path::PathBuf;
 
 use regex::Regex;
+
+use super::secure::{atomic_write, resolve_home_file};
 
 /// Read a file, apply regex replacement with template variables, and write it back.
 /// Variables are rendered into the replace_template before replacement.
@@ -13,22 +13,11 @@ pub fn patch_text_file(
     replace_template: String,
     variables: HashMap<String, String>,
 ) -> Result<(), String> {
-    // Restrict writes to files under $HOME
-    let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
-    let home = home.canonicalize().unwrap_or(home);
-    let path = shellexpand::tilde(&path).to_string();
-    let resolved = PathBuf::from(&path)
-        .canonicalize()
-        .map_err(|e| format!("Cannot resolve path {path}: {e}"))?;
-    if !resolved.starts_with(&home) {
-        return Err(format!(
-            "Path outside home directory is not allowed: {path}"
-        ));
-    }
+    let (path, resolved) = resolve_home_file(&path)?;
 
     // Read file
     let content =
-        std::fs::read_to_string(&path).map_err(|e| format!("Failed to read {path}: {e}"))?;
+        std::fs::read_to_string(&resolved).map_err(|e| format!("Failed to read {path}: {e}"))?;
 
     // Compile regex with multiline mode
     let regex = Regex::new(&format!("(?m){match_pattern}"))
@@ -62,25 +51,13 @@ pub fn patch_text_file(
     // Replace first match only
     let updated = regex.replace(&content, rendered.as_str()).to_string();
 
-    // Atomic write: temp file + persist
-    // Use resolved (not path) so rename() writes through symlinks
-    // rather than replacing the symlink itself with a new regular file.
-    let parent = resolved
-        .parent()
-        .ok_or_else(|| format!("No parent directory for {path}"))?;
-    let mut tmp = tempfile::NamedTempFile::new_in(parent)
-        .map_err(|e| format!("Failed to create temp file: {e}"))?;
-    tmp.write_all(updated.as_bytes())
-        .map_err(|e| format!("Failed to write temp file: {e}"))?;
-    tmp.persist(&resolved)
-        .map_err(|e| format!("Failed to persist to {path}: {e}"))?;
-
-    Ok(())
+    atomic_write(&resolved, &path, &updated)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Write;
     use std::path::PathBuf;
 
     fn fixture_path(name: &str) -> PathBuf {

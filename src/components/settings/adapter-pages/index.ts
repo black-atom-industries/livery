@@ -8,6 +8,7 @@ import { DeltaSettings } from "./delta.tsx";
 import { TmuxSettings } from "./tmux.tsx";
 import { ZedSettings } from "./zed.tsx";
 import { LazygitSettings } from "./lazygit.tsx";
+import { HerdrSettings } from "./herdr.tsx";
 import { ObsidianSettings } from "./obsidian.tsx";
 
 export type { AdapterField, AdapterPageProps } from "./types.ts";
@@ -22,5 +23,6 @@ export const adapterSettingsPages: Record<AppName, (props: AdapterPageProps) => 
     tmux: TmuxSettings,
     zed: ZedSettings,
     lazygit: LazygitSettings,
+    herdr: HerdrSettings,
     obsidian: ObsidianSettings,
 };
