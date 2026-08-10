@@ -7,6 +7,7 @@ import styles from "./adapter-page.module.css";
 export function LazygitSettings(
     {
         appConfig,
+        editableFields,
         detected,
         onToggleEnabled,
         onFieldCommit,
@@ -32,20 +33,24 @@ export function LazygitSettings(
                 verifyPathResult={verifyPathResult}
             />
             <div className={styles.fieldGrid}>
-                <DraftField
-                    label="CONFIG_PATH"
-                    note="THE FILE LIVERY PATCHES"
-                    value={appConfig.config_path}
-                    onCommit={(value) => onFieldCommit("config_path", value)}
-                    inputRef={firstFieldRef}
-                />
-                <DraftField
-                    label="THEMES_PATH"
-                    optional
-                    note="WHERE THEME FILES LIVE"
-                    value={appConfig.themes_path ?? ""}
-                    onCommit={(value) => onFieldCommit("themes_path", value)}
-                />
+                {editableFields.has("config_path") && (
+                    <DraftField
+                        label="CONFIG_PATH"
+                        note="THE FILE LIVERY PATCHES"
+                        value={appConfig.config_path}
+                        onCommit={(value) => onFieldCommit("config_path", value)}
+                        inputRef={firstFieldRef}
+                    />
+                )}
+                {editableFields.has("themes_path") && (
+                    <DraftField
+                        label="THEMES_PATH"
+                        optional
+                        note="WHERE THEME FILES LIVE"
+                        value={appConfig.themes_path ?? ""}
+                        onCommit={(value) => onFieldCommit("themes_path", value)}
+                    />
+                )}
             </div>
             <ActionRow
                 onSetUp={onSetUp}

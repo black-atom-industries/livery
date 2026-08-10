@@ -1,4 +1,4 @@
-import type { AppConfig } from "../../../bindings.ts";
+import type { AdapterEditableField, AppConfig } from "../../../bindings.ts";
 import type {
     LinkThemesRowResult,
     TestApplyResult,
@@ -6,14 +6,14 @@ import type {
 } from "../adapter-shared/results.ts";
 import type { SetUpOutcome } from "../../../lib/adapter-setup.ts";
 
-/** Every field an adapter page can offer — a page renders only what its
-    updater reads, listed explicitly in the page's own JSX. */
-export type AdapterField = "config_path" | "themes_path" | "match_pattern" | "replace_template";
+/** Fields an adapter updater may read, declared by the backend registry. */
+export type AdapterField = AdapterEditableField;
 
 /** Props every per-adapter settings page receives — one shape, one
-    component per adapter, each hardcoding which of these fields it shows. */
+    component per adapter, with field visibility supplied by the backend. */
 export type AdapterPageProps = {
     appConfig: AppConfig;
+    editableFields: ReadonlySet<AdapterField>;
     detected: boolean;
     onToggleEnabled: () => void;
     onFieldCommit: (field: AdapterField, value: string) => void;

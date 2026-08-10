@@ -33,6 +33,7 @@ function AdapterDetailRoute() {
     return (
         <AdapterSettings
             appConfig={appConfig}
+            editableFields={ctx.editableFieldsByApp[adapter] ?? new Set()}
             detected={detected}
             onToggleEnabled={() => ctx.onToggleEnabled(adapter)}
             onFieldCommit={(field, value) => ctx.onFieldCommit(adapter, field, value)}

@@ -13,6 +13,7 @@ import styles from "./adapter-page.module.css";
 export function TmuxSettings(
     {
         appConfig,
+        editableFields,
         detected,
         onToggleEnabled,
         onFieldCommit,
@@ -38,37 +39,47 @@ export function TmuxSettings(
                 verifyPathResult={verifyPathResult}
             />
             <div className={styles.fieldGrid}>
-                <DraftField
-                    label="CONFIG_PATH"
-                    note="THE FILE LIVERY PATCHES"
-                    value={appConfig.config_path}
-                    onCommit={(value) => onFieldCommit("config_path", value)}
-                    inputRef={firstFieldRef}
-                />
-                <DraftField
-                    label="THEMES_PATH"
-                    optional
-                    note="WHERE THEME FILES LIVE"
-                    value={appConfig.themes_path ?? ""}
-                    onCommit={(value) => onFieldCommit("themes_path", value)}
-                />
-                <DraftField
-                    label="MATCH_PATTERN"
-                    note="REGEX — FINDS THE THEME LINE"
-                    value={appConfig.match_pattern ?? ""}
-                    onCommit={(value) => onFieldCommit("match_pattern", value)}
-                />
-                <DraftField
-                    label="REPLACE_TEMPLATE"
-                    note="REPLACES THE MATCHED LINE"
-                    value={appConfig.replace_template ?? ""}
-                    onCommit={(value) => onFieldCommit("replace_template", value)}
-                />
-                <p className={styles.fieldGridNote}>
-                    Template variables: {"{themeKey}"} · {"{themesPath}"} · {"{collectionKey}"} ·
-                    {" "}
-                    {"{appearance}"}
-                </p>
+                {editableFields.has("config_path") && (
+                    <DraftField
+                        label="CONFIG_PATH"
+                        note="THE FILE LIVERY PATCHES"
+                        value={appConfig.config_path}
+                        onCommit={(value) => onFieldCommit("config_path", value)}
+                        inputRef={firstFieldRef}
+                    />
+                )}
+                {editableFields.has("themes_path") && (
+                    <DraftField
+                        label="THEMES_PATH"
+                        optional
+                        note="WHERE THEME FILES LIVE"
+                        value={appConfig.themes_path ?? ""}
+                        onCommit={(value) => onFieldCommit("themes_path", value)}
+                    />
+                )}
+                {editableFields.has("match_pattern") && (
+                    <DraftField
+                        label="MATCH_PATTERN"
+                        note="REGEX — FINDS THE THEME LINE"
+                        value={appConfig.match_pattern ?? ""}
+                        onCommit={(value) => onFieldCommit("match_pattern", value)}
+                    />
+                )}
+                {editableFields.has("replace_template") && (
+                    <DraftField
+                        label="REPLACE_TEMPLATE"
+                        note="REPLACES THE MATCHED LINE"
+                        value={appConfig.replace_template ?? ""}
+                        onCommit={(value) => onFieldCommit("replace_template", value)}
+                    />
+                )}
+                {(editableFields.has("match_pattern") || editableFields.has("replace_template")) &&
+                    (
+                        <p className={styles.fieldGridNote}>
+                            Template variables: {"{themeKey}"} · {"{themesPath}"} ·{" "}
+                            {"{collectionKey}"} · {"{appearance}"}
+                        </p>
+                    )}
             </div>
             <ActionRow
                 onSetUp={onSetUp}

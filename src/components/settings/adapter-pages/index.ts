@@ -13,8 +13,8 @@ import { ObsidianSettings } from "./obsidian.tsx";
 
 export type { AdapterField, AdapterPageProps } from "./types.ts";
 
-/** One real settings page per adapter — dispatched by name, each hardcoding
-    its own fields rather than a shared page filtering a conditional grid. */
+/** One real settings page per adapter, dispatched by name so each can keep
+    its adapter-specific copy while backend metadata controls field visibility. */
 export const adapterSettingsPages: Record<AppName, (props: AdapterPageProps) => ReactElement> = {
     nvim: NvimSettings,
     ghostty: GhosttySettings,

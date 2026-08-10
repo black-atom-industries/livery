@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import type { RefObject } from "react";
-import type { AppName, ThemeProvisioning } from "../../../bindings.ts";
+import type { AdapterEditableField, AppName, ThemeProvisioning } from "../../../bindings.ts";
 import type { SetUpOutcome } from "../../../lib/adapter-setup.ts";
 import type {
     LinkThemesRowResult,
@@ -23,6 +23,7 @@ export type SettingsContextValue = {
 
     linkableApps: ReadonlySet<AppName>;
     provisioningByApp: Partial<Record<AppName, ThemeProvisioning>>;
+    editableFieldsByApp: Partial<Record<AppName, ReadonlySet<AdapterEditableField>>>;
 
     verifyPathResults: Partial<Record<AppName, VerifyPathResult>>;
     onVerifyPath: (appName: AppName) => void;

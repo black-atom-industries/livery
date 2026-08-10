@@ -13,6 +13,7 @@ import styles from "./adapter-page.module.css";
 export function ObsidianSettings(
     {
         appConfig,
+        editableFields,
         detected,
         onToggleEnabled,
         onFieldCommit,
@@ -38,13 +39,15 @@ export function ObsidianSettings(
                 verifyPathResult={verifyPathResult}
             />
             <div className={styles.fieldGrid}>
-                <DraftField
-                    label="CONFIG_PATH"
-                    note="THE FILE LIVERY PATCHES"
-                    value={appConfig.config_path}
-                    onCommit={(value) => onFieldCommit("config_path", value)}
-                    inputRef={firstFieldRef}
-                />
+                {editableFields.has("config_path") && (
+                    <DraftField
+                        label="CONFIG_PATH"
+                        note="THE FILE LIVERY PATCHES"
+                        value={appConfig.config_path}
+                        onCommit={(value) => onFieldCommit("config_path", value)}
+                        inputRef={firstFieldRef}
+                    />
+                )}
             </div>
             <ActionRow
                 onSetUp={onSetUp}

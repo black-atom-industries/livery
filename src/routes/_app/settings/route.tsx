@@ -17,6 +17,7 @@ import type {
 } from "../../../components/settings/adapter-shared/index.ts";
 import { commands } from "../../../bindings.ts";
 import type {
+    AdapterEditableField,
     AdapterThemesStatus,
     AppConfig,
     AppName,
@@ -82,6 +83,9 @@ function SettingsRoute() {
     const provisioningByApp = Object.fromEntries(
         adapterEntries.map(([name, status]) => [name, status.provisioning]),
     ) as Partial<Record<AppName, ThemeProvisioning>>;
+    const editableFieldsByApp = Object.fromEntries(
+        adapterEntries.map(([name, status]) => [name, new Set(status.editable_fields)]),
+    ) as Partial<Record<AppName, ReadonlySet<AdapterEditableField>>>;
 
     // AUTO-DETECT scan — session-local, null until the first run.
     const [detecting, setDetecting] = useState(false);
@@ -384,6 +388,7 @@ function SettingsRoute() {
         onAutoDetect: autoDetectApps,
         linkableApps,
         provisioningByApp,
+        editableFieldsByApp,
         verifyPathResults,
         onVerifyPath: verifyAdapterPath,
         linkThemesResults,

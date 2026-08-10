@@ -23,7 +23,7 @@ import type {
 } from "../../components/settings/adapter-shared/index.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";
 import type { UpdateResult } from "../../lib/updaters.ts";
-import type { AppConfig, AppName, Config } from "../../bindings.ts";
+import type { AdapterEditableField, AppConfig, AppName, Config } from "../../bindings.ts";
 
 const SETTINGS_ADAPTERS_FIXTURE: Config = {
     system_appearance: false,
@@ -48,6 +48,18 @@ const SETTINGS_ADAPTERS_FIXTURE: Config = {
         },
         helm: { enabled: true, config_path: "~/.config/helm/config.json" },
     },
+};
+
+const SETTINGS_EDITABLE_FIELDS: Record<AppName, AdapterEditableField[]> = {
+    nvim: ["config_path", "match_pattern", "replace_template"],
+    ghostty: ["config_path", "match_pattern", "replace_template"],
+    helm: ["config_path", "match_pattern", "replace_template"],
+    delta: ["config_path", "match_pattern", "replace_template"],
+    tmux: ["config_path", "themes_path", "match_pattern", "replace_template"],
+    zed: ["config_path"],
+    lazygit: ["config_path", "themes_path"],
+    obsidian: ["config_path"],
+    herdr: ["config_path", "themes_path"],
 };
 
 const APPLY_RAIL_FIXTURES: Record<string, UpdateResult[]> = {
@@ -301,6 +313,9 @@ function Page() {
                         return (
                             <AdapterSettings
                                 appConfig={settingsFixture.apps[settingsSelectedApp]}
+                                editableFields={new Set(
+                                    SETTINGS_EDITABLE_FIELDS[settingsSelectedApp],
+                                )}
                                 detected={["ghostty", "tmux"].includes(settingsSelectedApp)}
                                 onToggleEnabled={() => {
                                     setSettingsFixture((prev) => ({
