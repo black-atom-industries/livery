@@ -226,10 +226,14 @@ function SettingsRoute() {
                 collection_key: probe.meta.collection.key,
                 theme_label: probe.meta.label,
             });
-            if (result.status === "error") {
+            if (result.status !== "done") {
                 setTestApplyResults((prev) => ({
                     ...prev,
-                    [appName]: { status: "error", message: result.message ?? "Unknown error" },
+                    [appName]: {
+                        status: "error",
+                        message: result.message ??
+                            (result.status === "skipped" ? "Adapter skipped" : "Unknown error"),
+                    },
                 }));
                 return;
             }
