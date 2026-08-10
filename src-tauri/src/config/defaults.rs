@@ -73,6 +73,16 @@ impl Default for Config {
             },
         );
         apps.insert(
+            AppName::Herdr,
+            AppConfig {
+                enabled: false,
+                config_path: "~/.config/herdr/config.toml".to_string(),
+                themes_path: Some("~/.config/black-atom/themes/herdr".to_string()),
+                match_pattern: None,
+                replace_template: None,
+            },
+        );
+        apps.insert(
             AppName::Obsidian,
             AppConfig {
                 enabled: false,

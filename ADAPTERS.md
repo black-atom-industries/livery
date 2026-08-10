@@ -12,7 +12,7 @@ consumes those files** — and every adapter falls into exactly one class:
 | ------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **External** | nvim, helm, delta            | The app's theme files are provided outside of livery — by a plugin, a compiled binary, or the user — so livery only performs switching.                                      |
 | **Linked**   | ghostty, zed, tmux, obsidian | Livery symlinks the downloaded theme files into a location the app itself reads, and switching selects one via a pointer in the app's config — a pointer setup may add once. |
-| **Merged**   | lazygit                      | The app cannot read external theme files, so on every switch livery reads the downloaded theme and writes its values directly into the app's config.                         |
+| **Merged**   | lazygit, herdr               | The app cannot read external theme files, so on every switch livery reads the downloaded theme and writes its values directly into the app's config.                         |
 
 Two per-adapter properties are deliberately **not** classes:
 
@@ -72,6 +72,20 @@ config file exist?), and **SET UP** runs the class-appropriate chain — enable 
 - **Switch pointer:** the `gui.theme` values themselves.
 - **Reload:** none (picked up on next lazygit start).
 - **Precondition:** none.
+
+### herdr — Merged
+
+- **Files:** consumed by livery itself — on every switch it reads
+  `<managed>/herdr/<collection>/<themeKey>.toml` and replaces the block between the Black Atom
+  Livery markers in `~/.config/herdr/config.toml`. Herdr never reads the managed dir.
+- **Switch pointer:** the complete managed `[theme]` + `[theme.custom]` block. If no markers or
+  theme table exist, livery can append it; ambiguous markers or an unmanaged theme table fail safely
+  without writing.
+- **Reload:** `herdr server reload-config` over every running Herdr session socket. With no running
+  session, the valid config applies on next launch; partial reload failures produce a degraded
+  apply.
+- **Precondition:** existing `[theme]` / `[theme.custom]` tables must be wrapped in
+  `# BEGIN BLACK ATOM LIVERY THEME` and `# END BLACK ATOM LIVERY THEME` markers before first apply.
 
 ### nvim — External
 

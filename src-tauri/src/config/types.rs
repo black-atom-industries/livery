@@ -12,6 +12,7 @@ pub enum AppName {
     Zed,
     Delta,
     Lazygit,
+    Herdr,
     Obsidian,
     Helm,
 }
@@ -26,6 +27,7 @@ impl AppName {
             AppName::Zed,
             AppName::Delta,
             AppName::Lazygit,
+            AppName::Herdr,
             AppName::Obsidian,
             AppName::Helm,
         ]
@@ -39,6 +41,7 @@ impl AppName {
             AppName::Zed => "zed",
             AppName::Delta => "delta",
             AppName::Lazygit => "lazygit",
+            AppName::Herdr => "herdr",
             AppName::Obsidian => "obsidian",
             AppName::Helm => "helm",
         }

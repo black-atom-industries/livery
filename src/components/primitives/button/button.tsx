@@ -38,8 +38,28 @@ export function Button({ intent, hotkey, children, onClick, disabled, className 
         <button
             data-component="button"
             type="button"
-            disabled={disabled}
-            onClick={onClick}
+            // `aria-disabled`, not the native `disabled` attribute — a truly
+            // disabled button is unfocusable, and the browser force-blurs it
+            // the instant it becomes disabled (e.g. an action's own running
+            // state). That silently drops keyboard focus with nothing to
+            // restore it. Staying focusable keeps the row/field the user
+            // was on intact; onClick/onKeyDown below enforce the same
+            // "can't activate while disabled" behavior by hand.
+            aria-disabled={disabled}
+            onClick={disabled ? undefined : onClick}
+            onKeyDown={(event) => {
+                // A focused button is meant to activate on Space/Enter like
+                // any native control — stop the keystroke here, before it
+                // reaches the app's document-level hotkeys (e.g. Space
+                // toggling a sidebar row), which would otherwise fire
+                // alongside the button's own native activation. Disabled:
+                // swallow the keys so the (still-focusable) button can't be
+                // activated, without also blocking other keys the page cares
+                // about.
+                if (event.key !== " " && event.key !== "Enter") return;
+                event.stopPropagation();
+                if (disabled) event.preventDefault();
+            }}
             className={buttonVariants({ intent, className })}
         >
             [ {hotkey && <span className={styles.hotkey}>{hotkey}&nbsp;</span>}

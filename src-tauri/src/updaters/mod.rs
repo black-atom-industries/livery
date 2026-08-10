@@ -1,5 +1,6 @@
 pub mod file_ops;
 mod ghostty;
+mod herdr;
 mod lazygit;
 pub mod nvim;
 mod obsidian;
@@ -169,6 +170,7 @@ pub fn dispatch_update(
         AppName::Delta => patch_text_updater(app_str, app_config, ctx),
         AppName::Helm => patch_text_updater(app_str, app_config, ctx),
         AppName::Lazygit => lazygit::update(app_str, app_config, ctx),
+        AppName::Herdr => herdr::update(app_str, app_config, ctx),
         AppName::Zed => zed::update(app_str, app_config, ctx),
         AppName::Obsidian => obsidian::update(app_str, app_config, ctx),
     }

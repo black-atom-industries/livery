@@ -33,10 +33,10 @@ function AppLayout() {
     const currentTheme = useStore(appStore, (s) => s.currentTheme);
 
     const matches = useMatches();
-    const settingsMatch = matches.find((m) => m.routeId === "/_app/settings");
-    const isSettings = settingsMatch !== undefined;
-    const settingsSection = (settingsMatch?.search as { section?: string } | undefined)?.section ??
-        "adapters";
+    const isSettings = matches.some((m) => m.routeId === "/_app/settings");
+    const settingsSection = matches.some((m) => m.routeId === "/_app/settings/general")
+        ? "general"
+        : "adapters";
 
     // Save mutation lives on the settings route's own useConfig() instance —
     // useMutationState reads the shared MutationCache by key instead of
@@ -175,17 +175,19 @@ function AppLayout() {
                     <div className={styles.content}>
                         <Outlet />
                     </div>
-                    <aside className={styles.rail}>
-                        <ApplyRail
-                            mode={railMode}
-                            themeName={themeName}
-                            results={railResults}
-                            cursorApp={railMode === "active" ? cursorResult?.app ?? null : null}
-                            expandedApp={expandedApp}
-                            onToggleRow={toggleCursoredRow}
-                            onRetryFailed={handleRetryFailed}
-                        />
-                    </aside>
+                    {!isSettings && (
+                        <aside className={styles.rail}>
+                            <ApplyRail
+                                mode={railMode}
+                                themeName={themeName}
+                                results={railResults}
+                                cursorApp={railMode === "active" ? cursorResult?.app ?? null : null}
+                                expandedApp={expandedApp}
+                                onToggleRow={toggleCursoredRow}
+                                onRetryFailed={handleRetryFailed}
+                            />
+                        </aside>
+                    )}
                 </main>
                 <footer className={styles.footer}>
                     <AppFooter
@@ -194,8 +196,7 @@ function AppLayout() {
                                 <>
                                     <KeyHint keys="j/k">ROWS</KeyHint>
                                     <KeyHint keys="space">TOGGLE</KeyHint>
-                                    <KeyHint keys="⏎">EXPAND</KeyHint>
-                                    <KeyHint keys="e">EDIT FIELD</KeyHint>
+                                    <KeyHint keys="⏎">EDIT FIELD</KeyHint>
                                     <KeyHint keys="esc">BACK</KeyHint>
                                 </>
                             )

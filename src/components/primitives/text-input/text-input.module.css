@@ -38,7 +38,7 @@
     font-family: inherit;
     font-size: var(--ba-font-size-2);
     color: var(--ba-color-fg-default);
-    caret-color: transparent;
+    caret-color: var(--ba-color-focus);
 }
 
 .input::placeholder {
@@ -52,14 +52,6 @@
 
 .input:focus {
     outline: none;
-}
-
-.caret {
-    display: inline-block;
-    width: 7px;
-    height: 14px;
-    background: var(--ba-color-focus);
-    flex: none;
 }
 
 .hint {

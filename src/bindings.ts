@@ -98,12 +98,23 @@ async verifyAppPath(app: AppName) : Promise<AppPathVerification> {
 
 /** user-defined types **/
 
+/**
+ * A config field an adapter's updater actually reads. Drives which inputs
+ * the settings UI offers per adapter — editing a field the updater ignores
+ * is silent noise; editing one it does read, wrongly, breaks switching.
+ */
+export type AdapterEditableField = "config_path" | "themes_path" | "match_pattern" | "replace_template"
 export type AdapterThemesStatus = { 
 /**
  * Who consumes the managed theme files — drives the class-specific
  * settings row content and the SET UP chain.
  */
-provisioning: ThemeProvisioning; downloaded: boolean; etag?: string | null; 
+provisioning: ThemeProvisioning; 
+/**
+ * Config fields this adapter's updater actually reads — trims the
+ * settings field grid to what's safe to edit.
+ */
+editable_fields: AdapterEditableField[]; downloaded: boolean; etag?: string | null; 
 /**
  * Unix epoch seconds (u32 carries us to 2106; tauri-specta has no u64).
  */
@@ -120,7 +131,7 @@ config_path: string; found: boolean }
 /**
  * Supported app names. TypeScript bindings are auto-generated via tauri-specta.
  */
-export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta" | "lazygit" | "obsidian" | "helm"
+export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta" | "lazygit" | "herdr" | "obsidian" | "helm"
 /**
  * Result of `verify_app_path` — backs the settings screen's [ VERIFY PATH ].
  */

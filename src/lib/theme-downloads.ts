@@ -19,6 +19,15 @@ export function downloadableApps(
         .map(([app]) => app);
 }
 
+/** Downloadable adapters whose managed files are not present yet. */
+export function missingDownloadableApps(
+    adapters: Partial<Record<AppName, AdapterThemesStatus>>,
+): AppName[] {
+    return (Object.entries(adapters) as [AppName, AdapterThemesStatus][])
+        .filter(([, status]) => status.provisioning !== "external" && !status.downloaded)
+        .map(([app]) => app);
+}
+
 /** Pending rows for a download pass, in stable alphabetical order. */
 export function initialDownloadRows(apps: AppName[]): DownloadRowResult[] {
     return [...apps].sort().map((app) => ({

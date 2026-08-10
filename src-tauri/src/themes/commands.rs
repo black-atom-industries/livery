@@ -59,6 +59,9 @@ pub struct AdapterThemesStatus {
     /// Who consumes the managed theme files — drives the class-specific
     /// settings row content and the SET UP chain.
     pub provisioning: registry::ThemeProvisioning,
+    /// Config fields this adapter's updater actually reads — trims the
+    /// settings field grid to what's safe to edit.
+    pub editable_fields: Vec<registry::AdapterEditableField>,
     pub downloaded: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub etag: Option<String>,
@@ -123,6 +126,7 @@ pub async fn get_themes_status() -> ThemesStatus {
             *app,
             AdapterThemesStatus {
                 provisioning: registry::provisioning(*app),
+                editable_fields: registry::editable_fields(*app),
                 downloaded: entry.is_some(),
                 etag: entry.and_then(|e| e.etag.clone()),
                 fetched_at_epoch: entry.map(|e| e.fetched_at_epoch as u32),
@@ -241,12 +245,13 @@ fn link_app_themes_inner(
         .apps
         .get(&app)
         .ok_or_else(|| format!("{} not found in config", app.as_str()))?;
-    let themes_dir = app_themes_dir(&app_config.config_path).ok_or_else(|| {
-        format!(
-            "Cannot derive a themes directory from config_path '{}'",
-            app_config.config_path
-        )
-    })?;
+    let themes_dir = app_themes_dir(&app_config.config_path, app_config.themes_path.as_deref())
+        .ok_or_else(|| {
+            format!(
+                "Cannot derive a themes directory from config_path '{}'",
+                app_config.config_path
+            )
+        })?;
 
     match placement {
         registry::LinkedPlacement::FlatByExtension(extension) => {
@@ -266,10 +271,15 @@ fn link_app_themes_inner(
     Err("Linked theme placement requires a unix filesystem".to_string())
 }
 
-/// The adapter's themes dir is the sibling `themes/` of its configured
-/// config file — NOT a hardcoded default path, so custom config locations
-/// (e.g. ~/.config/zed-custom/settings.json) are wired correctly.
-fn app_themes_dir(config_path: &str) -> Option<std::path::PathBuf> {
+/// Use an explicitly configured themes directory when present. Adapters without
+/// one use the sibling `themes/` directory of their config file.
+fn app_themes_dir(config_path: &str, configured_path: Option<&str>) -> Option<std::path::PathBuf> {
+    if let Some(path) = configured_path.filter(|path| !path.is_empty()) {
+        return Some(std::path::PathBuf::from(
+            shellexpand::tilde(path).to_string(),
+        ));
+    }
+
     let path = std::path::Path::new(config_path);
     Some(path.parent()?.join("themes"))
 }
@@ -387,14 +397,21 @@ mod tests {
     #[test]
     fn test_app_themes_dir_derives_from_config_path_sibling() {
         assert_eq!(
-            app_themes_dir("/Users/x/.config/zed/settings.json"),
+            app_themes_dir("/Users/x/.config/zed/settings.json", None),
             Some(std::path::PathBuf::from("/Users/x/.config/zed/themes"))
         );
         assert_eq!(
-            app_themes_dir("/Users/x/.config/zed-custom/settings.json"),
+            app_themes_dir("/Users/x/.config/zed-custom/settings.json", None),
             Some(std::path::PathBuf::from(
                 "/Users/x/.config/zed-custom/themes"
             ))
+        );
+        assert_eq!(
+            app_themes_dir(
+                "/Users/x/.config/tmux/tmux.conf",
+                Some("~/.config/tmux/themes")
+            ),
+            Some(dirs::home_dir().unwrap().join(".config/tmux/themes"))
         );
     }
 }

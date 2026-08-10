@@ -35,6 +35,10 @@
     color: var(--ba-color-fg-disabled);
 }
 
+.indented {
+    padding-left: 36px;
+}
+
 .cursor {
     width: 12px;
     color: var(--ba-color-fg-positive);

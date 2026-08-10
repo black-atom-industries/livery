@@ -14,10 +14,15 @@ export const listRowVariants = cva({
             true: styles.dimmed,
             false: "",
         },
+        indented: {
+            true: styles.indented,
+            false: "",
+        },
     },
     defaultVariants: {
         selected: false,
         dimmed: false,
+        indented: false,
     },
 });
 
@@ -27,6 +32,8 @@ type Props = VariantProps<typeof listRowVariants> & {
     pips?: string[];
     /** Appearance letter: "D" | "L". */
     appearance?: string;
+    /** Extra content after the name/pips/appearance — e.g. a status badge. */
+    trailing?: React.ReactNode;
     onClick?: () => void;
     /** Root element ref — e.g. to scroll the selected row into view. */
     rootRef?: React.Ref<HTMLDivElement>;
@@ -39,11 +46,13 @@ type Props = VariantProps<typeof listRowVariants> & {
  *
  * Selection = hint surface + 2px positive left edge + `›` cursor, bold name.
  * `dimmed` marks a query miss — the row stays in place, never removed.
+ * `indented` marks a permanent child row (e.g. an adapter under ADAPTERS).
  *
  * Spec: docs/design-system/reference/components/display/ListRow.jsx
  */
 export function ListRow(
-    { selected, dimmed, name, pips, appearance, onClick, rootRef, className }: Props,
+    { selected, dimmed, indented, name, pips, appearance, trailing, onClick, rootRef, className }:
+        Props,
 ) {
     return (
         <div
@@ -53,7 +62,7 @@ export function ListRow(
             tabIndex={0}
             onClick={onClick}
             ref={rootRef}
-            className={listRowVariants({ selected, dimmed, className })}
+            className={listRowVariants({ selected, dimmed, indented, className })}
         >
             <span className={styles.cursor}>{selected ? "›" : ""}</span>
             <span className={selected ? `${styles.name} ${styles.nameSelected}` : styles.name}>
@@ -61,6 +70,7 @@ export function ListRow(
             </span>
             {pips && !dimmed ? <Swatch variant="pips" colors={pips} /> : null}
             {appearance ? <Badge size="mini">{appearance}</Badge> : null}
+            {trailing}
         </div>
     );
 }

@@ -46,3 +46,20 @@ export function getGroupedThemes(themeMap: ThemeKeyDefinitionMap): ThemeGroup[] 
             };
         });
 }
+
+/**
+ * A random theme distinct from `currentKey` — TEST APPLY needs a visible
+ * change, so it never picks the theme already active. `random` is injected
+ * (defaults to Math.random) so the pick is deterministic under test.
+ */
+export function pickRandomOtherTheme(
+    themeMap: ThemeKeyDefinitionMap,
+    currentKey: string,
+    random: () => number = Math.random,
+): ThemeDefinition | null {
+    const candidates = Object.values(themeMap).filter(
+        (d): d is ThemeDefinition => d !== null && d.meta.key !== currentKey,
+    );
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(random() * candidates.length)];
+}
