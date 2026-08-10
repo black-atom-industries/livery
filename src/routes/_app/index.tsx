@@ -8,10 +8,10 @@ import { appStore } from "../../store/app.ts";
 import { commands } from "../../bindings.ts";
 import { applyTheme, createUpdaters, getEnabledApps } from "../../lib/updaters.ts";
 import {
-    downloadableApps,
     type DownloadRowResult,
     downloadThemes,
     hasDownloadErrors,
+    missingDownloadableApps,
 } from "../../lib/theme-downloads.ts";
 import { getGroupedThemes } from "../../lib/themes.ts";
 import { useConfig } from "../../queries/use-config.ts";
@@ -34,14 +34,15 @@ function Component() {
     const themesStatus = useThemesStatus();
     const navigate = useNavigate();
 
-    // First-run greeting: no theme files ever downloaded, not dismissed.
-    // A failed pass holds the greeting open for retry; an IPC error (plain
-    // browser) also lands here — the greeting is the fallback surface.
+    // Show the greeting when any downloadable adapter is missing its files.
+    // This also catches adapters added after the initial download pass.
     const [downloadResults, setDownloadResults] = useState<DownloadRowResult[] | null>(null);
     const [downloading, setDownloading] = useState(false);
+    const missingApps = themesStatus.query.data
+        ? missingDownloadableApps(themesStatus.query.data.adapters)
+        : [];
     const showGreeting = !themesStatus.query.isPending && (
-        downloading || hasDownloadErrors(downloadResults) ||
-        (!themesStatus.query.data?.any_downloaded && !themesStatus.query.data?.dismissed)
+        downloading || hasDownloadErrors(downloadResults) || missingApps.length > 0
     );
 
     const handleDownloadThemes = async () => {
@@ -51,7 +52,7 @@ function Component() {
             let adapters = themesStatus.query.data?.adapters;
             if (!adapters) adapters = (await themesStatus.query.refetch()).data?.adapters;
             if (!adapters) return;
-            await downloadThemes(downloadableApps(adapters), setDownloadResults);
+            await downloadThemes(missingDownloadableApps(adapters), setDownloadResults);
         } finally {
             setDownloading(false);
             themesStatus.query.refetch();
@@ -277,7 +278,7 @@ function Component() {
     if (showGreeting) {
         return (
             <ThemeGreeting
-                adapterCount={Object.keys(themesStatus.query.data?.adapters ?? {}).length}
+                adapterCount={missingApps.length}
                 results={downloadResults}
                 downloading={downloading}
                 onDownload={handleDownloadThemes}

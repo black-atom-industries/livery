@@ -6,6 +6,7 @@ import {
     hasDownloadErrors,
     initialDownloadRows,
     latestFetchedAtEpoch,
+    missingDownloadableApps,
 } from "./theme-downloads.ts";
 
 function status(overrides: Partial<AdapterThemesStatus> = {}): AdapterThemesStatus {
@@ -51,6 +52,18 @@ Deno.test("downloadableApps excludes external adapters", () => {
             lazygit: status({ provisioning: "merged" }),
         }).sort(),
         ["ghostty", "lazygit"],
+    );
+});
+
+Deno.test("missingDownloadableApps includes newly added adapters", () => {
+    assertEquals(
+        missingDownloadableApps({
+            ghostty: status({ downloaded: true }),
+            lazygit: status({ provisioning: "merged" }),
+            herdr: status({ provisioning: "merged" }),
+            nvim: status({ provisioning: "external" }),
+        }).sort(),
+        ["herdr", "lazygit"],
     );
 });
 
