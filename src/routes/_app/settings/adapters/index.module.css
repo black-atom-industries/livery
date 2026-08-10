@@ -1,14 +1,14 @@
 .root {
     display: flex;
     flex-direction: column;
+    gap: var(--ba-size-4);
+    padding: var(--ba-size-6);
 }
 
-/* AUTO-DETECT toolbar above the adapter rows. */
-.detectBar {
+.detectRow {
     display: flex;
     align-items: center;
     gap: var(--ba-size-3);
-    padding: var(--ba-size-3) 20px;
     font-family: var(--ba-font-mono);
 }
 
@@ -22,10 +22,4 @@
     font-size: var(--ba-font-size-0);
     letter-spacing: var(--ba-font-letterspacing-label);
     color: var(--ba-color-fg-negative);
-}
-
-.badges {
-    display: flex;
-    align-items: center;
-    gap: var(--ba-size-2);
 }

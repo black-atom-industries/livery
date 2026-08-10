@@ -17,6 +17,10 @@ import { Route as DevTypographyRouteImport } from './routes/dev/typography.tsx'
 import { Route as DevPrimitivesRouteImport } from './routes/dev/primitives.tsx'
 import { Route as DevComponentsRouteImport } from './routes/dev/components.tsx'
 import { Route as AppSettingsRouteRouteImport } from './routes/_app/settings/route.tsx'
+import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index.tsx'
+import { Route as AppSettingsGeneralRouteImport } from './routes/_app/settings/general.tsx'
+import { Route as AppSettingsAdaptersIndexRouteImport } from './routes/_app/settings/adapters/index.tsx'
+import { Route as AppSettingsAdaptersAdapterRouteImport } from './routes/_app/settings/adapters/$adapter.tsx'
 
 const DevRouteRoute = DevRouteRouteImport.update({
   id: '/dev',
@@ -57,34 +61,67 @@ const AppSettingsRouteRoute = AppSettingsRouteRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSettingsRouteRoute,
+} as any)
+const AppSettingsGeneralRoute = AppSettingsGeneralRouteImport.update({
+  id: '/general',
+  path: '/general',
+  getParentRoute: () => AppSettingsRouteRoute,
+} as any)
+const AppSettingsAdaptersIndexRoute =
+  AppSettingsAdaptersIndexRouteImport.update({
+    id: '/adapters/',
+    path: '/adapters/',
+    getParentRoute: () => AppSettingsRouteRoute,
+  } as any)
+const AppSettingsAdaptersAdapterRoute =
+  AppSettingsAdaptersAdapterRouteImport.update({
+    id: '/adapters/$adapter',
+    path: '/adapters/$adapter',
+    getParentRoute: () => AppSettingsRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/dev': typeof DevRouteRouteWithChildren
-  '/settings': typeof AppSettingsRouteRoute
+  '/settings': typeof AppSettingsRouteRouteWithChildren
   '/dev/components': typeof DevComponentsRoute
   '/dev/primitives': typeof DevPrimitivesRoute
   '/dev/typography': typeof DevTypographyRoute
   '/dev/': typeof DevIndexRoute
+  '/settings/general': typeof AppSettingsGeneralRoute
+  '/settings/': typeof AppSettingsIndexRoute
+  '/settings/adapters/$adapter': typeof AppSettingsAdaptersAdapterRoute
+  '/settings/adapters/': typeof AppSettingsAdaptersIndexRoute
 }
 export interface FileRoutesByTo {
-  '/settings': typeof AppSettingsRouteRoute
   '/dev/components': typeof DevComponentsRoute
   '/dev/primitives': typeof DevPrimitivesRoute
   '/dev/typography': typeof DevTypographyRoute
   '/': typeof AppIndexRoute
   '/dev': typeof DevIndexRoute
+  '/settings/general': typeof AppSettingsGeneralRoute
+  '/settings': typeof AppSettingsIndexRoute
+  '/settings/adapters/$adapter': typeof AppSettingsAdaptersAdapterRoute
+  '/settings/adapters': typeof AppSettingsAdaptersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
   '/dev': typeof DevRouteRouteWithChildren
-  '/_app/settings': typeof AppSettingsRouteRoute
+  '/_app/settings': typeof AppSettingsRouteRouteWithChildren
   '/dev/components': typeof DevComponentsRoute
   '/dev/primitives': typeof DevPrimitivesRoute
   '/dev/typography': typeof DevTypographyRoute
   '/_app/': typeof AppIndexRoute
   '/dev/': typeof DevIndexRoute
+  '/_app/settings/general': typeof AppSettingsGeneralRoute
+  '/_app/settings/': typeof AppSettingsIndexRoute
+  '/_app/settings/adapters/$adapter': typeof AppSettingsAdaptersAdapterRoute
+  '/_app/settings/adapters/': typeof AppSettingsAdaptersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,14 +133,21 @@ export interface FileRouteTypes {
     | '/dev/primitives'
     | '/dev/typography'
     | '/dev/'
+    | '/settings/general'
+    | '/settings/'
+    | '/settings/adapters/$adapter'
+    | '/settings/adapters/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/settings'
     | '/dev/components'
     | '/dev/primitives'
     | '/dev/typography'
     | '/'
     | '/dev'
+    | '/settings/general'
+    | '/settings'
+    | '/settings/adapters/$adapter'
+    | '/settings/adapters'
   id:
     | '__root__'
     | '/_app'
@@ -114,6 +158,10 @@ export interface FileRouteTypes {
     | '/dev/typography'
     | '/_app/'
     | '/dev/'
+    | '/_app/settings/general'
+    | '/_app/settings/'
+    | '/_app/settings/adapters/$adapter'
+    | '/_app/settings/adapters/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -179,16 +227,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/settings/': {
+      id: '/_app/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AppSettingsIndexRouteImport
+      parentRoute: typeof AppSettingsRouteRoute
+    }
+    '/_app/settings/general': {
+      id: '/_app/settings/general'
+      path: '/general'
+      fullPath: '/settings/general'
+      preLoaderRoute: typeof AppSettingsGeneralRouteImport
+      parentRoute: typeof AppSettingsRouteRoute
+    }
+    '/_app/settings/adapters/': {
+      id: '/_app/settings/adapters/'
+      path: '/adapters'
+      fullPath: '/settings/adapters/'
+      preLoaderRoute: typeof AppSettingsAdaptersIndexRouteImport
+      parentRoute: typeof AppSettingsRouteRoute
+    }
+    '/_app/settings/adapters/$adapter': {
+      id: '/_app/settings/adapters/$adapter'
+      path: '/adapters/$adapter'
+      fullPath: '/settings/adapters/$adapter'
+      preLoaderRoute: typeof AppSettingsAdaptersAdapterRouteImport
+      parentRoute: typeof AppSettingsRouteRoute
+    }
   }
 }
 
+interface AppSettingsRouteRouteChildren {
+  AppSettingsGeneralRoute: typeof AppSettingsGeneralRoute
+  AppSettingsIndexRoute: typeof AppSettingsIndexRoute
+  AppSettingsAdaptersAdapterRoute: typeof AppSettingsAdaptersAdapterRoute
+  AppSettingsAdaptersIndexRoute: typeof AppSettingsAdaptersIndexRoute
+}
+
+const AppSettingsRouteRouteChildren: AppSettingsRouteRouteChildren = {
+  AppSettingsGeneralRoute: AppSettingsGeneralRoute,
+  AppSettingsIndexRoute: AppSettingsIndexRoute,
+  AppSettingsAdaptersAdapterRoute: AppSettingsAdaptersAdapterRoute,
+  AppSettingsAdaptersIndexRoute: AppSettingsAdaptersIndexRoute,
+}
+
+const AppSettingsRouteRouteWithChildren =
+  AppSettingsRouteRoute._addFileChildren(AppSettingsRouteRouteChildren)
+
 interface AppRouteRouteChildren {
-  AppSettingsRouteRoute: typeof AppSettingsRouteRoute
+  AppSettingsRouteRoute: typeof AppSettingsRouteRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppSettingsRouteRoute: AppSettingsRouteRoute,
+  AppSettingsRouteRoute: AppSettingsRouteRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 

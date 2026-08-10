@@ -20,7 +20,7 @@
     outline-offset: var(--ba-focus-offset);
 }
 
-.root:disabled {
+.root[aria-disabled="true"] {
     background: var(--ba-color-bg-disabled);
     color: var(--ba-color-fg-disabled);
     border-color: transparent;
@@ -38,8 +38,8 @@
     border: var(--ba-border-strong);
 }
 
-.intentSecondary:not(:disabled):hover,
-.intentGhost:not(:disabled):hover {
+.intentSecondary:not([aria-disabled="true"]):hover,
+.intentGhost:not([aria-disabled="true"]):hover {
     background: var(--ba-color-bg-subtle);
 }
 
@@ -51,6 +51,6 @@
     color: var(--ba-color-fg-positive);
 }
 
-.root:disabled .hotkey {
+.root[aria-disabled="true"] .hotkey {
     color: inherit;
 }

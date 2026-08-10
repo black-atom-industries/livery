@@ -1,26 +1,15 @@
 import { useRef, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatches, useNavigate } from "@tanstack/react-router";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { useStore } from "@tanstack/react-store";
 import { themeMap } from "@black-atom/core";
 import { Typo } from "../../../components/typo/index.ts";
 import { useConfig } from "../../../queries/use-config.ts";
 import { useThemesStatus } from "../../../queries/use-themes-status.ts";
-import {
-    downloadableApps,
-    type DownloadRowResult,
-    downloadThemes,
-    latestFetchedAtEpoch,
-} from "../../../lib/theme-downloads.ts";
 import { pickRandomOtherTheme } from "../../../lib/themes.ts";
 import { App } from "../../../components/layouts/app.ts";
-import { ListRow } from "../../../components/primitives/list-row/list-row.tsx";
-import { AdapterNav } from "../../../components/settings/adapter-nav/index.ts";
-import {
-    type AdapterField,
-    adapterSettingsPages,
-} from "../../../components/settings/adapter-pages/index.ts";
-import { GeneralPanel } from "../../../components/settings/general-panel/index.ts";
+import { SettingsSidebar } from "../../../components/settings/settings-sidebar/index.ts";
+import type { AdapterField } from "../../../components/settings/adapter-pages/index.ts";
 import type {
     LinkThemesRowResult,
     TestApplyResult,
@@ -37,47 +26,34 @@ import type {
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { setUpAdapter, type SetUpOutcome } from "../../../lib/adapter-setup.ts";
 import { appStore } from "../../../store/app.ts";
-import denoConfig from "../../../../deno.json" with { type: "json" };
+import { SettingsContext, type SettingsContextValue } from "./-settings-context.ts";
 import styles from "./route.module.css";
-
-export type SettingsSection = "adapters" | "general";
-
-const APP_NAMES: readonly AppName[] = [
-    "nvim",
-    "ghostty",
-    "helm",
-    "delta",
-    "tmux",
-    "zed",
-    "lazygit",
-    "obsidian",
-];
-
-function isAppName(value: unknown): value is AppName {
-    return typeof value === "string" && (APP_NAMES as readonly string[]).includes(value);
-}
 
 /** How long a TEST APPLY probe theme stays applied before reverting. */
 const TEST_APPLY_REVERT_DELAY_MS = 3000;
 
 export const Route = createFileRoute("/_app/settings")({
-    validateSearch: (
-        search: Record<string, unknown>,
-    ): { section: SettingsSection; adapter?: AppName } => ({
-        section: search.section === "general" ? "general" : "adapters",
-        adapter: isAppName(search.adapter) ? search.adapter : undefined,
-    }),
     component: SettingsRoute,
 });
 
 function SettingsRoute() {
     const config = useConfig();
     const navigate = useNavigate();
-    const { section, adapter } = Route.useSearch();
+    const matches = useMatches();
+    const onGeneral = matches.some((m) => m.routeId === "/_app/settings/general");
+    const onAdaptersSection = matches.some((m) => m.routeId.startsWith("/_app/settings/adapters"));
+    const selectedAdapterMatch = matches.find(
+        (m) => m.routeId === "/_app/settings/adapters/$adapter",
+    )?.params as { adapter?: AppName } | undefined;
+    const selectedApp = selectedAdapterMatch?.adapter;
+
+    // Two keyboard levels, derived from the route (not separate state, so
+    // clicking a sidebar row and using j/k never desync): "root" cycles
+    // GENERAL/ADAPTERS; "detail" cycles adapters once a specific one is
+    // selected.
+    const navLevel: "root" | "detail" = selectedApp ? "detail" : "root";
 
     const firstFieldRef = useRef<HTMLInputElement>(null);
-    const selectedRowRef = useRef<HTMLDivElement>(null);
-    const detailPaneRef = useRef<HTMLDivElement>(null);
     // Session-local TEST APPLY results — never persisted, starts empty.
     const [testApplyResults, setTestApplyResults] = useState<
         Partial<Record<AppName, TestApplyResult>>
@@ -86,10 +62,7 @@ function SettingsRoute() {
     const [verifyPathResults, setVerifyPathResults] = useState<
         Partial<Record<AppName, VerifyPathResult>>
     >({});
-    // Session-local SYNC THEMES results — same runner as the first-run greeting.
     const themesStatus = useThemesStatus();
-    const [syncResults, setSyncResults] = useState<DownloadRowResult[] | null>(null);
-    const [syncing, setSyncing] = useState(false);
     // Session-local LINK THEMES results per adapter.
     const [linkThemesResults, setLinkThemesResults] = useState<
         Partial<Record<AppName, LinkThemesRowResult>>
@@ -201,44 +174,8 @@ function SettingsRoute() {
         }
     }
 
-    async function syncThemes() {
-        if (syncing) return;
-        setSyncing(true);
-        try {
-            let adapters = themesStatus.query.data?.adapters;
-            if (!adapters) adapters = (await themesStatus.query.refetch()).data?.adapters;
-            if (!adapters) return;
-            await downloadThemes(downloadableApps(adapters), setSyncResults);
-        } finally {
-            setSyncing(false);
-            themesStatus.query.refetch();
-        }
-    }
-
     const data = config.query.data;
     const appEntries = (data ? Object.entries(data.apps) : []) as [AppName, AppConfig][];
-
-    // `?adapter` is the single source of truth for selection — no separate
-    // cursor state to desync from it. Missing/invalid resolves to the first
-    // configured adapter so the detail pane never renders empty.
-    const selectedApp = section === "adapters"
-        ? (adapter && appEntries.some(([name]) => name === adapter) ? adapter : appEntries[0]?.[0])
-        : undefined;
-    const cursorIndex = selectedApp
-        ? Math.max(0, appEntries.findIndex(([name]) => name === selectedApp))
-        : 0;
-
-    function setSection(next: SettingsSection) {
-        navigate({ to: "/settings", search: { section: next } });
-    }
-
-    function selectAdapter(appName: AppName) {
-        navigate({
-            to: "/settings",
-            search: { section: "adapters", adapter: appName },
-            replace: true,
-        });
-    }
 
     function toggleAppEnabled(appName: AppName) {
         if (!data) return;
@@ -344,47 +281,82 @@ function SettingsRoute() {
         }
     }
 
-    function toggleSystemAppearance() {
-        if (!data) return;
-        const next: Config = { ...data, system_appearance: !data.system_appearance };
-        config.save.mutate(next);
-    }
-
-    function moveSelection(delta: number) {
-        if (section !== "adapters") return;
-        const nextIndex = Math.min(Math.max(0, appEntries.length - 1), cursorIndex + delta);
-        const entry = appEntries[nextIndex];
-        if (entry) selectAdapter(entry[0]);
-    }
-
-    function toggleSelected() {
-        if (section === "adapters") {
-            if (selectedApp) toggleAppEnabled(selectedApp);
-        } else {
-            toggleSystemAppearance();
+    /** Root level: j/k cycles GENERAL ↔ ADAPTERS (THEMES sits outside the
+        cycle — it's the back/exit affordance, not a settings section). */
+    function moveRootCursor(delta: number) {
+        if (onGeneral && delta > 0) {
+            navigate({ to: "/settings/adapters" });
+        } else if (onAdaptersSection && delta < 0) {
+            navigate({ to: "/settings/general" });
         }
     }
 
-    function focusFirstField() {
-        if (section !== "adapters" || !selectedApp) return;
-        firstFieldRef.current?.focus();
+    /** Detail level: j/k cycles adapters, swapping the detail pane live. */
+    function moveAdapterSelection(delta: number) {
+        if (appEntries.length === 0) return;
+        const currentIndex = selectedApp
+            ? Math.max(0, appEntries.findIndex(([name]) => name === selectedApp))
+            : delta > 0
+            ? -1
+            : appEntries.length;
+        const nextIndex = Math.min(Math.max(0, appEntries.length - 1), currentIndex + delta);
+        const entry = appEntries[nextIndex];
+        if (entry) {
+            navigate({
+                to: "/settings/adapters/$adapter",
+                params: { adapter: entry[0] },
+                replace: true,
+            });
+        }
+    }
+
+    function moveSelection(delta: number) {
+        if (navLevel === "root") moveRootCursor(delta);
+        else moveAdapterSelection(delta);
+    }
+
+    function toggleSelected() {
+        if (navLevel === "detail" && selectedApp) toggleAppEnabled(selectedApp);
+    }
+
+    /** Enter: on ADAPTERS at root, drill into the first adapter; on
+        GENERAL, nothing to drill into. At detail, focus the first editable
+        field (already inside an adapter page). */
+    function handleEnter() {
+        if (navLevel === "detail") {
+            firstFieldRef.current?.focus();
+            return;
+        }
+        if (onAdaptersSection && appEntries.length > 0) {
+            navigate({
+                to: "/settings/adapters/$adapter",
+                params: { adapter: appEntries[0][0] },
+            });
+        }
     }
 
     /**
-     * Global fallback — only reached when focus isn't inside the detail
-     * pane (the pane's own capture-phase handler intercepts Escape first
-     * and returns focus to the sidebar instead of navigating).
+     * Escape: a dirty field reverts and stops propagation before this ever
+     * runs (DraftField's own handler — `getDefaultIgnoreInputs` in
+     * @tanstack/hotkeys special-cases Escape so it still reaches this
+     * document-level hotkey from a focused input). From a clean field or
+     * adapter detail, Escape ascends to root, landing on ADAPTERS — the
+     * route-derived `selected` styling shows that, no DOM focus needed.
+     * From root, Escape exits to THEMES.
      */
     function handleEscape() {
-        if (detailPaneRef.current?.contains(document.activeElement)) return;
+        if (navLevel === "detail") {
+            navigate({ to: "/settings/adapters" });
+            return;
+        }
         navigate({ to: "/" });
     }
 
     useHotkey("J", () => moveSelection(1));
     useHotkey("K", () => moveSelection(-1));
     useHotkey("Space", toggleSelected);
-    useHotkey("Enter", focusFirstField);
-    useHotkey("E", focusFirstField);
+    useHotkey("Enter", handleEnter);
+    useHotkey("E", handleEnter);
     useHotkey("Escape", handleEscape);
 
     if (config.query.isPending) {
@@ -405,92 +377,41 @@ function SettingsRoute() {
         );
     }
 
-    const selectedConfig = selectedApp ? data.apps[selectedApp] : undefined;
-    const AdapterSettings = selectedApp ? adapterSettingsPages[selectedApp] : undefined;
+    const contextValue: SettingsContextValue = {
+        detecting,
+        detections,
+        detectError,
+        onAutoDetect: autoDetectApps,
+        linkableApps,
+        provisioningByApp,
+        verifyPathResults,
+        onVerifyPath: verifyAdapterPath,
+        linkThemesResults,
+        onLinkThemes: linkAppThemes,
+        setUpResults,
+        onSetUp: setUpAdapterRow,
+        testApplyResults,
+        onTestApply: testApplyAdapter,
+        onToggleEnabled: toggleAppEnabled,
+        onFieldCommit: commitAdapterField,
+        onOpenUrl: (url) => {
+            openUrl(url).catch((error) => console.error(error));
+        },
+        firstFieldRef,
+    };
 
     return (
-        <App.SplitPanel
-            left={
-                <>
-                    <ListRow name="THEMES" onClick={() => navigate({ to: "/" })} />
-                    <ListRow
-                        name="ADAPTERS"
-                        selected={section === "adapters"}
-                        onClick={() => setSection("adapters")}
+        <SettingsContext.Provider value={contextValue}>
+            <App.SplitPanel
+                left={
+                    <SettingsSidebar
+                        appEntries={appEntries}
+                        detectedApps={detectedApps}
+                        verifyPathResults={verifyPathResults}
                     />
-                    {section === "adapters" && (
-                        <AdapterNav
-                            apps={appEntries}
-                            selectedApp={selectedApp}
-                            onSelect={selectAdapter}
-                            detectedApps={detectedApps}
-                            detecting={detecting}
-                            onAutoDetect={autoDetectApps}
-                            detectError={detectError}
-                            verifyPathResults={verifyPathResults}
-                            selectedRowRef={selectedRowRef}
-                        />
-                    )}
-                    <ListRow
-                        name="GENERAL"
-                        selected={section === "general"}
-                        onClick={() => setSection("general")}
-                    />
-                </>
-            }
-            right={section === "adapters"
-                ? (selectedApp && selectedConfig && AdapterSettings
-                    ? (
-                        <div
-                            ref={detailPaneRef}
-                            onKeyDownCapture={(event) => {
-                                // Escape on a clean/blurred field: return
-                                // focus to the sidebar instead of letting
-                                // the global Escape hotkey navigate back.
-                                // A dirty field's own handler reverts and
-                                // stops propagation before this ever runs.
-                                if (event.key !== "Escape") return;
-                                event.stopPropagation();
-                                selectedRowRef.current?.focus();
-                            }}
-                        >
-                            <AdapterSettings
-                                appConfig={selectedConfig}
-                                detected={detectedApps?.has(selectedApp) ?? false}
-                                onToggleEnabled={() => toggleAppEnabled(selectedApp)}
-                                onFieldCommit={(field, value) =>
-                                    commitAdapterField(selectedApp, field, value)}
-                                firstFieldRef={firstFieldRef}
-                                onOpenUrl={(url) => {
-                                    openUrl(url).catch((error) => console.error(error));
-                                }}
-                                onSetUp={() => setUpAdapterRow(selectedApp)}
-                                setUpResult={setUpResults[selectedApp]}
-                                onVerifyPath={() => verifyAdapterPath(selectedApp)}
-                                verifyPathResult={verifyPathResults[selectedApp]}
-                                linkable={linkableApps.has(selectedApp)}
-                                onLinkThemes={() => linkAppThemes(selectedApp)}
-                                linkThemesResult={linkThemesResults[selectedApp]}
-                                onTestApply={() => testApplyAdapter(selectedApp)}
-                                testApplyResult={testApplyResults[selectedApp]}
-                            />
-                        </div>
-                    )
-                    : null)
-                : (
-                    <GeneralPanel
-                        followOsAppearance={data.system_appearance}
-                        onToggleFollowOsAppearance={toggleSystemAppearance}
-                        liveryVersion={denoConfig.version}
-                        themesLastSyncedEpoch={latestFetchedAtEpoch(
-                            themesStatus.query.data?.adapters ?? {},
-                        )}
-                        syncResults={syncResults}
-                        syncing={syncing}
-                        onSyncThemes={syncThemes}
-                        cursored
-                    />
-                )}
-        />
+                }
+                right={<Outlet />}
+            />
+        </SettingsContext.Provider>
     );
 }

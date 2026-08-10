@@ -213,9 +213,9 @@ function Component() {
         if (railOpen) return;
         if (filterCursor !== null) filterChips[filterCursor]?.toggle();
     });
-    useHotkey("S", () => navigate({ to: "/settings", search: { section: "adapters" } }));
+    useHotkey("S", () => navigate({ to: "/settings/adapters" }));
     // Muscle-memory alias: ⌘,/Ctrl+, — the OS-native settings chord.
-    useHotkey("Mod+,", () => navigate({ to: "/settings", search: { section: "adapters" } }));
+    useHotkey("Mod+,", () => navigate({ to: "/settings/adapters" }));
     useHotkey("Q", () => {
         // Only meaningful inside the Tauri shell; a plain browser has no window handle.
         getCurrentWindow().close().catch(() => {});
@@ -297,8 +297,7 @@ function Component() {
                 eyebrow={`${allThemes.length} THEMES INDEXED · 0 APPLIED`}
                 headline="PICK A LIVERY, PAINT THE COCKPIT"
                 body="Select any theme with j/k and press ⏎ — Livery repaints every enabled tool in one pass. Nothing is written until you apply. No adapters are enabled yet — check settings."
-                onOpenSettings={() =>
-                    navigate({ to: "/settings", search: { section: "adapters" } })}
+                onOpenSettings={() => navigate({ to: "/settings/adapters" })}
             />
         );
     }

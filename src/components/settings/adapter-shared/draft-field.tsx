@@ -7,7 +7,7 @@ type Props = {
     optional?: boolean;
     note?: string;
     onCommit: (value: string) => void;
-    inputRef?: React.Ref<HTMLInputElement>;
+    inputRef?: React.RefObject<HTMLInputElement>;
 };
 
 /**

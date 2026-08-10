@@ -33,7 +33,7 @@ type Props = VariantProps<typeof textInputVariants> & {
     onBlur?: (value: string) => void;
     /** Native key handler — e.g. commit-on-Enter or blur-on-Escape for draft fields. */
     onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-    inputRef?: React.Ref<HTMLInputElement>;
+    inputRef?: React.RefObject<HTMLInputElement>;
     className?: string;
 };
 

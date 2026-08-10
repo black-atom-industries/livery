@@ -15,7 +15,7 @@ import { StatusPip } from "../../components/primitives/status-pip/status-pip.tsx
 import { ThemeList } from "../../components/theme-list/index.ts";
 import { ThemeDetail } from "../../components/theme-detail/index.ts";
 import { AdapterStatusRow } from "../../components/primitives/adapter-status-row/adapter-status-row.tsx";
-import { AdapterNav } from "../../components/settings/adapter-nav/index.ts";
+import { ListRow } from "../../components/primitives/list-row/list-row.tsx";
 import { adapterSettingsPages } from "../../components/settings/adapter-pages/index.ts";
 import type {
     TestApplyResult,
@@ -283,16 +283,17 @@ function Page() {
                 }}
             >
                 <div style={{ width: 220, borderRight: "1px solid var(--ba-color-fg-hint)" }}>
-                    <AdapterNav
-                        apps={Object.entries(settingsFixture.apps) as [AppName, AppConfig][]}
-                        selectedApp={settingsSelectedApp}
-                        onSelect={setSettingsSelectedApp}
-                        detectedApps={new Set<AppName>(["ghostty", "tmux"])}
-                        detecting={false}
-                        onAutoDetect={() => {}}
-                        detectError={null}
-                        verifyPathResults={settingsVerifyPathResults}
-                    />
+                    {(Object.entries(settingsFixture.apps) as [AppName, AppConfig][]).map((
+                        [appName],
+                    ) => (
+                        <ListRow
+                            key={appName}
+                            name={appName}
+                            indented
+                            selected={settingsSelectedApp === appName}
+                            onClick={() => setSettingsSelectedApp(appName)}
+                        />
+                    ))}
                 </div>
                 <div style={{ flex: 1, padding: "24px 28px" }}>
                     {(() => {
