@@ -55,7 +55,9 @@ config file exist?), and **SET UP** runs the class-appropriate chain — enable 
 
 ### obsidian — Linked
 
-- **Files:** `theme.css` + `manifest.json` symlinked into `<vault>/.obsidian/themes/Black Atom/` —
+- **Files:** the managed dir carries the per-theme CSS under
+  `<managed>/obsidian/<collection>/black-atom-*.css` alongside the merged `theme.css` +
+  `manifest.json` pair. Only that pair is symlinked into `<vault>/.obsidian/themes/Black Atom/` —
   Obsidian discovers themes as per-name subdirectories of the vault's themes dir. Black Atom ships
   as ONE theme; collections/variants switch via the Style Settings plugin values.
 - **Switch pointer:** `cssTheme` in `appearance.json` + the variant key in the Style Settings plugin

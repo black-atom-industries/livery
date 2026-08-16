@@ -29,10 +29,11 @@ pub fn provisioning(app: AppName) -> ThemeProvisioning {
 /// How an adapter repo lays out its committed theme output.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ExtractLayout {
-    /// `themes/<collection>/black-atom-*.<ext>` (ghostty, tmux, lazygit, zed).
+    /// `themes/<collection>/black-atom-*.<ext>` — the common adapter layout
+    /// (ghostty, tmux, lazygit, zed, herdr).
     Collections,
-    /// Flat `themes/black-atom-*.css` plus the merged root `theme.css` +
-    /// `manifest.json` pair Obsidian installs into a vault.
+    /// The common layout plus the merged root `theme.css` + `manifest.json`
+    /// pair Obsidian installs into a vault.
     ObsidianMerged,
 }
 

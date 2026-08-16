@@ -297,6 +297,31 @@ mod tests {
     }
 
     #[test]
+    fn test_vault_links_only_the_pair_never_collection_themes() {
+        let s = vault_setup();
+        std::fs::create_dir_all(s.managed.join("default")).unwrap();
+        std::fs::write(
+            s.managed
+                .join("default")
+                .join("black-atom-default-dark.css"),
+            "generated",
+        )
+        .unwrap();
+
+        let stats = sync_vault_theme_links(&s.managed, &s.app_dir).unwrap();
+
+        assert_eq!(stats.linked, 2);
+        let theme_dir = s.app_dir.join(OBSIDIAN_THEME_DIR);
+        let mut names: Vec<String> = std::fs::read_dir(&theme_dir)
+            .unwrap()
+            .flatten()
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .collect();
+        names.sort();
+        assert_eq!(names, vec!["manifest.json", "theme.css"]);
+    }
+
+    #[test]
     fn test_vault_missing_managed_pair_is_an_error() {
         let s = setup(".css"); // no theme.css/manifest.json written
         let err = sync_vault_theme_links(&s.managed, &s.app_dir).unwrap_err();

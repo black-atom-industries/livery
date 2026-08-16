@@ -107,18 +107,25 @@ fn theme_relative_path(entry_path: &Path, layout: ExtractLayout) -> Option<PathB
         .collect::<Option<Vec<_>>>()?;
 
     match layout {
-        ExtractLayout::Collections => match repo_relative.as_slice() {
-            ["themes", collection, file] if file.starts_with("black-atom-") => {
-                Some(PathBuf::from(collection).join(file))
-            }
-            _ => None,
-        },
-        ExtractLayout::ObsidianMerged => match repo_relative.as_slice() {
-            ["themes", file] if file.starts_with("black-atom-") => Some(PathBuf::from(file)),
-            // The vault-installable pair at the repo root.
-            ["theme.css"] | ["manifest.json"] => Some(PathBuf::from(repo_relative[0])),
-            _ => None,
-        },
+        ExtractLayout::Collections => collection_theme_file(&repo_relative),
+        ExtractLayout::ObsidianMerged => {
+            collection_theme_file(&repo_relative).or_else(|| match repo_relative.as_slice() {
+                // The vault-installable pair at the repo root — obsidian only.
+                ["theme.css"] | ["manifest.json"] => Some(PathBuf::from(repo_relative[0])),
+                _ => None,
+            })
+        }
+    }
+}
+
+/// The common adapter layout: `themes/<collection>/black-atom-*.<ext>` maps to
+/// `<collection>/<file>` inside the adapter dir.
+fn collection_theme_file(repo_relative: &[&str]) -> Option<PathBuf> {
+    match repo_relative {
+        ["themes", collection, file] if file.starts_with("black-atom-") => {
+            Some(PathBuf::from(collection).join(file))
+        }
+        _ => None,
     }
 }
 
@@ -189,6 +196,22 @@ pub(super) fn ensure_under_home(path: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// In-memory adapter-repo tarball, same shape as a codeload archive.
+    fn gz_tarball(entries: &[(&str, &str)]) -> Vec<u8> {
+        let encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::default());
+        let mut builder = tar::Builder::new(encoder);
+        for (path, content) in entries {
+            let mut header = tar::Header::new_gnu();
+            header.set_size(content.len() as u64);
+            header.set_mode(0o644);
+            header.set_cksum();
+            builder
+                .append_data(&mut header, path, content.as_bytes())
+                .unwrap();
+        }
+        builder.into_inner().unwrap().finish().unwrap()
+    }
 
     fn fixture_bytes(name: &str) -> Vec<u8> {
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -308,11 +331,11 @@ mod tests {
     }
 
     #[test]
-    fn test_obsidian_layout_takes_flat_themes_and_vault_pair() {
+    fn test_obsidian_layout_takes_collection_themes_and_vault_pair() {
         let take = |p: &str| theme_relative_path(Path::new(p), ExtractLayout::ObsidianMerged);
         assert_eq!(
-            take("obsidian-main/themes/black-atom-jpn-koyo-hiru.css"),
-            Some(PathBuf::from("black-atom-jpn-koyo-hiru.css"))
+            take("obsidian-main/themes/jpn/black-atom-jpn-koyo-hiru.css"),
+            Some(PathBuf::from("jpn").join("black-atom-jpn-koyo-hiru.css"))
         );
         assert_eq!(
             take("obsidian-main/theme.css"),
@@ -322,8 +345,86 @@ mod tests {
             take("obsidian-main/manifest.json"),
             Some(PathBuf::from("manifest.json"))
         );
+        // Themes live below their collection — a bare themes/ entry is not one.
+        assert_eq!(
+            take("obsidian-main/themes/black-atom-jpn-koyo-hiru.css"),
+            None
+        );
+        assert_eq!(
+            take("obsidian-main/themes/jpn/collection.template.css"),
+            None
+        );
         assert_eq!(take("obsidian-main/styles/source.css"), None);
         assert_eq!(take("obsidian-main/README.md"), None);
+    }
+
+    #[test]
+    fn test_obsidian_extraction_nests_themes_beside_the_vault_pair() {
+        let root = temp_root();
+        let bytes = gz_tarball(&[
+            (
+                "obsidian-HEAD/themes/jpn/black-atom-jpn-koyo-hiru.css",
+                "body{}",
+            ),
+            (
+                "obsidian-HEAD/themes/default/black-atom-default-dark.css",
+                "body{}",
+            ),
+            ("obsidian-HEAD/themes/collection.template.css", "{{ }}"),
+            ("obsidian-HEAD/theme.css", "body{}"),
+            ("obsidian-HEAD/manifest.json", "{\"name\":\"Black Atom\"}"),
+        ]);
+
+        let count = extract_tarball(
+            &bytes,
+            ExtractLayout::ObsidianMerged,
+            root.path(),
+            "obsidian",
+        )
+        .unwrap();
+
+        assert_eq!(count, 4);
+        assert_eq!(
+            managed_dir_listing(&root.path().join("obsidian")),
+            vec![
+                "default/black-atom-default-dark.css",
+                "jpn/black-atom-jpn-koyo-hiru.css",
+                "manifest.json",
+                "theme.css",
+            ]
+        );
+    }
+
+    #[test]
+    fn test_herdr_uses_the_common_collection_layout() {
+        let root = temp_root();
+        let bytes = gz_tarball(&[
+            (
+                "herdr-HEAD/themes/terra/black-atom-terra-summer-day.toml",
+                "[theme]\n",
+            ),
+            (
+                "herdr-HEAD/themes/terra/collection.template.toml",
+                "{{ }}\n",
+            ),
+            ("herdr-HEAD/README.md", "# herdr\n"),
+        ]);
+
+        let count = extract_tarball(
+            &bytes,
+            super::super::registry::distribution(crate::config::types::AppName::Herdr)
+                .unwrap()
+                .layout,
+            root.path(),
+            "herdr",
+        )
+        .unwrap();
+
+        assert_eq!(count, 1);
+        assert_eq!(
+            managed_dir_listing(&root.path().join("herdr")),
+            vec!["terra/black-atom-terra-summer-day.toml"]
+        );
     }
 
     #[test]

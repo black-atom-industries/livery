@@ -81,7 +81,7 @@ fn fixture_tarballs() -> HashMap<&'static str, Vec<u8>> {
         "obsidian",
         gz_tarball(&[
             (
-                "obsidian-HEAD/themes/black-atom-jpn-koyo-hiru.css",
+                "obsidian-HEAD/themes/jpn/black-atom-jpn-koyo-hiru.css",
                 "body{}",
             ),
             ("obsidian-HEAD/theme.css", "body{}"),
@@ -247,7 +247,13 @@ fn setup_chain_end_to_end() {
             app.as_str(),
             result.message
         );
-        assert!(result.file_count.unwrap_or(0) > 0);
+        if *app == AppName::Obsidian {
+            // Exact: the nested collection theme plus the vault-installable
+            // root pair. A dropped nested theme would still leave the pair.
+            assert_eq!(result.file_count, Some(3), "obsidian extraction count");
+        } else {
+            assert!(result.file_count.unwrap_or(0) > 0);
+        }
     }
     // External adapters have nothing to fetch — a skip, not a failure.
     let nvim_download = tauri::async_runtime::block_on(themes::download_theme(AppName::Nvim));
