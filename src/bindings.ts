@@ -131,7 +131,7 @@ config_path: string; found: boolean }
 /**
  * Supported app names. TypeScript bindings are auto-generated via tauri-specta.
  */
-export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta" | "lazygit" | "herdr" | "obsidian" | "helm"
+export type AppName = "nvim" | "tmux" | "ghostty" | "zed" | "delta" | "lazygit" | "herdr" | "obsidian" | "helm-tmux"
 /**
  * Result of `verify_app_path` — backs the settings screen's [ VERIFY PATH ].
  */

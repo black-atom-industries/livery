@@ -93,10 +93,10 @@ impl Default for Config {
             },
         );
         apps.insert(
-            AppName::Helm,
+            AppName::HelmTmux,
             AppConfig {
                 enabled: false,
-                config_path: "~/.config/black-atom/helm/config.yml".to_string(),
+                config_path: "~/.config/black-atom/helm-tmux/config.yml".to_string(),
                 themes_path: None,
                 match_pattern: Some(r"^theme:\s*\S*$".to_string()),
                 replace_template: Some("theme: {themeKey}".to_string()),

@@ -14,7 +14,8 @@ pub enum AppName {
     Lazygit,
     Herdr,
     Obsidian,
-    Helm,
+    #[serde(rename = "helm-tmux")]
+    HelmTmux,
 }
 
 impl AppName {
@@ -29,7 +30,7 @@ impl AppName {
             AppName::Lazygit,
             AppName::Herdr,
             AppName::Obsidian,
-            AppName::Helm,
+            AppName::HelmTmux,
         ]
     }
 
@@ -43,7 +44,7 @@ impl AppName {
             AppName::Lazygit => "lazygit",
             AppName::Herdr => "herdr",
             AppName::Obsidian => "obsidian",
-            AppName::Helm => "helm",
+            AppName::HelmTmux => "helm-tmux",
         }
     }
 }
@@ -84,4 +85,21 @@ pub struct Config {
     #[serde(default)]
     pub keymappings: Keymappings,
     pub apps: HashMap<AppName, AppConfig>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn helm_tmux_serializes_with_its_config_key() {
+        assert_eq!(
+            serde_json::to_string(&AppName::HelmTmux).unwrap(),
+            "\"helm-tmux\""
+        );
+        assert_eq!(
+            serde_json::from_str::<AppName>("\"helm-tmux\"").unwrap(),
+            AppName::HelmTmux
+        );
+    }
 }

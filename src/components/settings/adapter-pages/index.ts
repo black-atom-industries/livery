@@ -18,7 +18,7 @@ export type { AdapterField, AdapterPageProps } from "./types.ts";
 export const adapterSettingsPages: Record<AppName, (props: AdapterPageProps) => ReactElement> = {
     nvim: NvimSettings,
     ghostty: GhosttySettings,
-    helm: HelmSettings,
+    "helm-tmux": HelmSettings,
     delta: DeltaSettings,
     tmux: TmuxSettings,
     zed: ZedSettings,

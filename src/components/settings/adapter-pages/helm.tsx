@@ -32,7 +32,7 @@ export function HelmSettings(
     return (
         <div className={styles.root}>
             <AdapterHeader
-                appName="helm"
+                appName="helm-tmux"
                 appConfig={appConfig}
                 detected={detected}
                 onToggleEnabled={onToggleEnabled}

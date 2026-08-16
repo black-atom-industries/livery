@@ -18,7 +18,7 @@ pub enum ThemeProvisioning {
 
 pub fn provisioning(app: AppName) -> ThemeProvisioning {
     match app {
-        AppName::Nvim | AppName::Helm | AppName::Delta => ThemeProvisioning::External,
+        AppName::Nvim | AppName::HelmTmux | AppName::Delta => ThemeProvisioning::External,
         AppName::Ghostty | AppName::Zed | AppName::Tmux | AppName::Obsidian => {
             ThemeProvisioning::Linked
         }
@@ -74,7 +74,7 @@ pub fn distribution(app: AppName) -> Option<AdapterDistribution> {
             repo: "herdr",
             layout: ExtractLayout::Collections,
         }),
-        AppName::Nvim | AppName::Delta | AppName::Helm => None,
+        AppName::Nvim | AppName::Delta | AppName::HelmTmux => None,
     }
 }
 
@@ -97,7 +97,9 @@ pub fn linked_placement(app: AppName) -> Option<LinkedPlacement> {
         AppName::Ghostty | AppName::Tmux => Some(LinkedPlacement::FlatByExtension(".conf")),
         AppName::Zed => Some(LinkedPlacement::FlatByExtension(".json")),
         AppName::Obsidian => Some(LinkedPlacement::VaultThemeDir),
-        AppName::Nvim | AppName::Helm | AppName::Delta | AppName::Lazygit | AppName::Herdr => None,
+        AppName::Nvim | AppName::HelmTmux | AppName::Delta | AppName::Lazygit | AppName::Herdr => {
+            None
+        }
     }
 }
 
@@ -124,7 +126,7 @@ pub enum AdapterEditableField {
 pub fn editable_fields(app: AppName) -> Vec<AdapterEditableField> {
     use AdapterEditableField::*;
     match app {
-        AppName::Nvim | AppName::Ghostty | AppName::Helm | AppName::Delta => {
+        AppName::Nvim | AppName::Ghostty | AppName::HelmTmux | AppName::Delta => {
             vec![ConfigPath, MatchPattern, ReplaceTemplate]
         }
         AppName::Tmux => vec![ConfigPath, ThemesPath, MatchPattern, ReplaceTemplate],
@@ -152,7 +154,7 @@ mod tests {
             vec![ConfigPath, MatchPattern, ReplaceTemplate]
         );
         assert_eq!(
-            editable_fields(AppName::Helm),
+            editable_fields(AppName::HelmTmux),
             vec![ConfigPath, MatchPattern, ReplaceTemplate]
         );
         assert_eq!(

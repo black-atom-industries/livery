@@ -17,7 +17,7 @@
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
 | **Config**           | The user's livery configuration file (`~/.config/black-atom/livery/config.json`) containing a SystemAppearance toggle and per-app settings | Settings, preferences        |
 | **AppConfig**        | The per-app configuration block — enabled flag, config_path, themes_path, match_pattern, and replace_template                              | App settings, app entry      |
-| **AppName**          | An enum of supported applications that livery can update (nvim, tmux, ghostty, zed, delta, lazygit, obsidian, helm)                        | App, tool, target            |
+| **AppName**          | An enum of supported applications that livery can update (nvim, tmux, ghostty, zed, delta, lazygit, obsidian, helm-tmux)                   | App, tool, target            |
 | **ConfigPath**       | The filesystem path to an app's configuration file that livery will patch                                                                  | Target file, output path     |
 | **ThemesPath**       | An optional directory path where an app stores its theme files — used as a template variable, not expanded by Rust                         | Theme directory              |
 | **MatchPattern**     | A regex pattern that locates the theme-setting line in an app's config file                                                                | Search pattern, find pattern |

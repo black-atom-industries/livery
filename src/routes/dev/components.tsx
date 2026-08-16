@@ -46,14 +46,14 @@ const SETTINGS_ADAPTERS_FIXTURE: Config = {
             config_path: "~/.config/herdr/config.toml",
             themes_path: "~/.config/black-atom/themes/herdr",
         },
-        helm: { enabled: true, config_path: "~/.config/helm/config.json" },
+        "helm-tmux": { enabled: true, config_path: "~/.config/black-atom/helm-tmux/config.yml" },
     },
 };
 
 const SETTINGS_EDITABLE_FIELDS: Record<AppName, AdapterEditableField[]> = {
     nvim: ["config_path", "match_pattern", "replace_template"],
     ghostty: ["config_path", "match_pattern", "replace_template"],
-    helm: ["config_path", "match_pattern", "replace_template"],
+    "helm-tmux": ["config_path", "match_pattern", "replace_template"],
     delta: ["config_path", "match_pattern", "replace_template"],
     tmux: ["config_path", "themes_path", "match_pattern", "replace_template"],
     zed: ["config_path"],
@@ -70,7 +70,7 @@ const APPLY_RAIL_FIXTURES: Record<string, UpdateResult[]> = {
         { app: "delta", status: "pending", duration_ms: null },
         { app: "lazygit", status: "pending", duration_ms: null },
         { app: "obsidian", status: "pending", duration_ms: null },
-        { app: "helm", status: "pending", duration_ms: null },
+        { app: "helm-tmux", status: "pending", duration_ms: null },
     ],
     degraded: [
         { app: "nvim", status: "done", duration_ms: 12 },
@@ -84,7 +84,7 @@ const APPLY_RAIL_FIXTURES: Record<string, UpdateResult[]> = {
         { app: "delta", status: "done", duration_ms: 60 },
         { app: "lazygit", status: "done", duration_ms: 92 },
         { app: "obsidian", status: "done", duration_ms: 110 },
-        { app: "helm", status: "done", duration_ms: 115 },
+        { app: "helm-tmux", status: "done", duration_ms: 115 },
     ],
     running: [
         { app: "nvim", status: "done", duration_ms: 12 },
@@ -93,7 +93,7 @@ const APPLY_RAIL_FIXTURES: Record<string, UpdateResult[]> = {
         { app: "delta", status: "running", duration_ms: null },
         { app: "lazygit", status: "pending", duration_ms: null },
         { app: "obsidian", status: "pending", duration_ms: null },
-        { app: "helm", status: "pending", duration_ms: null },
+        { app: "helm-tmux", status: "pending", duration_ms: null },
     ],
     success: [
         { app: "nvim", status: "done", duration_ms: 12 },
@@ -102,7 +102,7 @@ const APPLY_RAIL_FIXTURES: Record<string, UpdateResult[]> = {
         { app: "delta", status: "done", duration_ms: 60 },
         { app: "lazygit", status: "done", duration_ms: 92 },
         { app: "obsidian", status: "done", duration_ms: 110 },
-        { app: "helm", status: "done", duration_ms: 115 },
+        { app: "helm-tmux", status: "done", duration_ms: 115 },
     ],
     partialFailure: [
         { app: "nvim", status: "done", duration_ms: 12 },
@@ -117,7 +117,7 @@ const APPLY_RAIL_FIXTURES: Record<string, UpdateResult[]> = {
                 "config not found at ~/.config/obsidian/themes/black-atom.css — check THEMES_PATH in settings",
             duration_ms: 3,
         },
-        { app: "helm", status: "done", duration_ms: 115 },
+        { app: "helm-tmux", status: "done", duration_ms: 115 },
     ],
 };
 

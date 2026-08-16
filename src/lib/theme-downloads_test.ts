@@ -47,7 +47,7 @@ Deno.test("downloadableApps excludes external adapters", () => {
     assertEquals(
         downloadableApps({
             nvim: status({ provisioning: "external" }),
-            helm: status({ provisioning: "external" }),
+            "helm-tmux": status({ provisioning: "external" }),
             ghostty: status({ provisioning: "linked" }),
             lazygit: status({ provisioning: "merged" }),
         }).sort(),

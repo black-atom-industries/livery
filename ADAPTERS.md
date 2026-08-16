@@ -10,7 +10,7 @@ consumes those files** — and every adapter falls into exactly one class:
 
 | Class        | Adapters                     | Definition                                                                                                                                                                   |
 | ------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **External** | nvim, helm, delta            | The app's theme files are provided outside of livery — by a plugin, a compiled binary, or the user — so livery only performs switching.                                      |
+| **External** | nvim, helm-tmux, delta       | The app's theme files are provided outside of livery — by a plugin, a compiled binary, or the user — so livery only performs switching.                                      |
 | **Linked**   | ghostty, zed, tmux, obsidian | Livery symlinks the downloaded theme files into a location the app itself reads, and switching selects one via a pointer in the app's config — a pointer setup may add once. |
 | **Merged**   | lazygit, herdr               | The app cannot read external theme files, so on every switch livery reads the downloaded theme and writes its values directly into the app's config.                         |
 
@@ -98,10 +98,10 @@ config file exist?), and **SET UP** runs the class-appropriate chain — enable 
 - **Reload:** `nvim --server <socket> --remote-expr` against every running instance.
 - **Precondition:** the plugin, installed and on your runtimepath.
 
-### helm — External
+### helm-tmux — External
 
-- **Files:** compiled into the helm binary — nothing to download or install.
-- **Switch pointer:** `theme: <themeKey>` in `~/.config/black-atom/helm/config.yml`.
+- **Files:** compiled into the Helm binary — nothing to download or install.
+- **Switch pointer:** `theme: <themeKey>` in `~/.config/black-atom/helm-tmux/config.yml`.
 
 ### delta — External
 
