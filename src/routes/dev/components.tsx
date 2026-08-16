@@ -342,6 +342,7 @@ function Page() {
                                         },
                                     }));
                                 }}
+                                onPickPath={() => Promise.resolve(null)}
                                 linkable={["zed", "ghostty", "tmux", "obsidian"].includes(
                                     settingsSelectedApp,
                                 )}

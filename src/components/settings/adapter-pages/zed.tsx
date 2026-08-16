@@ -12,6 +12,7 @@ export function ZedSettings(
         onToggleEnabled,
         onFieldCommit,
         firstFieldRef,
+        onPickPath,
         onSetUp,
         setUpResult,
         onVerifyPath,
@@ -40,6 +41,8 @@ export function ZedSettings(
                         value={appConfig.config_path}
                         onCommit={(value) => onFieldCommit("config_path", value)}
                         inputRef={firstFieldRef}
+                        pathKind="file"
+                        onPickPath={onPickPath}
                     />
                 )}
             </div>

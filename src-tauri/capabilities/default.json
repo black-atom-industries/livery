@@ -11,6 +11,7 @@
         "global-shortcut:allow-register",
         "global-shortcut:allow-is-registered",
         "global-shortcut:allow-unregister",
-        "opener:default"
+        "opener:default",
+        "dialog:default"
     ]
 }

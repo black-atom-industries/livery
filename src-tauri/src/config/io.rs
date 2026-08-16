@@ -81,9 +81,9 @@ pub fn ensure_config_exists() {
     }
 }
 
-/// Expand tilde in config_path so the frontend receives absolute paths.
+/// Expand tilde in config_path before backend filesystem operations.
 ///
-/// themes_path is deliberately NOT expanded: it feeds the {themesPath}
+/// themes_path is deliberately NOT expanded here: it feeds the {themesPath}
 /// template var, whose rendered line lands in the user's OWN config files
 /// (tmux.conf `source-file ~/...`), which are often dotfiles synced across
 /// machines — an expanded absolute home prefix would break them elsewhere.

@@ -12,6 +12,7 @@ import { SettingsSidebar } from "../../../components/settings/settings-sidebar/i
 import type { AdapterField } from "../../../components/settings/adapter-pages/index.ts";
 import type {
     LinkThemesRowResult,
+    PathKind,
     TestApplyResult,
     VerifyPathResult,
 } from "../../../components/settings/adapter-shared/index.ts";
@@ -24,6 +25,8 @@ import type {
     Config,
     ThemeProvisioning,
 } from "../../../bindings.ts";
+import { homeDir, sep } from "@tauri-apps/api/path";
+import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { setUpAdapter, type SetUpOutcome } from "../../../lib/adapter-setup.ts";
 import { appStore } from "../../../store/app.ts";
@@ -360,6 +363,18 @@ function SettingsRoute() {
         navigate({ to: "/" });
     }
 
+    async function pickPath(kind: PathKind) {
+        const selected = await open({ multiple: false, directory: kind === "directory" });
+        if (typeof selected !== "string") return null;
+
+        const home = await homeDir();
+        const separator = sep();
+        const homePrefix = home.endsWith(separator) ? home : `${home}${separator}`;
+        return selected === home || selected.startsWith(homePrefix)
+            ? `~${selected.slice(home.length)}`
+            : selected;
+    }
+
     useHotkey("J", () => moveSelection(1));
     useHotkey("K", () => moveSelection(-1));
     useHotkey("Space", toggleSelected);
@@ -403,6 +418,7 @@ function SettingsRoute() {
         onTestApply: testApplyAdapter,
         onToggleEnabled: toggleAppEnabled,
         onFieldCommit: commitAdapterField,
+        onPickPath: pickPath,
         onOpenUrl: (url) => {
             openUrl(url).catch((error) => console.error(error));
         },

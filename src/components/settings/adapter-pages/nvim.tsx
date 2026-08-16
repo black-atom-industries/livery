@@ -17,6 +17,7 @@ export function NvimSettings(
         onToggleEnabled,
         onFieldCommit,
         firstFieldRef,
+        onPickPath,
         onOpenUrl,
         onSetUp,
         setUpResult,
@@ -46,6 +47,8 @@ export function NvimSettings(
                         value={appConfig.config_path}
                         onCommit={(value) => onFieldCommit("config_path", value)}
                         inputRef={firstFieldRef}
+                        pathKind="file"
+                        onPickPath={onPickPath}
                     />
                 )}
                 {editableFields.has("match_pattern") && (

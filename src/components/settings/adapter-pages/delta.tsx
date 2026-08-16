@@ -17,6 +17,7 @@ export function DeltaSettings(
         onToggleEnabled,
         onFieldCommit,
         firstFieldRef,
+        onPickPath,
         onSetUp,
         setUpResult,
         onVerifyPath,
@@ -45,6 +46,8 @@ export function DeltaSettings(
                         value={appConfig.config_path}
                         onCommit={(value) => onFieldCommit("config_path", value)}
                         inputRef={firstFieldRef}
+                        pathKind="file"
+                        onPickPath={onPickPath}
                     />
                 )}
                 {editableFields.has("match_pattern") && (

@@ -18,6 +18,7 @@ export function HelmSettings(
         onToggleEnabled,
         onFieldCommit,
         firstFieldRef,
+        onPickPath,
         onSetUp,
         setUpResult,
         onVerifyPath,
@@ -46,6 +47,8 @@ export function HelmSettings(
                         value={appConfig.config_path}
                         onCommit={(value) => onFieldCommit("config_path", value)}
                         inputRef={firstFieldRef}
+                        pathKind="file"
+                        onPickPath={onPickPath}
                     />
                 )}
                 {editableFields.has("match_pattern") && (

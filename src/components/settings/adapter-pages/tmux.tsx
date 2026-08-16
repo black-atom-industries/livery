@@ -18,6 +18,7 @@ export function TmuxSettings(
         onToggleEnabled,
         onFieldCommit,
         firstFieldRef,
+        onPickPath,
         onSetUp,
         setUpResult,
         onVerifyPath,
@@ -46,6 +47,8 @@ export function TmuxSettings(
                         value={appConfig.config_path}
                         onCommit={(value) => onFieldCommit("config_path", value)}
                         inputRef={firstFieldRef}
+                        pathKind="file"
+                        onPickPath={onPickPath}
                     />
                 )}
                 {editableFields.has("themes_path") && (
@@ -55,6 +58,8 @@ export function TmuxSettings(
                         note="WHERE THEME FILES LIVE"
                         value={appConfig.themes_path ?? ""}
                         onCommit={(value) => onFieldCommit("themes_path", value)}
+                        pathKind="directory"
+                        onPickPath={onPickPath}
                     />
                 )}
                 {editableFields.has("match_pattern") && (

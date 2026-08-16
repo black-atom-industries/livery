@@ -38,6 +38,7 @@ function AdapterDetailRoute() {
             onToggleEnabled={() => ctx.onToggleEnabled(adapter)}
             onFieldCommit={(field, value) => ctx.onFieldCommit(adapter, field, value)}
             firstFieldRef={ctx.firstFieldRef}
+            onPickPath={ctx.onPickPath}
             onOpenUrl={ctx.onOpenUrl}
             onSetUp={() => ctx.onSetUp(adapter)}
             setUpResult={ctx.setUpResults[adapter]}

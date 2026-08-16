@@ -18,6 +18,7 @@ export function ObsidianSettings(
         onToggleEnabled,
         onFieldCommit,
         firstFieldRef,
+        onPickPath,
         onSetUp,
         setUpResult,
         onVerifyPath,
@@ -46,6 +47,8 @@ export function ObsidianSettings(
                         value={appConfig.config_path}
                         onCommit={(value) => onFieldCommit("config_path", value)}
                         inputRef={firstFieldRef}
+                        pathKind="file"
+                        onPickPath={onPickPath}
                     />
                 )}
             </div>

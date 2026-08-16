@@ -7,7 +7,7 @@ pub fn get_config() -> Config {
     io::ensure_config_exists();
 
     let mut config = io::read_config_from_disk();
-    io::expand_app_paths(&mut config);
+    io::collapse_app_paths(&mut config);
     config
 }
 

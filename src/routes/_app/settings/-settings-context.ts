@@ -4,6 +4,7 @@ import type { AdapterEditableField, AppName, ThemeProvisioning } from "../../../
 import type { SetUpOutcome } from "../../../lib/adapter-setup.ts";
 import type {
     LinkThemesRowResult,
+    PathKind,
     TestApplyResult,
     VerifyPathResult,
 } from "../../../components/settings/adapter-shared/index.ts";
@@ -39,6 +40,7 @@ export type SettingsContextValue = {
 
     onToggleEnabled: (appName: AppName) => void;
     onFieldCommit: (appName: AppName, field: AdapterField, value: string) => void;
+    onPickPath: (kind: PathKind) => Promise<string | null>;
     onOpenUrl: (url: string) => void;
 
     firstFieldRef: RefObject<HTMLInputElement>;

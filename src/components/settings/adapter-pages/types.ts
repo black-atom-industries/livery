@@ -1,9 +1,10 @@
 import type { AdapterEditableField, AppConfig } from "../../../bindings.ts";
 import type {
     LinkThemesRowResult,
+    PathKind,
     TestApplyResult,
     VerifyPathResult,
-} from "../adapter-shared/results.ts";
+} from "../adapter-shared/index.ts";
 import type { SetUpOutcome } from "../../../lib/adapter-setup.ts";
 
 /** Fields an adapter updater may read, declared by the backend registry. */
@@ -18,6 +19,7 @@ export type AdapterPageProps = {
     onToggleEnabled: () => void;
     onFieldCommit: (field: AdapterField, value: string) => void;
     firstFieldRef?: React.RefObject<HTMLInputElement>;
+    onPickPath: (kind: PathKind) => Promise<string | null>;
     onOpenUrl?: (url: string) => void;
 
     onSetUp: () => void;
