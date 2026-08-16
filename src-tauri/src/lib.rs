@@ -2,6 +2,9 @@ pub mod config;
 pub mod themes;
 pub mod updaters;
 
+#[cfg(debug_assertions)]
+mod dev_bridge;
+
 use tauri_specta::{collect_commands, Builder};
 
 fn specta_builder() -> Builder<tauri::Wry> {
@@ -49,6 +52,12 @@ pub fn start_app() {
                 .build(),
         )
         .setup(|app| {
+            #[cfg(debug_assertions)]
+            if let Some(bridge) = dev_bridge::start() {
+                use tauri::Manager;
+                app.manage(bridge);
+            }
+
             #[cfg(desktop)]
             {
                 use tauri::Manager;

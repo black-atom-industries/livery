@@ -4,6 +4,7 @@ import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import "./lib/dev-bridge.ts";
 import { routeTree } from "./routeTree.gen.ts";
 import "./index.css";
 

@@ -31,6 +31,23 @@ developer tools. Pick a theme once, apply it everywhere.
 Active development. See the
 [livery project](https://linear.app/black-atom-industries/project/livery-ebebb9cdaef9) for progress.
 
+## Development
+
+Run the desktop app with:
+
+```sh
+deno task dev
+```
+
+For browser-based visual editing with Airship:
+
+```sh
+deno task airship
+```
+
+This starts the Tauri app, Vite, and Airship together. Debug builds expose the Rust command bridge
+on loopback so Airship frames can use the real configuration and settings.
+
 ## Tech Stack
 
 | Layer      | Technology                                      | Notes                                     |

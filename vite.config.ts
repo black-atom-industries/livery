@@ -5,8 +5,13 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 
 const host = Deno.env.get("TAURI_DEV_HOST");
+const devBridgePort = Deno.env.get("LIVERY_DEV_BRIDGE_PORT") ?? "1422";
+const devBridgeToken = Deno.env.get("LIVERY_DEV_BRIDGE_TOKEN") ?? "";
 
 export default defineConfig({
+    define: {
+        "import.meta.env.VITE_LIVERY_DEV_BRIDGE_TOKEN": JSON.stringify(devBridgeToken),
+    },
     clearScreen: false,
     plugins: [
         deno(),
@@ -35,5 +40,10 @@ export default defineConfig({
         strictPort: true,
         host: host || false,
         hmr: host ? { protocol: "ws", host, port: 1421 } : undefined,
+        proxy: {
+            "/__livery": {
+                target: `http://127.0.0.1:${devBridgePort}`,
+            },
+        },
     },
 });

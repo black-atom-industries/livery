@@ -20,6 +20,7 @@
     "tasks": {
         "cache": "deno cache --reload src/",
         "dev": "deno run -A npm:@tauri-apps/cli dev",
+        "airship": "deno run -A scripts/airship.ts",
         "build": "deno run -A npm:@tauri-apps/cli build",
         "vite:dev": "deno run -A npm:vite --port 1420",
         "vite:build": "deno run -A npm:vite build",
